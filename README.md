@@ -103,6 +103,13 @@ Authentication and student self-registration are not yet implemented.
 
 ---
 
+## Development note
+
+Claude Code was used during the final UI refinement phase, mainly to improve responsiveness and layout consistency.  
+The project concept, data model, backend structure, frontend logic, and final decisions remain authored and curated by Cinzia Cipri.
+
+---
+
 ## Author
 
 Built by Cinzia Cipri as a final project for a full-stack developer course.
