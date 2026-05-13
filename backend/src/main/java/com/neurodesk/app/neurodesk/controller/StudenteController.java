@@ -2,6 +2,7 @@ package com.neurodesk.app.neurodesk.controller;
 
 import com.neurodesk.app.neurodesk.dto.StudenteDto;
 import com.neurodesk.app.neurodesk.service.StudenteService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class StudenteController {
     }
 
     @PostMapping
-    public StudenteDto create(@RequestBody StudenteDto dto) {
+    public StudenteDto create(@Valid @RequestBody StudenteDto dto) {
         return studenteService.save(dto);
     }
 }

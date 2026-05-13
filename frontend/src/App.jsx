@@ -8,6 +8,7 @@ import TaskPage from './pages/TaskPage';
 import StudentiFormPage from './pages/StudentiFormPage';
 import ModuliFormPage from './pages/ModuliFormPage';
 import TaskFormPage from './pages/TaskFormPage';
+import CompanionPage from './pages/CompanionPage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/moduli/nuovo" element={<ModuliFormPage />} />
         <Route path="/task" element={<TaskPage />} />
         <Route path="/task/nuovo" element={<TaskFormPage />} />
+        <Route path="/companion" element={<CompanionPage />} />
       </Routes>
     </MainLayout>
   );

@@ -15,7 +15,7 @@ function greeting() {
 function useCountUp(target, duration = 700) {
     const [count, setCount] = useState(0);
     useEffect(() => {
-        if (target === 0) { setCount(0); return; }
+        if (target === 0) return;
         const start = performance.now();
         function tick(now) {
             const p = Math.min((now - start) / duration, 1);
@@ -27,7 +27,7 @@ function useCountUp(target, duration = 700) {
         const id = requestAnimationFrame(tick);
         return () => cancelAnimationFrame(id);
     }, [target, duration]);
-    return count;
+    return target === 0 ? 0 : count;
 }
 
 const STATO_LABEL = { DA_FARE: 'Da fare', IN_CORSO: 'In corso', COMPLETATO: 'Completato' };

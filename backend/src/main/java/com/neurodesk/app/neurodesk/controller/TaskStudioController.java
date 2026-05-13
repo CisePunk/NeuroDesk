@@ -2,6 +2,7 @@ package com.neurodesk.app.neurodesk.controller;
 
 import com.neurodesk.app.neurodesk.dto.TaskStudioDto;
 import com.neurodesk.app.neurodesk.service.TaskStudioService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,7 @@ public class TaskStudioController {
     }
 
     @PostMapping
-    public TaskStudioDto create(@RequestBody TaskStudioDto dto) {
+    public TaskStudioDto create(@Valid @RequestBody TaskStudioDto dto) {
         return taskStudioService.save(dto);
     }
 }

@@ -38,6 +38,15 @@ export function IconTask(props) {
     );
 }
 
+export function IconCompanion(props) {
+    return (
+        <svg {...base} {...props}>
+            <path d="M5 4.5h10a2 2 0 0 1 2 2v5.5a2 2 0 0 1-2 2H9l-4 3v-3a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2z" />
+            <path d="M7 8h6M7 11h4" />
+        </svg>
+    );
+}
+
 export function IconSun(props) {
     return (
         <svg {...base} {...props}>

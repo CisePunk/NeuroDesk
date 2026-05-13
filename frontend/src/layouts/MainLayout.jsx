@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { IconDashboard, IconStudenti, IconModuli, IconTask, IconSun, IconMoon } from '../components/Icons';
+import { IconDashboard, IconStudenti, IconModuli, IconTask, IconCompanion, IconSun, IconMoon } from '../components/Icons';
 
 function MainLayout({ children }) {
     const [isLight, setIsLight] = useState(() => {
@@ -43,6 +43,10 @@ function MainLayout({ children }) {
                     <NavLink to="/task" className={navClass}>
                         <IconTask className="nav-icon" />
                         <span>Task</span>
+                    </NavLink>
+                    <NavLink to="/companion" className={navClass}>
+                        <IconCompanion className="nav-icon" />
+                        <span>Companion</span>
                     </NavLink>
                 </nav>
 
