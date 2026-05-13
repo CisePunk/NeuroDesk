@@ -84,6 +84,23 @@ Backend runs on `http://localhost:8080`
 MVP complete.  
 Authentication and student self-registration are not yet implemented.
 
+## Screenshots
+
+### Dashboard (Dark Mode)
+![Dashboard Dark](screenshots/dashboard-dark.png)
+
+### Dashboard (Light Mode)
+![Dashboard Light](screenshots/dashboard-light.png)
+
+### Student Management
+![Students](screenshots/students-page.png)
+
+### Module Management
+![Modules](screenshots/modules-page.png)
+
+### Task Studio
+![Tasks](screenshots/tasks-page.png)
+
 ---
 
 ## Author
