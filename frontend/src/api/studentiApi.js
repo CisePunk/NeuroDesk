@@ -1,25 +1,29 @@
-const BASE_URL = 'http://localhost:8080/api/studenti';
+import { apiFetch } from './http';
 
-export async function getStudenti() {
-    const response = await fetch(BASE_URL);
-    if (!response.ok) {
-        throw new Error('Errore nel caricamento studenti');
+// Modalita' test: true solo se il backend ha neurodesk.test-mode=true.
+export async function getTestMode() {
+    try {
+        const data = await apiFetch('/api/test/status');
+        return Boolean(data.enabled);
+    } catch {
+        return false;
     }
-    return response.json();
 }
 
-export async function createStudente(studente) {
-    const response = await fetch(BASE_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(studente),
-    });
+// Genera N utenti FITTIZI (solo in modalita' test). Non e' registrazione reale.
+export function seedTestStudenti(count = 5) {
+    return apiFetch(`/api/test/seed/studenti?count=${count}`, { method: 'POST' });
+}
 
-    if (!response.ok) {
-        throw new Error('Errore nel salvataggio studente');
-    }
+// Rimuove tutti gli utenti di test (email sul dominio riservato).
+export function removeTestStudenti() {
+    return apiFetch('/api/test/seed/studenti', { method: 'DELETE' });
+}
 
-    return response.json();
+export function getStudenti() {
+    return apiFetch('/api/studenti');
+}
+
+export function createStudente(studente) {
+    return apiFetch('/api/studenti', { method: 'POST', body: studente });
 }

@@ -71,3 +71,11 @@ export function IconPlus(props) {
         </svg>
     );
 }
+
+export function IconFeedback(props) {
+    return (
+        <svg {...base} {...props}>
+            <path d="M10 2.5l2.06 4.18 4.61.67-3.34 3.25.79 4.6L10 13.4l-4.12 2.17.79-4.6L3.33 7.35l4.61-.67z" />
+        </svg>
+    );
+}

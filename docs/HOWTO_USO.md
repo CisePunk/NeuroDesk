@@ -191,6 +191,27 @@ Nella piattaforma puoi usare:
    - livello energia preferito
 4. Salvare.
 
+### 7.1.1 Generare utenti di test (solo in modalita' test)
+
+Non c'e' registrazione pubblica: in produzione gli utenti li inserisce solo la
+scuola. Per i test, con il backend avviato con `neurodesk.test-mode=true`
+(default gia' impostato in `application.properties`), nella pagina `Studenti`
+compare un banner con due comandi:
+
+- `+ Crea 5 utenti di test` — genera 5 studenti **fittizi** (email su
+  `@test.neurodesk.local`).
+- `Rimuovi utenti di test` — cancella in blocco solo quegli utenti, senza
+  toccare i dati reali.
+
+Da riga di comando l'equivalente e':
+
+```bash
+curl -X POST "http://localhost:8080/api/test/seed/studenti?count=5"
+curl -X DELETE "http://localhost:8080/api/test/seed/studenti"
+```
+
+Con `neurodesk.test-mode=false` (produzione) questi endpoint rispondono `404`.
+
 ### 7.2 Creare un modulo
 
 1. Aprire `Moduli`.

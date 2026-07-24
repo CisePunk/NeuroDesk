@@ -1,5 +1,12 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { sendCompanionMessage } from '../api/companionApi';
+import {
+    salvaScambio,
+    getSessioni,
+    getSessione,
+    cancellaCronologia,
+} from '../api/companionSessionApi';
+import { useToast } from '../ui/ToastProvider';
 
 const MODES = [
     {
@@ -40,22 +47,70 @@ const PROFILE_TEMPLATE = {
     needs: ['micro-passaggi', 'tono semplice', 'niente liste lunghe'],
 };
 
+// Cache locale della conversazione in corso: resiste a refresh e cadute di rete.
+const ACTIVE_KEY = 'nd-companion-active';
+
+function leggiCache() {
+    try {
+        const raw = localStorage.getItem(ACTIVE_KEY);
+        if (!raw) return null;
+        const p = JSON.parse(raw);
+        return {
+            conversation: Array.isArray(p.conversation) ? p.conversation : [],
+            sessioneId: p.sessioneId ?? null,
+            mode: p.mode ?? null,
+        };
+    } catch {
+        return null;
+    }
+}
+
 function CompanionPage() {
+    const toast = useToast();
     const textareaRef = useRef(null);
-    const [mode, setMode] = useState('crisis_mode');
+    // Stato iniziale ripristinato dal browser (istantaneo, regge refresh e disconnessioni).
+    const [mode, setMode] = useState(() => leggiCache()?.mode ?? 'crisis_mode');
     const [message, setMessage] = useState('');
     const [includeProfile, setIncludeProfile] = useState(false);
     const [showAdvanced, setShowAdvanced] = useState(false);
-    const [reply, setReply] = useState(null);
+
+    const [conversation, setConversation] = useState(() => leggiCache()?.conversation ?? []); // [{ role, content }]
+    const [sessioneId, setSessioneId] = useState(() => leggiCache()?.sessioneId ?? null);
+    const [lastMeta, setLastMeta] = useState(null); // { provider, usage }
     const [errore, setErrore] = useState('');
     const [caricamento, setCaricamento] = useState(false);
 
     const activeMode = MODES.find(item => item.value === mode);
 
+    // Se non c'era nulla nel browser, provo a riprendere l'ultima sessione dal server.
+    useEffect(() => {
+        if (localStorage.getItem(ACTIVE_KEY)) return; // già ripristinata dalla cache locale
+        let attivo = true;
+        getSessioni()
+            .then(list => {
+                if (!attivo || !list || list.length === 0) return null;
+                return getSessione(list[0].id).then(det => {
+                    if (!attivo) return;
+                    setSessioneId(det.id);
+                    setConversation(det.messaggi.map(m => ({ role: m.ruolo, content: m.contenuto })));
+                });
+            })
+            .catch(() => { /* nessuna memoria da riprendere: si parte puliti */ });
+        return () => { attivo = false; };
+    }, []);
+
+    // Salvo in locale a ogni cambiamento, così un refresh o una caduta non perde nulla.
+    useEffect(() => {
+        if (conversation.length === 0 && sessioneId == null) {
+            localStorage.removeItem(ACTIVE_KEY);
+            return;
+        }
+        localStorage.setItem(ACTIVE_KEY, JSON.stringify({ sessioneId, mode, conversation }));
+    }, [conversation, sessioneId, mode]);
+
     async function handleSubmit(event) {
         event.preventDefault();
         setErrore('');
-        setReply(null);
 
         const cleanMessage = message.trim();
         if (!cleanMessage) {
@@ -63,26 +118,88 @@ function CompanionPage() {
             return;
         }
 
+        const base = conversation;
+        const history = base.map(m => ({ role: m.role, content: m.content }));
+        setConversation([...base, { role: 'user', content: cleanMessage }]);
+        setMessage('');
         setCaricamento(true);
+
         try {
             const data = await sendCompanionMessage({
                 message: cleanMessage,
                 mode,
                 profile: includeProfile ? PROFILE_TEMPLATE : null,
+                history,
             });
-            setReply(data);
-        } catch {
-            setErrore('Il Companion non risponde. Assicurati che il servizio sia attivo su 127.0.0.1:8090.');
+            setConversation([...base,
+                { role: 'user', content: cleanMessage },
+                { role: 'assistant', content: data.reply },
+            ]);
+            setLastMeta({ provider: data.provider, usage: data.usage });
+
+            // Salvataggio cifrato sul server. Se fallisce, la conversazione resta
+            // comunque nel browser e scaricabile: non blocco l'utente.
+            try {
+                const saved = await salvaScambio({
+                    sessioneId,
+                    titolo: activeMode?.label,
+                    messaggioUtente: cleanMessage,
+                    rispostaCompanion: data.reply,
+                });
+                if (saved?.sessioneId) setSessioneId(saved.sessioneId);
+            } catch { /* memoria server non disponibile: resta la copia locale */ }
+        } catch (err) {
+            // Rollback del messaggio ottimista, così può riprovare senza doppioni.
+            setConversation(base);
+            setMessage(cleanMessage);
+            setErrore(err.message);
         } finally {
             setCaricamento(false);
+            setTimeout(() => textareaRef.current?.focus(), 50);
         }
     }
 
-    function handleReset() {
-        setReply(null);
+    function nuovaConversazione() {
+        setConversation([]);
+        setSessioneId(null);
         setMessage('');
+        setLastMeta(null);
+        setErrore('');
+        localStorage.removeItem(ACTIVE_KEY);
         setTimeout(() => textareaRef.current?.focus(), 50);
     }
+
+    function scaricaIstruzioni() {
+        if (conversation.length === 0) return;
+        const righe = conversation.map(m =>
+            (m.role === 'user' ? 'Tu:\n' : 'Companion:\n') + m.content
+        );
+        const testo = ['NeuroDesk Companion — i tuoi passaggi', '', ...righe].join('\n\n');
+        const blob = new Blob([testo], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'neurodesk-companion.txt';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    }
+
+    async function cancellaTutto() {
+        if (!window.confirm('Vuoi cancellare tutta la tua cronologia salvata? L\'operazione non è reversibile.')) {
+            return;
+        }
+        try {
+            await cancellaCronologia();
+            nuovaConversazione();
+            toast.successo('Cronologia cancellata.');
+        } catch (err) {
+            toast.errore(err.message);
+        }
+    }
+
+    const vuota = conversation.length === 0;
 
     return (
         <div className="page companion-page">
@@ -92,7 +209,7 @@ function CompanionPage() {
                     <p className="subtitle">Un passo piccolo quando tutto sembra troppo.</p>
                 </div>
                 <span className="badge badge-secondary">
-                    {reply?.provider ? `Provider: ${reply.provider}` : 'AI mock attiva'}
+                    {lastMeta?.provider ? `Provider: ${lastMeta.provider}` : 'AI mock attiva'}
                 </span>
             </div>
 
@@ -143,8 +260,19 @@ function CompanionPage() {
                                     <span /><span /><span />
                                 </span>
                             </>
-                        ) : 'Aiutami a fare il prossimo passo'}
+                        ) : vuota ? 'Aiutami a fare il prossimo passo' : 'Continua'}
                     </button>
+
+                    {!vuota && (
+                        <div className="companion-thread-actions">
+                            <button type="button" className="btn-secondary" onClick={scaricaIstruzioni}>
+                                ↓ Scarica le istruzioni
+                            </button>
+                            <button type="button" className="btn-ghost" onClick={nuovaConversazione}>
+                                Nuova conversazione
+                            </button>
+                        </div>
+                    )}
 
                     <div className="companion-advanced">
                         <button
@@ -155,67 +283,71 @@ function CompanionPage() {
                             {showAdvanced ? '▾' : '▸'} Opzioni avanzate
                         </button>
                         {showAdvanced && (
-                            <label className="companion-profile-check">
-                                <input
-                                    type="checkbox"
-                                    checked={includeProfile}
-                                    onChange={(event) => setIncludeProfile(event.target.checked)}
-                                />
-                                Includi profilo funzionale minimale
-                                <span className="companion-profile-note"> — può consumare token in modalità AI reale</span>
-                            </label>
+                            <>
+                                <label className="companion-profile-check">
+                                    <input
+                                        type="checkbox"
+                                        checked={includeProfile}
+                                        onChange={(event) => setIncludeProfile(event.target.checked)}
+                                    />
+                                    Includi profilo funzionale minimale
+                                    <span className="companion-profile-note"> — può consumare token in modalità AI reale</span>
+                                </label>
+                                <button type="button" className="companion-clear-history" onClick={cancellaTutto}>
+                                    Cancella la mia cronologia
+                                </button>
+                            </>
                         )}
                     </div>
 
                     <p className="companion-notice">
-                        Companion non sostituisce medico, terapeuta, tutor o consulente. In emergenza chiama il 112.
+                        Companion non sostituisce medico, terapeuta, tutor o consulente. Se stai male, parlane con una persona di cui ti fidi o con il tuo medico.
                     </p>
                 </form>
 
                 <section className="companion-panel">
                     <div className="companion-panel-header">
-                        <span className="companion-panel-title">Risposta</span>
+                        <span className="companion-panel-title">Conversazione</span>
                         <span className="badge">{activeMode?.label}</span>
                     </div>
 
-                    {caricamento ? (
-                        <div className="companion-panel-loading">
-                            <span className="companion-dots companion-dots--lg">
-                                <span /><span /><span />
-                            </span>
-                            <p>Sto preparando un passo concreto...</p>
-                        </div>
-                    ) : !reply ? (
+                    {vuota && !caricamento ? (
                         <div className="companion-empty">
                             <p className="companion-empty-mode">{activeMode?.description}</p>
                             <p className="companion-empty-cta">Descrivi il blocco nel form e invia.</p>
                         </div>
                     ) : (
-                        <>
-                            {reply.risk?.level === 'high' && (
-                                <div className="companion-risk">
-                                    Rischio alto rilevato. Dai priorità alla sicurezza e contatta subito aiuto reale.
+                        <div className="companion-thread">
+                            {conversation.map((m, i) => (
+                                <div
+                                    key={i}
+                                    className={`companion-msg companion-msg--${m.role === 'user' ? 'user' : 'assistant'}`}
+                                >
+                                    <span className="companion-msg-label">
+                                        {m.role === 'user' ? 'Tu' : 'Companion'}
+                                    </span>
+                                    <div className="companion-msg-body">{m.content}</div>
+                                </div>
+                            ))}
+
+                            {caricamento && (
+                                <div className="companion-panel-loading">
+                                    <span className="companion-dots companion-dots--lg">
+                                        <span /><span /><span />
+                                    </span>
+                                    <p>Sto preparando un passo concreto...</p>
                                 </div>
                             )}
-                            <div className="companion-reply">
-                                {reply.reply}
-                            </div>
-                            <div className="companion-reply-actions">
-                                <button
-                                    type="button"
-                                    className="btn-secondary companion-reset"
-                                    onClick={handleReset}
-                                >
-                                    Scrivi un altro blocco
-                                </button>
+
+                            {lastMeta && !caricamento && (
                                 <div className="companion-meta">
-                                    <span>Provider: {reply.provider ?? 'nessuna chiamata AI'}</span>
-                                    {reply.usage?.estimatedInputTokens && (
-                                        <span>Token stimati: {reply.usage.estimatedInputTokens}</span>
+                                    <span>Provider: {lastMeta.provider ?? 'nessuna chiamata AI'}</span>
+                                    {lastMeta.usage?.estimatedInputTokens && (
+                                        <span>Token stimati: {lastMeta.usage.estimatedInputTokens}</span>
                                     )}
                                 </div>
-                            </div>
-                        </>
+                            )}
+                        </div>
                     )}
                 </section>
             </div>

@@ -2,6 +2,7 @@
   "name": "neurodesk-companion-service",
   "version": "0.1.0",
   "private": true,
+  "license": "AGPL-3.0-only",
   "type": "module",
   "description": "Node.js AI companion service for NeuroDesk",
   "scripts": {

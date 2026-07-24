@@ -10,3 +10,32 @@ spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 server.port=8080
+
+# Modalita' test: se true abilita /api/test/** per generare utenti FITTIZI.
+# In produzione lasciare false: non esiste registrazione pubblica, gli utenti
+# reali li inserisce solo la scuola (che ha firmato l'accordo privacy).
+neurodesk.test-mode=false
+
+# --- Autenticazione (Fase 1) ---
+neurodesk.jwt.secret=METTI_UN_SEGRETO_LUNGO_ALMENO_32_CARATTERI
+
+# Chiave DEDICATA per cifrare le conversazioni (AES-256-GCM).
+# DEVE essere diversa e indipendente dal segreto JWT: se un giorno ruoti il JWT
+# (es. dopo un sospetto di fuga) le conversazioni gia' salvate restano leggibili.
+# Senza questa riga la chiave deriva dal JWT e ruotarlo distrugge i dati.
+neurodesk.crypto.secret=
+neurodesk.jwt.expiration-ms=86400000
+neurodesk.login.pepper=METTI_UN_PEPPER_LUNGO_E_SEGRETO
+neurodesk.admin.codice=scuola
+neurodesk.admin.password=CAMBIA_QUESTA_PASSWORD
+
+# Actuator: solo health esposto.
+management.endpoints.web.exposure.include=health
+# Produzione: true -> l'app NON parte se i segreti sono deboli/di default.
+neurodesk.security.strict=true
+
+# Dietro un proxy/CDN FIDATO (Cloudflare, nginx): abilita la riscrittura dell'IP
+# client cosi' il rate limiting usa il vero IP e non quello del proxy.
+# Lasciare COMMENTATO se l'app e' esposta direttamente (senza proxy fidato),
+# altrimenti un client potrebbe falsificare l'header e aggirare il rate limiting.
+# server.forward-headers-strategy=NATIVE

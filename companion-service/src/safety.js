@@ -24,7 +24,7 @@ export function assessRisk(message = '') {
     return {
       level: 'high',
       guidance:
-        'Se sei in pericolo immediato, contatta subito il 112 o una persona fidata. Se puoi, non restare da sola mentre chiedi aiuto.',
+        'Mi dispiace che tu stia così. Non sei solo/a in questo. Se ti va, parlane con una persona di cui ti fidi o con il tuo medico: meriti di essere ascoltato/a e supportato/a.',
     };
   }
 

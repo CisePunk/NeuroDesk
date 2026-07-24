@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { createTask } from '../api/taskApi';
 import { getStudenti } from '../api/studentiApi';
 import { getModuli } from '../api/moduliApi';
+import { useToast } from '../ui/ToastProvider';
 
 const PRIORITA = ['ALTA', 'MEDIA', 'BASSA'];
 const STATI    = ['DA_FARE', 'IN_CORSO', 'COMPLETATO'];
 
 function TaskFormPage() {
     const navigate = useNavigate();
+    const toast = useToast();
     const [formData, setFormData] = useState({
         titolo: '',
         descrizione: '',
@@ -33,8 +35,8 @@ function TaskFormPage() {
                 setModuli(m);
                 if (s.length > 0) setFormData(prev => ({ ...prev, studenteId: s[0].id }));
                 if (m.length > 0) setFormData(prev => ({ ...prev, moduloId: m[0].id }));
-            } catch {
-                setErrore('Impossibile caricare studenti o moduli. Verifica che il backend sia attivo.');
+            } catch (err) {
+                setErrore(err.message);
             }
         }
         loadOpzioni();
@@ -56,9 +58,10 @@ function TaskFormPage() {
                 moduloId: Number(formData.moduloId),
                 durataStimataMinuti: formData.durataStimataMinuti ? Number(formData.durataStimataMinuti) : null,
             });
+            toast.successo('Task salvato.');
             navigate('/task');
-        } catch {
-            setErrore('Errore nel salvataggio. Riprova.');
+        } catch (err) {
+            setErrore(err.message);
         } finally {
             setCaricamento(false);
         }
@@ -102,7 +105,8 @@ function TaskFormPage() {
                             value={formData.durataStimataMinuti}
                             onChange={handleChange}
                             min="1"
-                            placeholder="es. 30"
+                            max="480"
+                            placeholder="es. 30 (max 480)"
                         />
                     </div>
                 </div>

@@ -6,6 +6,16 @@ backend/src/main/resources/application.properties
 frontend/node_modules/
 frontend/dist/
 frontend/.env
+frontend/.env.production
+frontend/.env*.local
+
+# Segreti: nessun .env finisce in git, in nessuna cartella.
+# Gli esempi senza valori restano tracciati (servono a chi installa).
+.env
+.env.*
+!.env.example
+!*.env.example
+!.env.production.example
 
 # Cartella residua (solo quella nella root)
 /neurodesk/

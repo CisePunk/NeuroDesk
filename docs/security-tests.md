@@ -73,7 +73,7 @@ Tutti eseguiti con `curl` contro l'endpoint `POST /api/companion/respond`.
 
 | # | Test | Verifica | Esito |
 |---|------|----------|-------|
-| 15 | Password DB in git | `git log -S "NeuroDesk123"` | ✅ assente dalla history |
+| 15 | Password DB in git | `git log -S "<password-db>"` | ✅ assente dalla history (application.properties è gitignored) |
 | 16 | `application.properties` tracciato | `git ls-files` | ✅ solo il template `.example` (con placeholder `YOUR_DB_PASSWORD`); il file reale è gitignored |
 | 17 | `.env` companion-service tracciato | `git ls-files` | ✅ NON tracciato (gitignored) |
 | 18 | `.env` frontend tracciato | `git ls-files frontend/` | ✅ nessuno |

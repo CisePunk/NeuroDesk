@@ -184,6 +184,26 @@ NeuroDesk Companion non:
 
 In caso di rischio immediato per la sicurezza personale, il servizio invita a contattare il 112 o una persona fidata.
 
+## Gestione utenti e privacy
+
+Allo stato attuale **non esiste registrazione pubblica**. Gli utenti (studenti)
+li inserisce soltanto la scuola/ente, che ha gia' firmato l'accordo di
+riservatezza sul trattamento dei dati. Questa e' una scelta deliberata: il
+Companion tratta dati di categoria particolare (neurodivergenza, salute,
+difficolta' cognitive — Art. 9 GDPR), quindi la raccolta deve avvenire dentro
+il perimetro di consenso dell'ente, non tramite auto-iscrizione libera.
+
+Per i **test** e' disponibile un generatore di utenti **fittizi**, attivo solo
+quando il backend ha `neurodesk.test-mode=true` (vedi
+`backend/src/main/resources/application.properties`). In quella modalita', nella
+pagina *Studenti* compaiono i comandi «Crea 5 utenti di test» e «Rimuovi utenti
+di test». Gli utenti generati hanno email sul dominio riservato
+`@test.neurodesk.local`, cosi' sono riconoscibili e cancellabili in blocco senza
+toccare dati reali.
+
+In produzione `neurodesk.test-mode` **deve restare `false`**: gli endpoint
+`/api/test/**` rispondono allora `404`, come se non esistessero.
+
 ## Stato attuale
 
 Verifiche eseguite il 20 giugno 2026:
@@ -229,3 +249,22 @@ neurodesk
 ## Autrice
 
 Progetto ideato, sviluppato e curato da Cinzia Cipri come progetto finale full stack, poi ampliato come piattaforma neurodivergent-friendly con estensione AI.
+
+## Licenza
+
+Copyright (C) 2026 Cinzia Cipri.
+
+NeuroDesk e' software libero: puoi ridistribuirlo e/o modificarlo secondo i
+termini della **GNU Affero General Public License, versione 3** (AGPLv3) come
+pubblicata dalla Free Software Foundation. Il testo completo e' nel file
+[`LICENSE`](LICENSE).
+
+La scelta dell'AGPLv3 e' deliberata: chiunque usi, modifichi o offra NeuroDesk
+**come servizio in rete** e' tenuto a rendere disponibile il codice sorgente
+completo, con la stessa licenza. NeuroDesk puo' essere usato anche in contesti
+commerciali, ma **non puo' essere reso proprietario o chiuso**: deve restare un
+bene comune a disposizione delle persone neurodivergenti a cui e' rivolto.
+
+Il copyright resta in capo all'autrice. Chi desidera termini diversi da quelli
+dell'AGPLv3 (ad es. una licenza commerciale) puo' contattare l'autrice per un
+accordo separato.

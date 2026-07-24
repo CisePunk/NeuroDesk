@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTask } from '../api/taskApi';
+import { useAsyncData } from '../ui/useAsyncData';
+import { StatoLista } from '../ui/StatoLista';
 
 const PRIORITA_CLASS = {
     ALTA:  'badge-danger',
@@ -10,20 +11,8 @@ const PRIORITA_CLASS = {
 
 function TaskPage() {
     const navigate = useNavigate();
-    const [task, setTask] = useState([]);
-    const [errore, setErrore] = useState('');
-
-    useEffect(() => {
-        async function load() {
-            try {
-                const data = await getTask();
-                setTask(data);
-            } catch {
-                setErrore('Errore nel caricamento dei task.');
-            }
-        }
-        load();
-    }, []);
+    const { dati, caricamento, errore, ricarica } = useAsyncData(getTask);
+    const task = dati ?? [];
 
     return (
         <div className="page">
@@ -34,11 +23,13 @@ function TaskPage() {
                 </button>
             </div>
 
-            {errore && <p className="errore">{errore}</p>}
-
-            {task.length === 0 && !errore ? (
-                <p className="empty-state">Nessun task presente.</p>
-            ) : (
+            <StatoLista
+                caricamento={caricamento}
+                errore={errore}
+                vuoto={task.length === 0}
+                messaggioVuoto="Nessun task ancora. Aggiungine uno."
+                onRiprova={ricarica}
+            >
                 <div className="card-list">
                     {task.map((item, i) => (
                         <div
@@ -77,7 +68,7 @@ function TaskPage() {
                         </div>
                     ))}
                 </div>
-            )}
+            </StatoLista>
         </div>
     );
 }

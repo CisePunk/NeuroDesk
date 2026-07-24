@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createModulo } from '../api/moduliApi';
+import { useToast } from '../ui/ToastProvider';
 
 const STATI      = ['BOZZA', 'IN_CORSO', 'COMPLETATO'];
 const DIFFICOLTA = ['BASSA', 'MEDIA', 'ALTA'];
@@ -8,6 +9,7 @@ const CARICHI    = ['BASSO', 'MEDIO', 'ALTO'];
 
 function ModuliFormPage() {
     const navigate = useNavigate();
+    const toast = useToast();
     const [formData, setFormData] = useState({
         titolo: '',
         descrizione: '',
@@ -30,9 +32,10 @@ function ModuliFormPage() {
         setCaricamento(true);
         try {
             await createModulo(formData);
+            toast.successo('Modulo salvato.');
             navigate('/moduli');
-        } catch {
-            setErrore('Errore nel salvataggio. Riprova.');
+        } catch (err) {
+            setErrore(err.message);
         } finally {
             setCaricamento(false);
         }

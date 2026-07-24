@@ -1,23 +1,12 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getModuli } from '../api/moduliApi';
+import { useAsyncData } from '../ui/useAsyncData';
+import { StatoLista } from '../ui/StatoLista';
 
 function ModuliPage() {
     const navigate = useNavigate();
-    const [moduli, setModuli] = useState([]);
-    const [errore, setErrore] = useState('');
-
-    useEffect(() => {
-        async function load() {
-            try {
-                const data = await getModuli();
-                setModuli(data);
-            } catch {
-                setErrore('Errore nel caricamento dei moduli.');
-            }
-        }
-        load();
-    }, []);
+    const { dati, caricamento, errore, ricarica } = useAsyncData(getModuli);
+    const moduli = dati ?? [];
 
     return (
         <div className="page">
@@ -28,11 +17,13 @@ function ModuliPage() {
                 </button>
             </div>
 
-            {errore && <p className="errore">{errore}</p>}
-
-            {moduli.length === 0 && !errore ? (
-                <p className="empty-state">Nessun modulo presente.</p>
-            ) : (
+            <StatoLista
+                caricamento={caricamento}
+                errore={errore}
+                vuoto={moduli.length === 0}
+                messaggioVuoto="Nessun modulo ancora. Aggiungine uno."
+                onRiprova={ricarica}
+            >
                 <div className="card-list">
                     {moduli.map((modulo, i) => (
                         <div
@@ -57,7 +48,7 @@ function ModuliPage() {
                         </div>
                     ))}
                 </div>
-            )}
+            </StatoLista>
         </div>
     );
 }

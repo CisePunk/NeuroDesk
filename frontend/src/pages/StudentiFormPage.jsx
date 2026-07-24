@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createStudente } from '../api/studentiApi';
+import { useToast } from '../ui/ToastProvider';
 
 function StudentiFormPage() {
     const navigate = useNavigate();
+    const toast = useToast();
     const [formData, setFormData] = useState({
         nome: '',
         cognome: '',
@@ -29,9 +31,10 @@ function StudentiFormPage() {
         setCaricamento(true);
         try {
             await createStudente(formData);
+            toast.successo('Utente salvato.');
             navigate('/studenti');
-        } catch {
-            setErrore('Errore nel salvataggio. Riprova.');
+        } catch (err) {
+            setErrore(err.message);
         } finally {
             setCaricamento(false);
         }
@@ -40,7 +43,7 @@ function StudentiFormPage() {
     return (
         <div className="page">
             <div className="page-header">
-                <h2>Nuovo Studente</h2>
+                <h2>Nuovo utente</h2>
                 <button className="btn-secondary" onClick={() => navigate('/studenti')}>
                     ← Torna alla lista
                 </button>
@@ -89,7 +92,7 @@ function StudentiFormPage() {
                 <div className="form-group form-group-checkbox">
                     <label>
                         <input type="checkbox" name="attivo" checked={formData.attivo} onChange={handleChange} />
-                        Studente attivo
+                        Utente attivo
                     </label>
                 </div>
 

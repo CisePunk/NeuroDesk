@@ -1,17 +1,9 @@
-const BASE_URL = 'http://localhost:8080/api/task';
+import { apiFetch } from './http';
 
-export async function getTask() {
-    const response = await fetch(BASE_URL);
-    if (!response.ok) throw new Error('Errore nel caricamento task');
-    return response.json();
+export function getTask() {
+    return apiFetch('/api/task');
 }
 
-export async function createTask(task) {
-    const response = await fetch(BASE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(task),
-    });
-    if (!response.ok) throw new Error('Errore nel salvataggio task');
-    return response.json();
+export function createTask(task) {
+    return apiFetch('/api/task', { method: 'POST', body: task });
 }
