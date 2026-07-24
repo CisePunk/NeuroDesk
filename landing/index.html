@@ -10,6 +10,7 @@
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
 <title>NeuroDesk — dal sovraccarico al prossimo piccolo passo</title>
+<link rel="stylesheet" href="assets/site.css">
 <style>
   :root {
     --bg: #faf8f4; --bg-2: #f2eee6; --surface: #ffffff;
@@ -79,6 +80,7 @@
   .block-ico svg { width: 1.3rem; height: 1.3rem; }
   .blocks h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 700; margin-bottom: 0.45rem; }
   .blocks p { color: var(--text-2); font-size: 0.97rem; }
+  .step-badge { width: 2.2rem; height: 2.2rem; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-deep); font-family: var(--serif); font-weight: 600; font-size: 1.05rem; margin-bottom: 0.9rem; }
 
   /* mock conversazione */
   .chat-mock { background: var(--surface); border: 1px solid var(--border); border-radius: 1.25rem; box-shadow: var(--shadow); overflow: hidden; }
@@ -132,10 +134,22 @@
 <header class="top">
   <div class="wrap top-inner">
     <div class="brand"><span class="bdot" aria-hidden="true"></span> NeuroDesk</div>
-    <button class="theme-btn" id="themeBtn" type="button" aria-label="Cambia tema chiaro o scuro">
-      <svg class="ic-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 12.5A7.5 7.5 0 0 1 7.5 2.5a7.5 7.5 0 1 0 10 10z"/></svg>
-      <svg class="ic-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.22 4.22l1.06 1.06M14.72 14.72l1.06 1.06M4.22 15.78l1.06-1.06M14.72 5.28l1.06-1.06"/></svg>
-    </button>
+    <div class="top-right">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Apri il menu" aria-expanded="false" aria-controls="siteNav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav class="site-nav" id="siteNav" aria-label="Navigazione">
+        <a href="index.html" data-nav="index.html">Home</a>
+        <a href="tester.html" data-nav="tester.html">Tester</a>
+        <a href="finanziatori.html" data-nav="finanziatori.html">Partner</a>
+        <a href="chi-siamo.html" data-nav="chi-siamo.html">Chi siamo</a>
+        <a href="contatti.html" data-nav="contatti.html">Contatti</a>
+      </nav>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Cambia tema chiaro o scuro">
+        <svg class="ic-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 12.5A7.5 7.5 0 0 1 7.5 2.5a7.5 7.5 0 1 0 10 10z"/></svg>
+        <svg class="ic-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.22 4.22l1.06 1.06M14.72 14.72l1.06 1.06M4.22 15.78l1.06-1.06M14.72 5.28l1.06-1.06"/></svg>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -145,16 +159,43 @@
   <section class="hero">
     <div class="wrap">
       <span class="eyebrow">Companion neurodivergent-friendly</span>
-      <h1>Dal sovraccarico al prossimo piccolo passo.</h1>
+      <h1>Dal sovraccarico al prossimo piccolo passo</h1>
       <p class="lede">Uno strumento pratico e gentile per adulti neurodivergenti — ADHD, autismo, AuDHD, DOP, DSA.</p>
       <div class="hero-art" aria-hidden="true">
-        <svg viewBox="0 0 480 120" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 96 C 110 96, 120 40, 200 40 S 300 92, 380 60 460 30 460 30" opacity="0.5" stroke-dasharray="2 9"/>
-          <circle cx="20" cy="96" r="6" fill="currentColor" stroke="none" opacity="0.35"/>
-          <circle cx="200" cy="40" r="6" fill="currentColor" stroke="none" opacity="0.55"/>
-          <circle cx="380" cy="60" r="6" fill="currentColor" stroke="none" opacity="0.75"/>
-          <path d="M452 18 l16 10 -16 10 z" fill="currentColor" stroke="none"/>
+        <svg viewBox="0 0 480 120" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 96 C 110 96, 120 40, 200 40 S 300 92, 380 60 460 30 460 30" opacity="0.9"/>
+          <circle cx="20" cy="96" r="7" fill="currentColor" stroke="none" opacity="0.55"/>
+          <circle cx="200" cy="40" r="7" fill="currentColor" stroke="none" opacity="0.75"/>
+          <circle cx="380" cy="60" r="7" fill="currentColor" stroke="none"/>
+          <path d="M452 16 l18 12 -18 12 z" fill="currentColor" stroke="none"/>
         </svg>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Come funziona</span>
+        <h2>In tre passi, dal blocco al fatto</h2>
+        <p>Scrivi l'attività che ti blocca, anche se non riesci a spiegarla per bene. NeuroDesk trova con te il primo punto su cui intervenire.</p>
+      </div>
+      <div class="blocks reveal">
+        <div class="block">
+          <span class="step-badge" aria-hidden="true">1</span>
+          <h3>Dici cosa non riesci a fare adesso</h3>
+          <p>Scrivi come ti viene, senza doverlo spiegare per bene. Scegli l'area: blocco, studio, burocrazia, lavoro, autonomie.</p>
+        </div>
+        <div class="block">
+          <span class="step-badge" aria-hidden="true">2</span>
+          <h3>Ricevi un solo passo</h3>
+          <p>Una micro-azione da due minuti, non un piano intero. Se è ancora troppo, la dividiamo in un passo più piccolo.</p>
+        </div>
+        <div class="block">
+          <span class="step-badge" aria-hidden="true">3</span>
+          <h3>Riprendi da dove eri quando torni</h3>
+          <p>NeuroDesk ricorda a cosa stavi lavorando e puoi scaricare i tuoi passaggi, per averli sempre con te.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -163,7 +204,7 @@
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow">Da dove vuoi entrare?</span>
-        <h2>Scegli il tuo percorso.</h2>
+        <h2>Scegli il tuo percorso</h2>
       </div>
       <div class="choices reveal">
         <a class="choice" href="tester.html">
@@ -190,7 +231,7 @@
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow">Che cos'è NeuroDesk</span>
-        <h2>Un aiuto che rende possibile iniziare.</h2>
+        <h2>Un aiuto che rende possibile iniziare</h2>
         <p>Scrivi l'attività che ti blocca. NeuroDesk ti risponde con un solo passo concreto, quello che puoi fare adesso.</p>
       </div>
       <div class="blocks reveal">
@@ -223,7 +264,7 @@
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow">Come funziona</span>
-        <h2>Semplice per chi lo usa, chiaro per chi lo gestisce.</h2>
+        <h2>Semplice per chi lo usa, chiaro per chi lo gestisce</h2>
         <p>La persona riceve un aiuto concreto. Chi la accompagna — scuola, ente o azienda — vede com'è andata.</p>
       </div>
       <div class="shots">
@@ -304,6 +345,12 @@
     els.forEach(function (e) { io.observe(e); });
   })();
 </script>
+
+<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Informativa cookie" hidden>
+  <p>Usiamo solo <strong>cookie tecnici</strong> necessari al funzionamento del sito. Nessun tracciamento pubblicitario. <a href="privacy.html#cookie">Maggiori dettagli</a>.</p>
+  <button id="cookieOk" type="button">Ho capito</button>
+</div>
+<script src="assets/site.js" defer></script>
 
 </body>
 </html>

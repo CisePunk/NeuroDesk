@@ -10,6 +10,7 @@
 <meta property="og:type" content="website">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
 <title>NeuroDesk — provalo con noi</title>
+<link rel="stylesheet" href="assets/site.css">
 <style>
   :root {
     --bg: #faf8f4; --bg-2: #f2eee6; --surface: #ffffff;
@@ -138,8 +139,21 @@
 <body>
 <header class="top">
   <div class="wrap top-inner">
-    <a class="brand brand-home" href="index.html"><span class="bdot" aria-hidden="true"></span> NeuroDesk</a>
+    <div class="brand-nav">
+      <a class="back-btn" href="index.html" aria-label="Torna alla home">←</a>
+      <a class="brand brand-home" href="index.html"><span class="bdot" aria-hidden="true"></span> NeuroDesk</a>
+    </div>
     <div class="top-right">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Apri il menu" aria-expanded="false" aria-controls="siteNav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav class="site-nav" id="siteNav" aria-label="Navigazione">
+        <a href="index.html" data-nav="index.html">Home</a>
+        <a href="tester.html" data-nav="tester.html">Tester</a>
+        <a href="finanziatori.html" data-nav="finanziatori.html">Partner</a>
+        <a href="chi-siamo.html" data-nav="chi-siamo.html">Chi siamo</a>
+        <a href="contatti.html" data-nav="contatti.html">Contatti</a>
+      </nav>
       <button class="theme-btn" id="themeBtn" type="button" aria-label="Cambia tema chiaro o scuro">
         <svg class="ic-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 12.5A7.5 7.5 0 0 1 7.5 2.5a7.5 7.5 0 1 0 10 10z"/></svg>
         <svg class="ic-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.22 4.22l1.06 1.06M14.72 14.72l1.06 1.06M4.22 15.78l1.06-1.06M14.72 5.28l1.06-1.06"/></svg>
@@ -182,6 +196,20 @@
     </div>
   </section>
 
+  <section style="padding-block:1rem 0">
+    <div class="wrap">
+      <div class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 480 120" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 96 C 110 96, 120 40, 200 40 S 300 92, 380 60 460 30 460 30" opacity="0.9"/>
+          <circle cx="20" cy="96" r="7" fill="currentColor" stroke="none" opacity="0.55"/>
+          <circle cx="200" cy="40" r="7" fill="currentColor" stroke="none" opacity="0.75"/>
+          <circle cx="380" cy="60" r="7" fill="currentColor" stroke="none"/>
+          <path d="M452 16 l18 12 -18 12 z" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
   <section class="band">
     <div class="wrap reveal">
       <p class="lead-line">Scrivi l'attività che non riesci a iniziare. NeuroDesk ti risponde con <strong>un solo piccolo passo</strong> da fare, non con una lista lunga.</p>
@@ -192,7 +220,7 @@
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow">Com'è provarlo</span>
-        <h2>Semplice, e senza fretta.</h2>
+        <h2>Semplice, e senza fretta</h2>
       </div>
       <div class="steps reveal">
         <div class="step-row"><div class="step-num">1</div><div><h3>Ti diamo un codice</h3><p>Entri con un codice, senza dare il tuo nome. Nessuna registrazione.</p></div></div>
@@ -206,7 +234,7 @@
     <div class="wrap">
       <div class="section-head reveal">
         <span class="eyebrow">Cosa devi sapere</span>
-        <h2>Poche informazioni, chiare.</h2>
+        <h2>Poche informazioni, chiare</h2>
       </div>
       <div class="reassure reveal">
         <div class="box"><h3>Non serve essere esperti</h3><p>Non c'è modo giusto o sbagliato di usarlo. Ci interessa capire com'è per te.</p></div>
@@ -218,7 +246,6 @@
 
   <section>
     <div class="wrap">
-      <div class="hero-art" aria-hidden="true" style="margin-bottom:2.6rem"><svg viewBox="0 0 480 120" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 96 C 110 96, 120 40, 200 40 S 300 92, 380 60 460 30 460 30" opacity="0.5" stroke-dasharray="2 9"/><circle cx="20" cy="96" r="6" fill="currentColor" stroke="none" opacity="0.35"/><circle cx="200" cy="40" r="6" fill="currentColor" stroke="none" opacity="0.55"/><circle cx="380" cy="60" r="6" fill="currentColor" stroke="none" opacity="0.75"/><path d="M452 18 l16 10 -16 10 z" fill="currentColor" stroke="none"/></svg></div>
       <div class="cta-box reveal">
         <span class="eyebrow">Facci sapere</span>
         <h2 style="margin-top:0.7rem">Vuoi provarlo?</h2>
@@ -258,6 +285,12 @@
     els.forEach(function (e) { io.observe(e); });
   })();
 </script>
+
+<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Informativa cookie" hidden>
+  <p>Usiamo solo <strong>cookie tecnici</strong> necessari al funzionamento del sito. Nessun tracciamento pubblicitario. <a href="privacy.html#cookie">Maggiori dettagli</a>.</p>
+  <button id="cookieOk" type="button">Ho capito</button>
+</div>
+<script src="assets/site.js" defer></script>
 
 </body>
 </html>
