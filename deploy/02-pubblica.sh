@@ -48,8 +48,8 @@ rsync -az --delete --info=none \
 msg "Carico il frontend"
 rsync -az --delete --info=none frontend/dist/ "$SERVER:/var/www/neurodesk/"
 
-msg "Carico la landing"
-rsync -az --delete --info=none --include='*.html' --exclude='*' \
+msg "Carico la landing (HTML + assets: CSS e JS del menu)"
+rsync -az --delete --info=none --exclude='.DS_Store' \
     landing/ "$SERVER:/var/www/neurodesk-landing/"
 
 # --- 3. Permessi e riavvio ---------------------------------------------------
