@@ -1,0 +1,77 @@
+/* NeuroDesk landing — stili condivisi: menu di navigazione, banner cookie, form contatti.
+   Usa le stesse variabili CSS (:root) definite inline in ogni pagina. */
+
+/* ---- Menu di navigazione ---- */
+.top-right { display: flex; align-items: center; gap: 0.6rem; }
+.site-nav { display: flex; align-items: center; gap: 0.15rem; }
+.site-nav a { font-family: var(--sans); font-size: 0.92rem; font-weight: 600; color: var(--text-2); text-decoration: none; padding: 0.4rem 0.7rem; border-radius: 999px; line-height: 1; white-space: nowrap; transition: background 0.15s ease, color 0.15s ease; }
+.site-nav a:hover { color: var(--accent-deep); background: var(--accent-soft); }
+.site-nav a.is-current { color: var(--accent-deep); background: var(--accent-soft); }
+
+.nav-toggle { display: none; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); cursor: pointer; }
+.nav-toggle:hover { background: var(--accent-soft); border-color: var(--accent); }
+.nav-toggle svg { width: 1.25rem; height: 1.25rem; }
+
+@media (max-width: 860px) {
+  .nav-toggle { display: inline-grid; }
+  .site-nav { position: absolute; top: 3.9rem; right: 1.5rem; left: 1.5rem; flex-direction: column; align-items: stretch; gap: 0.1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: var(--shadow); padding: 0.5rem; display: none; z-index: 30; }
+  .site-nav.open { display: flex; }
+  .site-nav a { padding: 0.75rem 0.9rem; font-size: 1rem; }
+}
+
+/* Header su telefoni stretti: evita che logo e menu (☰) si tocchino. */
+@media (max-width: 560px) {
+  /* La CTA in alto è ridondante col menu ☰ e con la CTA nella pagina: la nascondo. */
+  .top-right .cta-link { display: none; }
+}
+@media (max-width: 380px) {
+  header.top .top-inner { gap: 0.5rem; }
+  header.top .brand { font-size: 1.12rem; }
+}
+
+/* CTA "Scrivici" a tutta larghezza: appare solo su telefono, su una riga sua
+   (quando la CTA in alto viene nascosta), così non affolla il logo. */
+.mobile-cta { display: none; }
+@media (max-width: 560px) {
+  .mobile-cta { display: block; padding: 0.7rem 1.1rem; background: var(--accent-soft); border-bottom: 1px solid var(--border-soft); }
+  .mobile-cta a { display: flex; justify-content: center; align-items: center; gap: 0.45rem; font-family: var(--sans); font-weight: 700; font-size: 1rem; color: #fbfdfb; background: var(--accent); border-radius: 999px; padding: 0.7rem 1rem; text-decoration: none; box-shadow: var(--shadow); }
+  .mobile-cta a:active { background: var(--accent-deep); }
+}
+
+/* ---- Banner cookie (solo tecnici) ---- */
+.cookie-banner { position: fixed; left: 1rem; right: 1rem; bottom: 1rem; z-index: 50; max-width: 46rem; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: var(--shadow); padding: 1rem 1.2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem 1.2rem; }
+.cookie-banner p { margin: 0; font-size: 0.9rem; color: var(--text-2); flex: 1 1 18rem; }
+.cookie-banner a { color: var(--accent-deep); font-weight: 600; }
+.cookie-banner .btn { padding: 0.6rem 1.3rem; font-size: 0.92rem; }
+.cookie-banner button { font-family: var(--sans); font-weight: 600; font-size: 0.92rem; cursor: pointer; border: 1px solid transparent; border-radius: 999px; padding: 0.6rem 1.3rem; background: var(--accent); color: #fbfdfb; }
+.cookie-banner button:hover { background: var(--accent-deep); }
+.cookie-banner[hidden] { display: none; }
+
+/* ---- Form contatti ---- */
+.form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 1.25rem; box-shadow: var(--shadow); padding: clamp(1.5rem, 4vw, 2.4rem); max-width: 38rem; }
+.contact-form { display: grid; gap: 1.1rem; }
+.field { display: grid; gap: 0.4rem; }
+.field label { font-family: var(--sans); font-weight: 600; font-size: 0.92rem; }
+.field .req { color: var(--accent-deep); }
+.field input, .field textarea { font-family: var(--sans); font-size: 1rem; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 0.7rem; padding: 0.7rem 0.85rem; width: 100%; }
+.field input:focus, .field textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+.field textarea { min-height: 8rem; resize: vertical; }
+.consent { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.9rem; color: var(--text-2); line-height: 1.5; }
+.consent input { margin-top: 0.2rem; width: 1.05rem; height: 1.05rem; flex: none; accent-color: var(--accent); }
+.consent a { color: var(--accent-deep); font-weight: 600; }
+.form-status { font-size: 0.92rem; padding: 0.7rem 0.9rem; border-radius: 0.7rem; }
+.form-status.ok { background: var(--accent-soft); color: var(--accent-deep); }
+.form-status.err { background: rgba(190,70,70,0.12); color: #b04545; }
+.form-note { font-size: 0.82rem; color: var(--text-3); margin: 0; }
+.form-note a { color: var(--accent-deep); font-weight: 600; }
+
+/* ---- Contenuto testuale lungo (privacy, chi siamo) ---- */
+.prose { max-width: 46rem; }
+.prose h2 { font-size: clamp(1.4rem, 3vw, 1.9rem); margin-top: 2.2rem; }
+.prose h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 700; margin-top: 1.6rem; }
+.prose p, .prose li { color: var(--text-2); }
+.prose p { margin-top: 0.7rem; }
+.prose ul { margin: 0.6rem 0 0; padding-left: 1.2rem; }
+.prose li { margin-top: 0.35rem; }
+.prose .todo { background: rgba(200,150,40,0.14); color: #9a6a10; border-radius: 0.4rem; padding: 0.05rem 0.35rem; font-weight: 600; font-size: 0.9em; }
+:root[data-theme="dark"] .prose .todo { color: #e0b25a; }

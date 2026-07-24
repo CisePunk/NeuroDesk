@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="NeuroDesk: uno strumento pratico e gentile per adulti neurodivergenti — ADHD, autismo, AuDHD, DOP, DSA. Provalo e dicci cosa aiuta e cosa no.">
+<meta name="keywords" content="NeuroDesk, neurodivergenza, neurodivergente, adulti neurodivergenti, ADHD, ADHD adulti, autismo, autismo adulti, spettro autistico, AuDHD, DOP, disturbo oppositivo provocatorio, DSA, dislessia, discalculia, supporto neurodivergenti, strumento ADHD">
+<meta property="og:title" content="NeuroDesk — provalo con noi">
+<meta property="og:description" content="NeuroDesk: uno strumento pratico e gentile per adulti neurodivergenti — ADHD, autismo, AuDHD, DOP, DSA. Provalo e dicci cosa aiuta e cosa no.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
+<title>NeuroDesk — provalo con noi</title>
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  :root {
+    --bg: #faf8f4; --bg-2: #f2eee6; --surface: #ffffff;
+    --border: rgba(95,130,121,0.22); --border-soft: rgba(95,130,121,0.14);
+    --accent: #5f8279; --accent-deep: #45625a; --accent-soft: rgba(95,130,121,0.10);
+    --text: #2f2f36; --text-2: #5c5c64; --text-3: #8a8a90;
+    --shadow: 0 1px 2px rgba(60,55,45,0.05), 0 12px 32px -18px rgba(60,55,45,0.28);
+    --serif: "Iowan Old Style","Palatino Linotype","Palatino","Georgia",ui-serif,serif;
+    --sans: ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --page: 62rem;
+  }
+  :root[data-theme="dark"] {
+    --bg: #191c21; --bg-2: #20242b; --surface: #262b32;
+    --border: rgba(230,227,220,0.13); --border-soft: rgba(230,227,220,0.08);
+    --accent: #8aa8a1; --accent-deep: #a6bfb8; --accent-soft: rgba(138,168,161,0.14);
+    --text: #e8e5de; --text-2: #aeaca4; --text-3: #7d7b75;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 14px 34px -18px rgba(0,0,0,0.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 1.08rem; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: var(--page); margin: 0 auto; padding: 0 1.5rem; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; margin: 0; }
+  p { margin: 0; }
+  a { color: inherit; }
+  .eyebrow { font-family: var(--sans); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.16em; font-weight: 600; color: var(--accent-deep); }
+
+  header.top { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); background: color-mix(in srgb, var(--bg) 82%, transparent); border-bottom: 1px solid var(--border-soft); }
+  .top-inner { display: flex; align-items: center; justify-content: space-between; height: 4rem; }
+  .brand { display: flex; align-items: center; gap: 0.6rem; font-family: var(--serif); font-size: 1.25rem; font-weight: 600; }
+  .brand .bdot { width: 0.85rem; height: 0.85rem; border-radius: 50%; background: radial-gradient(circle at 35% 30%, var(--accent-deep), var(--accent)); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .top-right { display: flex; align-items: center; gap: 0.6rem; }
+  .theme-btn { display: inline-grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); cursor: pointer; }
+  .theme-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .theme-btn svg { width: 1.15rem; height: 1.15rem; }
+  .theme-btn .ic-sun { display: none; }
+  :root[data-theme="dark"] .theme-btn .ic-moon { display: none; }
+  :root[data-theme="dark"] .theme-btn .ic-sun { display: block; }
+
+  .btn { font-family: var(--sans); font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 999px; padding: 0.85rem 1.6rem; border: 1px solid transparent; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: transform 0.15s ease, background 0.2s ease; }
+  .btn-primary { background: var(--accent); color: #fbfdfb; box-shadow: var(--shadow); }
+  .btn-primary:hover { background: var(--accent-deep); transform: translateY(-1px); }
+  /* Ingresso per chi il codice ce l'ha gia': secondario, ma sempre visibile. */
+  .btn-secondary { background: var(--surface); color: var(--accent-deep); border-color: var(--border); }
+  .btn-secondary:hover { background: var(--accent-soft); border-color: var(--accent); transform: translateY(-1px); }
+  .cta-link { font-family: var(--sans); font-size: 0.92rem; font-weight: 600; text-decoration: none; color: var(--accent-deep); padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 999px; }
+  .cta-link:hover { background: var(--accent-soft); border-color: var(--accent); }
+
+  .tagline { background: var(--accent-soft); border-bottom: 1px solid var(--border-soft); }
+  .tagline p { max-width: var(--page); margin: 0 auto; padding: 0.75rem 1.5rem; text-align: center; font-family: var(--serif); font-style: italic; font-size: 1.03rem; color: var(--accent-deep); }
+
+  section { padding: clamp(3rem, 7vw, 5rem) 0; }
+  .band { background: var(--bg-2); }
+
+  .hero { padding: clamp(3.5rem, 9vw, 6rem) 0 clamp(2.5rem, 6vw, 4rem); }
+  .hero-grid { display: grid; grid-template-columns: 1fr 0.9fr; gap: clamp(2rem, 5vw, 3.5rem); align-items: center; }
+  .hero h1 { font-size: clamp(2.3rem, 5vw, 3.5rem); line-height: 1.06; letter-spacing: -0.02em; }
+  .hero .lede { margin-top: 1.3rem; font-size: 1.18rem; color: var(--text-2); max-width: 28rem; }
+  .hero .eyebrow { display: inline-block; margin-bottom: 1rem; }
+  .hero-actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; }
+
+  /* mockup chat in CSS */
+  .chat-mock { background: var(--surface); border: 1px solid var(--border); border-radius: 1.25rem; box-shadow: var(--shadow); overflow: hidden; }
+  .chat-head { display: flex; align-items: center; gap: 0.55rem; padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--border-soft); font-size: 0.9rem; font-weight: 600; color: var(--text-2); }
+  .chat-head .bdot { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--accent); }
+  .chat-body { padding: 1.2rem 1.1rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  .cm-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-top: 0.5rem; }
+  .cm-bubble { border-radius: 0.85rem; padding: 0.8rem 0.95rem; line-height: 1.5; font-size: 0.98rem; }
+  .cm-user { background: var(--accent-soft); color: var(--text); }
+  .cm-bot { background: var(--bg-2); color: var(--text); border: 1px solid var(--border-soft); }
+
+  .lead-line { font-family: var(--serif); font-size: clamp(1.5rem, 3.2vw, 2.1rem); line-height: 1.34; letter-spacing: -0.01em; max-width: 40rem; }
+
+  .steps { display: grid; gap: 1.3rem; margin-top: 2.2rem; max-width: 44rem; }
+  .step-row { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: start; }
+  .step-num { font-family: var(--serif); font-size: 1.05rem; font-weight: 600; color: var(--accent-deep); width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid var(--border); display: grid; place-items: center; background: var(--surface); flex: none; }
+  .step-row h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 700; margin-bottom: 0.2rem; }
+  .step-row p { color: var(--text-2); font-size: 1rem; }
+
+  .section-head { max-width: 40rem; margin-bottom: 1.6rem; }
+  .section-head h2 { font-size: clamp(1.7rem, 3.5vw, 2.3rem); line-height: 1.14; letter-spacing: -0.015em; }
+  .section-head .eyebrow { display: block; margin-bottom: 0.8rem; }
+
+  .reassure { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.1rem; }
+  .reassure .box { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 1rem; padding: 1.2rem 1.3rem; box-shadow: var(--shadow); }
+  .reassure h3 { font-family: var(--sans); font-size: 1.02rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .reassure p { color: var(--text-2); font-size: 0.96rem; }
+
+  .cta-box { background: var(--surface); border: 1px solid var(--border); border-radius: 1.5rem; box-shadow: var(--shadow); padding: clamp(2rem, 5vw, 3.2rem); text-align: center; max-width: 42rem; margin: 0 auto; }
+  .cta-box h2 { font-size: clamp(1.7rem, 3.6vw, 2.3rem); line-height: 1.16; }
+  .cta-box p { color: var(--text-2); margin: 1rem auto 0; max-width: 30rem; }
+  .cta-box .btn { margin-top: 1.8rem; }
+  .cta-note { font-size: 0.82rem; color: var(--text-3); margin-top: 1.2rem; }
+
+  .brand-nav { display: flex; align-items: center; gap: 0.7rem; }
+  .back-btn { display: inline-grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); text-decoration: none; font-size: 1.15rem; line-height: 1; }
+  .back-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .hero-art { margin: 0 auto; max-width: 26rem; color: var(--accent); }
+  .hero-art svg { width: 100%; height: auto; display: block; }
+  .switch-band { background: var(--bg-2); border-top: 1px solid var(--border-soft); }
+  .switch-band .wrap { padding: 1.7rem 1.5rem; display: flex; flex-wrap: wrap; gap: 0.7rem 1.4rem; align-items: center; justify-content: center; text-align: center; }
+  .switch-band p { color: var(--text-2); margin: 0; }
+  .brand-home { text-decoration: none; color: inherit; }
+  .crumbs { border-bottom: 1px solid var(--border-soft); background: var(--bg); }
+  .crumbs .wrap { padding: 0.6rem 1.5rem; font-size: 0.86rem; color: var(--text-3); display: flex; gap: 0.5rem; align-items: center; }
+  .crumbs a { color: var(--accent-deep); text-decoration: none; font-weight: 600; }
+  .crumbs a:hover { text-decoration: underline; }
+  .crumbs .sep { opacity: 0.55; }
+  .crumbs [aria-current="page"] { color: var(--text-2); }
+  .mail-btn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--sans); font-weight: 600; font-size: 0.92rem; color: var(--accent-deep); background: var(--accent-soft); border: 1px solid var(--border); border-radius: 999px; padding: 0.45rem 1rem; text-decoration: none; transition: background 0.2s ease, border-color 0.2s ease; }
+  .mail-btn:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: var(--accent); }
+  footer { padding: 2.5rem 0 3rem; border-top: 1px solid var(--border-soft); color: var(--text-3); font-size: 0.88rem; }
+  .foot-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; align-items: center; }
+
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  @media (max-width: 760px) { .hero-grid { grid-template-columns: 1fr; } .chat-mock { order: -1; } }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: 0.001ms !important; } .reveal { opacity: 1; transform: none; } }
+</style>
+
+<script>
+  (function () { try { var t = localStorage.getItem('nd-theme'); document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light'); } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); } })();
+</script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="brand-nav">
+      <a class="back-btn" href="index.html" aria-label="Torna alla home">←</a>
+      <a class="brand brand-home" href="index.html"><span class="bdot" aria-hidden="true"></span> NeuroDesk</a>
+    </div>
+    <div class="top-right">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Apri il menu" aria-expanded="false" aria-controls="siteNav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav class="site-nav" id="siteNav" aria-label="Navigazione">
+        <a href="index.html" data-nav="index.html">Home</a>
+        <a href="tester.html" data-nav="tester.html">Tester</a>
+        <a href="finanziatori.html" data-nav="finanziatori.html">Partner</a>
+        <a href="chi-siamo.html" data-nav="chi-siamo.html">Chi siamo</a>
+        <a href="contatti.html" data-nav="contatti.html">Contatti</a>
+      </nav>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Cambia tema chiaro o scuro">
+        <svg class="ic-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 12.5A7.5 7.5 0 0 1 7.5 2.5a7.5 7.5 0 1 0 10 10z"/></svg>
+        <svg class="ic-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.22 4.22l1.06 1.06M14.72 14.72l1.06 1.06M4.22 15.78l1.06-1.06M14.72 5.28l1.06-1.06"/></svg>
+      </button>
+      <a class="cta-link" href="mailto:hello@neurodesk.it?subject=Voglio%20provare%20NeuroDesk">Voglio provarlo</a>
+    </div>
+  </div>
+</header>
+
+<div class="tagline"><p>Quando il passo davanti è troppo grande, NeuroDesk aiuta a trovarne uno possibile.</p></div>
+
+<nav class="crumbs" aria-label="Percorso"><div class="wrap"><a href="index.html">Home</a><span class="sep">/</span><span aria-current="page">Tester</span></div></nav>
+
+<div class="mobile-cta">
+  <a href="mailto:hello@neurodesk.it?subject=Voglio%20provare%20NeuroDesk">
+    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M3 6l7 5 7-5"/></svg>
+    Scrivici
+  </a>
+</div>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">Cerchiamo tester</span>
+        <h1>Ti va di provare NeuroDesk?</h1>
+        <p class="lede">
+          NeuroDesk è già in prova con un piccolo gruppo. Cerchiamo altre persone neurodivergenti —
+          con ADHD, autismo, AuDHD, DOP, DSA — che lo usino e ci dicano, senza troppi giri di parole,
+          cosa aiuta e cosa no.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="mailto:hello@neurodesk.it?subject=Voglio%20provare%20NeuroDesk">Voglio provarlo</a>
+          <a class="btn btn-secondary" href="https://app.neurodesk.it">Ho già un codice</a>
+        </div>
+      </div>
+
+      <div class="chat-mock" aria-label="Esempio di conversazione con il Companion">
+        <div class="chat-head"><span class="bdot" aria-hidden="true"></span> NeuroDesk Companion</div>
+        <div class="chat-body">
+          <div class="cm-label">Tu</div>
+          <div class="cm-bubble cm-user">Ho un esame fra tre giorni e non riesco a iniziare a studiare.</div>
+          <div class="cm-label">Companion</div>
+          <div class="cm-bubble cm-bot">Ti credo, e non è colpa tua.<br><br>Prossimo passo (2 minuti): apri il libro alla prima pagina del capitolo. Non leggere ancora. Solo aprilo.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-block:1rem 0">
+    <div class="wrap">
+      <div class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 480 120" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 96 C 110 96, 120 40, 200 40 S 300 92, 380 60 460 30 460 30" opacity="0.9"/>
+          <circle cx="20" cy="96" r="7" fill="currentColor" stroke="none" opacity="0.55"/>
+          <circle cx="200" cy="40" r="7" fill="currentColor" stroke="none" opacity="0.75"/>
+          <circle cx="380" cy="60" r="7" fill="currentColor" stroke="none"/>
+          <path d="M452 16 l18 12 -18 12 z" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap reveal">
+      <p class="lead-line">Scrivi l'attività che non riesci a iniziare. NeuroDesk ti risponde con <strong>un solo piccolo passo</strong> da fare, non con una lista lunga.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Com'è provarlo</span>
+        <h2>Semplice, e senza fretta</h2>
+      </div>
+      <div class="steps reveal">
+        <div class="step-row"><div class="step-num">1</div><div><h3>Ti diamo un codice</h3><p>Entri con un codice, senza dare il tuo nome. Nessuna registrazione.</p></div></div>
+        <div class="step-row"><div class="step-num">2</div><div><h3>Lo usi quando vuoi</h3><p>Scrivi come ti viene, anche poche parole. Ricevi un passo alla volta.</p></div></div>
+        <div class="step-row"><div class="step-num">3</div><div><h3>Ci dici com'è andata</h3><p>Poche domande con dei pulsanti, e uno spazio per scrivere. Non servono relazioni.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="cta-box reveal">
+        <span class="eyebrow">Facci sapere</span>
+        <h2 style="margin-top:0.7rem">Vuoi provarlo?</h2>
+        <p>Scrivici e ti mandiamo un codice per iniziare. Bastano pochi minuti quando ti va.</p>
+        <a class="btn btn-primary" href="mailto:hello@neurodesk.it?subject=Voglio%20provare%20NeuroDesk">Voglio provarlo</a>
+        <p class="cta-note">Ti rispondiamo noi, una persona vera.</p>
+        <p class="cta-note">Hai già un codice? <a href="https://app.neurodesk.it" style="color:var(--accent-deep);font-weight:600">Entra da qui</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Cosa devi sapere</span>
+        <h2>Poche informazioni, chiare</h2>
+      </div>
+      <div class="reassure reveal">
+        <div class="box"><h3>Non serve essere esperti</h3><p>Non c'è modo giusto o sbagliato di usarlo. Ci interessa capire com'è per te.</p></div>
+        <div class="box"><h3>I tuoi dati restano tuoi</h3><p>Entri senza nome. Le conversazioni sono cifrate e le puoi cancellare quando vuoi.</p></div>
+        <div class="box"><h3>Non è una terapia</h3><p>NeuroDesk è uno strumento pratico. Non sostituisce medici, psicologi o servizi.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<section class="switch-band"><div class="wrap"><p>Sei un'azienda, un ente o un finanziatore?</p><a class="cta-link" href="finanziatori.html">Vai alla pagina partner →</a></div></section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div class="brand" style="font-size:1.05rem"><span class="bdot" aria-hidden="true"></span> NeuroDesk</div>
+    <a class="mail-btn" href="mailto:hello@neurodesk.it"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M3 6l7 5 7-5"/></svg> Scrivici</a>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var btn = document.getElementById('themeBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      var next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('nd-theme', next); } catch (e) {}
+    });
+  })();
+  (function () {
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (en) { en.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } }); }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(function (e) { io.observe(e); });
+  })();
+</script>
+
+<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Informativa cookie" hidden>
+  <p>Usiamo solo <strong>cookie tecnici</strong> necessari al funzionamento del sito. Nessun tracciamento pubblicitario. <a href="privacy.html#cookie">Maggiori dettagli</a>.</p>
+  <button id="cookieOk" type="button">Ho capito</button>
+</div>
+<script src="assets/site.js" defer></script>
+
+</body>
+</html>
