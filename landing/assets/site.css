@@ -19,6 +19,25 @@
   .site-nav a { padding: 0.75rem 0.9rem; font-size: 1rem; }
 }
 
+/* Header su telefoni stretti: evita che logo e menu (☰) si tocchino. */
+@media (max-width: 560px) {
+  /* La CTA in alto è ridondante col menu ☰ e con la CTA nella pagina: la nascondo. */
+  .top-right .cta-link { display: none; }
+}
+@media (max-width: 380px) {
+  header.top .top-inner { gap: 0.5rem; }
+  header.top .brand { font-size: 1.12rem; }
+}
+
+/* CTA "Scrivici" a tutta larghezza: appare solo su telefono, su una riga sua
+   (quando la CTA in alto viene nascosta), così non affolla il logo. */
+.mobile-cta { display: none; }
+@media (max-width: 560px) {
+  .mobile-cta { display: block; padding: 0.7rem 1.1rem; background: var(--accent-soft); border-bottom: 1px solid var(--border-soft); }
+  .mobile-cta a { display: flex; justify-content: center; align-items: center; gap: 0.45rem; font-family: var(--sans); font-weight: 700; font-size: 1rem; color: #fbfdfb; background: var(--accent); border-radius: 999px; padding: 0.7rem 1rem; text-decoration: none; box-shadow: var(--shadow); }
+  .mobile-cta a:active { background: var(--accent-deep); }
+}
+
 /* ---- Banner cookie (solo tecnici) ---- */
 .cookie-banner { position: fixed; left: 1rem; right: 1rem; bottom: 1rem; z-index: 50; max-width: 46rem; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: var(--shadow); padding: 1rem 1.2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem 1.2rem; }
 .cookie-banner p { margin: 0; font-size: 0.9rem; color: var(--text-2); flex: 1 1 18rem; }
