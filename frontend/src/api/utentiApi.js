@@ -1,20 +1,20 @@
 import { apiFetch } from './http';
 
-// Un "utente" = un accesso a CODICE ANONIMO. La scuola rilascia il codice una
-// volta sola, identifica l'utente senza nome né email, e ne mantiene la gestione
-// (revoca). È questo a risolvere GDPR e conservazione dati. Backend: /api/tester.
+// Un "utente" = anagrafica gestita dalla SCUOLA (nome, email…) + un account-codice
+// ANONIMO collegato. Registrarlo genera il codice, mostrato una volta sola. Nome ed
+// email restano nel registro; dati e chat vivono sul codice → pseudonimizzazione (GDPR).
+// Backend: /api/studenti.
 
 export function getUtenti() {
-    return apiFetch('/api/tester');
+    return apiFetch('/api/studenti');
 }
 
-// Crea un utente e restituisce il codice IN CHIARO una sola volta ({id, codice, etichetta}).
-export function creaCodice(etichetta) {
-    const body = etichetta ? { etichetta } : {};
-    return apiFetch('/api/tester', { method: 'POST', body });
+// Registra l'utente e restituisce anche il CODICE in chiaro (campo `codice`) una sola volta.
+export function registraUtente(dati) {
+    return apiFetch('/api/studenti', { method: 'POST', body: dati });
 }
 
-// Attiva/revoca l'accesso di un utente.
+// Attiva/revoca l'accesso: agisce sul codice-account collegato.
 export function impostaStato(id, attivo) {
-    return apiFetch(`/api/tester/${id}/stato`, { method: 'PUT', body: { attivo } });
+    return apiFetch(`/api/studenti/${id}/stato`, { method: 'PUT', body: { attivo } });
 }

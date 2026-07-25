@@ -30,9 +30,10 @@ public class Studente {
     @Builder.Default
     private Boolean attivo = true;
 
-    private String profiloNeurodivergente;
-
     private String livelloEnergiaPreferito;
+
+    /** Account-codice ANONIMO collegato (pseudonimizzazione): il nome sta qui, i dati/chat sul codice. */
+    private Long utenteId;
 
     @Column(updatable = false)
     private LocalDateTime creatoIl;

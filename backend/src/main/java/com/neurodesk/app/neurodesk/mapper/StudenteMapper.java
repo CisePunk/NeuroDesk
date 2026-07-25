@@ -14,7 +14,6 @@ public class StudenteMapper {
                 .cognome(entity.getCognome())
                 .email(entity.getEmail())
                 .attivo(entity.getAttivo())
-                .profiloNeurodivergente(entity.getProfiloNeurodivergente())
                 .livelloEnergiaPreferito(entity.getLivelloEnergiaPreferito())
                 .creatoIl(entity.getCreatoIl())
                 .build();
@@ -26,7 +25,6 @@ public class StudenteMapper {
                 .cognome(dto.getCognome())
                 .email(dto.getEmail())
                 .attivo(dto.getAttivo() != null ? dto.getAttivo() : true)
-                .profiloNeurodivergente(dto.getProfiloNeurodivergente())
                 .livelloEnergiaPreferito(dto.getLivelloEnergiaPreferito())
                 .build();
     }
@@ -38,7 +36,6 @@ public class StudenteMapper {
         if (dto.getAttivo() != null) {
             entity.setAttivo(dto.getAttivo());
         }
-        entity.setProfiloNeurodivergente(dto.getProfiloNeurodivergente());
         entity.setLivelloEnergiaPreferito(dto.getLivelloEnergiaPreferito());
     }
 }
