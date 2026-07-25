@@ -30,6 +30,12 @@ public class ContactRateLimiter {
         long now = System.currentTimeMillis();
         if (contatori.size() > MAX_VOCI) {
             purgaScaduti(now);
+            // Tetto RIGIDO alla memoria: se dopo la pulizia siamo ancora oltre il cap
+            // (es. flood da IP rotanti su un blocco IPv6), svuota. Valvola anti-OOM: il
+            // conteggio per-IP riparte da zero, ma la memoria resta limitata.
+            if (contatori.size() > MAX_VOCI) {
+                contatori.clear();
+            }
         }
         Contatore c = contatori.computeIfAbsent(ip, k -> new Contatore());
         synchronized (c) {

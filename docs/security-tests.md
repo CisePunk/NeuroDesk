@@ -2,12 +2,12 @@
 
 | Campo | Valore |
 |---|---|
-| Data esecuzione | 2026-06-29 |
+| Data esecuzione | 2026-06-29 · aggiornato 2026-07-25 |
 | Branch | `main` |
-| Commit HEAD | `4dd692e` |
+| Commit HEAD | `main` (luglio 2026 — dopo modello Utenti a codice + fix rate-limiter) |
 | Runtime | Node v24.14.1, npm 11.11.0 |
-| Tipo di verifica | Sola lettura (nessuna modifica al codice durante i test) |
-| Esito complessivo | **14/14 test superati** |
+| Tipo di verifica | Live + analisi statica (nessuna modifica al codice durante i test) |
+| Esito complessivo | **35/35 test superati** |
 
 Questo documento elenca i test di sicurezza condotti sul progetto NeuroDesk
 (frontend React, companion-service Node.js, backend Spring Boot) e il loro esito.
@@ -99,7 +99,44 @@ Tutti eseguiti con `curl` contro l'endpoint `POST /api/companion/respond`.
 
 ---
 
-## 6. Sintesi
+## 6. Modifiche recenti — form contatti pubblico + gestionale utenti (luglio 2026)
+
+Analisi statica adversariale sulle modifiche successive al consolidamento: nuovo
+endpoint pubblico `POST /api/public/contact` e gestionale "Utenti" (registrazione con
+nome + generazione di un codice di accesso anonimo collegato).
+
+### 6.1 Endpoint pubblico contatti (non autenticato)
+
+| # | Test | Verifica | Esito |
+|---|------|----------|-------|
+| 23 | Whitelist minima | in `SecurityConfig` è `permitAll` **solo** `POST /api/public/contact`; ogni altro metodo/rotta resta protetto | ✅ |
+| 24 | Consenso obbligatorio | `@AssertTrue` sul boolean `consenso` → 400 se assente o `false` | ✅ |
+| 25 | Limiti di lunghezza input | `messaggio ≤ 2000`, `nome ≤ 100`, `email ≤ 255` (+ colonne DB coerenti) | ✅ |
+| 26 | Injection SQL/JPA | solo Spring Data parametrizzato (`save`, `existsByEmail`); nessuna concatenazione di stringhe | ✅ |
+| 27 | Rate limiting per IP | `ContactRateLimiter`: max 5 invii / 15 min per IP; `getRemoteAddr()` (no `X-Forwarded-For` spoofabile) | ✅ |
+| 28 | Tetto memoria rate-limiter | cap rigido: oltre `MAX_VOCI` la mappa viene svuotata → nessun OOM sotto flood di IP rotanti (**fix applicato**) | ✅ |
+| 29 | Nessun information disclosure | codice/email/messaggio/IP non finiscono nei log | ✅ |
+
+### 6.2 Gestionale utenti (ruolo SCUOLA)
+
+| # | Test | Verifica | Esito |
+|---|------|----------|-------|
+| 30 | Autorizzazione | `POST /api/studenti` e `PUT /api/studenti/{id}/stato` → `hasRole("SCUOLA")` (401 senza token) | ✅ |
+| 31 | Codice non esposto in lista | il codice in chiaro è **solo** nella risposta di creazione; `GET /api/studenti` non lo restituisce; nel DB solo l'hash | ✅ |
+| 32 | Rimozione dato art. 9 | `profiloNeurodivergente` rimosso da entity, DTO e mapper; nessun residuo nel codice | ✅ |
+| 33 | Revoca accesso | `PUT .../stato {attivo:false}` disattiva l'account-codice collegato; il filtro JWT ricontrolla `attivo` → accesso revocato subito | ✅ |
+| 34 | Pseudonimizzazione | nome/email solo nell'anagrafica `Studente`; account-codice anonimo (etichetta null), collegati via `utenteId` | ✅ |
+| 35 | Pulizia account orfani | la rimozione utenti di test elimina anche gli account-codice collegati | ✅ |
+
+### Finding aperti (da chiudere prima del go-live)
+
+- **[MEDIA] Rate-limiter dietro reverse proxy** — con Caddy davanti, `getRemoteAddr()` vede l'IP del proxy: tutti gli invii finirebbero in un unico bucket (blocco funzionale). **Mitigazione:** in produzione impostare `server.forward-headers-strategy` (nel `backend.env` della checklist: `SERVER_FORWARD_HEADERS_STRATEGY=NATIVE`) e **verificare** che l'IP client reale venga risolto. Vale anche per il preesistente `LoginRateLimiter`.
+- **[BASSA / latente] Stored XSS** — `messaggio`/`nome` sono salvati grezzi, ma **nessun endpoint li rilegge oggi** e il frontend React escapa. Attenzione se si aggiungerà una vista "contatti/CRM" lato SCUOLA: rendering solo testuale, mai `dangerouslySetInnerHTML`.
+- **[GDPR] DROP COLUMN** — rimuovere il campo JPA `profiloNeurodivergente` non cancella l'eventuale colonna/dati storici: se il DB di produzione avesse dati, prevedere una migrazione che elimini la colonna.
+
+---
+
+## 7. Sintesi
 
 | Area | Test | Superati |
 |------|------|----------|
@@ -107,9 +144,11 @@ Tutti eseguiti con `curl` contro l'endpoint `POST /api/companion/respond`.
 | Companion-service (dinamici) | 10 | 10 |
 | Backend Spring Boot (statici) | 4 | 4 |
 | Gestione segreti | 6 | 6 |
-| **Totale** | **22** | **22** |
+| Form contatti pubblico (statici) | 7 | 7 |
+| Gestionale utenti (statici) | 6 | 6 |
+| **Totale** | **35** | **35** |
 
-Nessuna vulnerabilità aperta al momento del test. Le aree non ancora coperte
-(autenticazione utente, conformità GDPR per i dati di categoria speciale,
-rate limiting sulle API REST del backend, migrazioni schema con `ddl-auto`)
-restano da affrontare prima del go-live e sono tracciate separatamente.
+Nessuna vulnerabilità **critica** né aperta bloccante. Restano da chiudere prima del
+go-live i tre finding sopra (config proxy per il rate-limiting, vigilanza XSS su una
+futura vista contatti, migrazione DROP COLUMN) e le aree già note (rate limiting sulle
+altre API REST, migrazioni schema `ddl-auto` → Flyway, DPA con i fornitori AI).
