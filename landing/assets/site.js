@@ -30,6 +30,15 @@
     }
   }
 
+  // --- Pulsante "Accedi" all'applicazione, su tutte le pagine ---
+  if (nav && !nav.querySelector('.nav-accedi')) {
+    var accedi = document.createElement('a');
+    accedi.href = 'https://app.neurodesk.it';
+    accedi.className = 'nav-accedi';
+    accedi.textContent = 'Accedi';
+    nav.appendChild(accedi);
+  }
+
   // --- Banner cookie (solo cookie tecnici, nessun tracciamento) ---
   var banner = document.getElementById('cookieBanner');
   if (banner) {

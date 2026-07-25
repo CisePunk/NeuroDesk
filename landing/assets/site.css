@@ -7,6 +7,9 @@
 .site-nav a { font-family: var(--sans); font-size: 0.92rem; font-weight: 600; color: var(--text-2); text-decoration: none; padding: 0.4rem 0.7rem; border-radius: 999px; line-height: 1; white-space: nowrap; transition: background 0.15s ease, color 0.15s ease; }
 .site-nav a:hover { color: var(--accent-deep); background: var(--accent-soft); }
 .site-nav a.is-current { color: var(--accent-deep); background: var(--accent-soft); }
+/* Pulsante "Accedi" all'app: distinto, come una CTA. */
+.site-nav a.nav-accedi { color: #fbfdfb; background: var(--accent); font-weight: 700; }
+.site-nav a.nav-accedi:hover { color: #fbfdfb; background: var(--accent-deep); }
 
 .nav-toggle { display: none; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); cursor: pointer; }
 .nav-toggle:hover { background: var(--accent-soft); border-color: var(--accent); }

@@ -38,18 +38,18 @@ msg "Compilo il frontend"
 
 # --- 2. Carico ---------------------------------------------------------------
 msg "Carico il backend"
-rsync -az --info=none "$JAR" "$SERVER:/opt/neurodesk/backend.jar"
+rsync -az "$JAR" "$SERVER:/opt/neurodesk/backend.jar"
 
 msg "Carico il companion (senza .env e senza node_modules)"
-rsync -az --delete --info=none \
+rsync -az --delete \
     --exclude='.env' --exclude='node_modules' --exclude='.git' \
     companion-service/ "$SERVER:/opt/neurodesk/companion-service/"
 
 msg "Carico il frontend"
-rsync -az --delete --info=none frontend/dist/ "$SERVER:/var/www/neurodesk/"
+rsync -az --delete frontend/dist/ "$SERVER:/var/www/neurodesk/"
 
 msg "Carico la landing (HTML + assets: CSS e JS del menu)"
-rsync -az --delete --info=none --exclude='.DS_Store' \
+rsync -az --delete --exclude='.DS_Store' \
     landing/ "$SERVER:/var/www/neurodesk-landing/"
 
 # --- 3. Permessi e riavvio ---------------------------------------------------
