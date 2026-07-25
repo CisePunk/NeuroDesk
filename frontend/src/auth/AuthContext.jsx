@@ -14,6 +14,8 @@ export function AuthProvider({ children }) {
     clearToken();
     // Pulisce la conversazione Companion salvata nel browser: su un dispositivo
     // condiviso non deve restare materiale sensibile dell'utente precedente.
+    // sessionStorage e' l'archivio attuale; localStorage per le copie legacy.
+    sessionStorage.removeItem('nd-companion-active');
     localStorage.removeItem('nd-companion-active');
     setTokenState(null);
     setRuolo(null);

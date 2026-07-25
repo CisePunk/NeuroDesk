@@ -47,12 +47,19 @@ const PROFILE_TEMPLATE = {
     needs: ['micro-passaggi', 'tono semplice', 'niente liste lunghe'],
 };
 
-// Cache locale della conversazione in corso: resiste a refresh e cadute di rete.
+// Cache della conversazione in corso: resiste a refresh e cadute di rete, ma vive in
+// sessionStorage -> muore quando si chiude la scheda. Prima era in localStorage (in
+// chiaro, a tempo indeterminato): su un dispositivo condiviso restava leggibile a
+// chiunque. Copia cifrata autorevole resta sul server, ripristinata al rientro.
 const ACTIVE_KEY = 'nd-companion-active';
+
+// Bonifica una tantum: rimuove la vecchia copia in chiaro lasciata in localStorage
+// dalle versioni precedenti (i tester che non hanno mai fatto logout).
+try { localStorage.removeItem(ACTIVE_KEY); } catch { /* ignora */ }
 
 function leggiCache() {
     try {
-        const raw = localStorage.getItem(ACTIVE_KEY);
+        const raw = sessionStorage.getItem(ACTIVE_KEY);
         if (!raw) return null;
         const p = JSON.parse(raw);
         return {
@@ -84,7 +91,7 @@ function CompanionPage() {
 
     // Se non c'era nulla nel browser, provo a riprendere l'ultima sessione dal server.
     useEffect(() => {
-        if (localStorage.getItem(ACTIVE_KEY)) return; // già ripristinata dalla cache locale
+        if (sessionStorage.getItem(ACTIVE_KEY)) return; // già ripristinata dalla cache locale
         let attivo = true;
         getSessioni()
             .then(list => {
@@ -102,10 +109,10 @@ function CompanionPage() {
     // Salvo in locale a ogni cambiamento, così un refresh o una caduta non perde nulla.
     useEffect(() => {
         if (conversation.length === 0 && sessioneId == null) {
-            localStorage.removeItem(ACTIVE_KEY);
+            sessionStorage.removeItem(ACTIVE_KEY);
             return;
         }
-        localStorage.setItem(ACTIVE_KEY, JSON.stringify({ sessioneId, mode, conversation }));
+        sessionStorage.setItem(ACTIVE_KEY, JSON.stringify({ sessioneId, mode, conversation }));
     }, [conversation, sessioneId, mode]);
 
     async function handleSubmit(event) {
@@ -165,7 +172,7 @@ function CompanionPage() {
         setMessage('');
         setLastMeta(null);
         setErrore('');
-        localStorage.removeItem(ACTIVE_KEY);
+        sessionStorage.removeItem(ACTIVE_KEY);
         setTimeout(() => textareaRef.current?.focus(), 50);
     }
 
