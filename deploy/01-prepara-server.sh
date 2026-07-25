@@ -218,6 +218,9 @@ cat > /etc/caddy/Caddyfile <<CADDY
 ${DOMINIO} {
     encode gzip
     root * /var/www/neurodesk-landing
+    # Gli asset della landing (site.css/site.js) hanno nome fisso: no-cache
+    # forza il browser a rivalidare, così gli aggiornamenti si vedono subito.
+    header /assets/* Cache-Control "no-cache"
     file_server
 }
 
