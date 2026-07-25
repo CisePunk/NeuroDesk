@@ -18,6 +18,9 @@ public class SecurityGuard {
 
     public SecurityGuard(
             @Value("${neurodesk.jwt.secret}") String jwtSecret,
+            // Vuota di default: cosi' possiamo distinguere "assente" (fallback debole
+            // in CryptoService) da "impostata". Il controllo sotto la rende obbligatoria.
+            @Value("${neurodesk.crypto.secret:}") String cryptoSecret,
             @Value("${neurodesk.login.pepper}") String pepper,
             @Value("${neurodesk.admin.password}") String adminPassword,
             // Default TRUE: se la proprieta' manca del tutto, si fallisce chiusi
@@ -28,10 +31,18 @@ public class SecurityGuard {
                 jwtSecret.length() < 32
                 || jwtSecret.contains("cambia-in-produzione")
                 || pepper.contains("cambia-in-produzione")
-                || "CambiaMi123!".equals(adminPassword);
+                || "CambiaMi123!".equals(adminPassword)
+                // Chiave di cifratura conversazioni (AES-256-GCM). Se assente, CryptoService
+                // deriva la chiave da un valore noto (SHA-256 di stringa vuota): chiave
+                // pubblica. Se uguale al JWT, ruotare il JWT rende illeggibili tutte le
+                // conversazioni gia' salvate.
+                || cryptoSecret.isBlank()
+                || cryptoSecret.length() < 32
+                || cryptoSecret.equals(jwtSecret);
 
         if (segretiDeboli) {
-            String msg = "Segreti di sicurezza deboli o di default (neurodesk.jwt.secret / login.pepper / admin.password). "
+            String msg = "Segreti di sicurezza deboli o di default (neurodesk.jwt.secret / neurodesk.crypto.secret / login.pepper / admin.password). "
+                    + "La chiave di cifratura deve esistere, essere lunga almeno 32 caratteri ed essere diversa dal JWT. "
                     + "Impostane di forti (variabili d'ambiente) prima della produzione.";
             if (strict) {
                 throw new IllegalStateException(msg + " [neurodesk.security.strict=true -> avvio bloccato]");

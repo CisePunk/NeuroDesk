@@ -35,7 +35,12 @@ public class TesterController {
         return testerService.lista();
     }
 
-    /** Attiva/disattiva un tester. Disattivarlo revoca subito l'accesso (il filtro JWT ricontrolla attivo). */
+    /**
+     * Attiva/disattiva un tester. Disattivarlo revoca l'accesso: sul backend e' immediato
+     * (JwtAuthFilter ricontrolla 'attivo' a ogni richiesta); sul Companion (servizio Node,
+     * che si fida del solo JWT) ha effetto entro ~60s, perche' interroga l'endpoint interno
+     * /api/internal/utente/{id}/stato con una cache di 60s.
+     */
     @PutMapping("/{id}/stato")
     public void impostaStato(@PathVariable Long id, @RequestBody Map<String, Boolean> body) {
         Boolean attivo = body == null ? null : body.get("attivo");

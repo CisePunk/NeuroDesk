@@ -240,6 +240,11 @@ ${APP} {
     handle /api/companion/* {
         reverse_proxy 127.0.0.1:8090
     }
+    # Endpoint interno servizio-a-servizio: mai esposto al web. Il companion lo
+    # raggiunge in locale (127.0.0.1:8080), non da qui.
+    handle /api/internal/* {
+        respond 404
+    }
     handle /api/* {
         reverse_proxy 127.0.0.1:8080
     }

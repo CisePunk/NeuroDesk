@@ -23,7 +23,7 @@ neurodesk.jwt.secret=METTI_UN_SEGRETO_LUNGO_ALMENO_32_CARATTERI
 # DEVE essere diversa e indipendente dal segreto JWT: se un giorno ruoti il JWT
 # (es. dopo un sospetto di fuga) le conversazioni gia' salvate restano leggibili.
 # Senza questa riga la chiave deriva dal JWT e ruotarlo distrugge i dati.
-neurodesk.crypto.secret=
+neurodesk.crypto.secret=METTI_UNA_CHIAVE_DEDICATA_DIVERSA_DAL_JWT_ALMENO_32
 neurodesk.jwt.expiration-ms=86400000
 neurodesk.login.pepper=METTI_UN_PEPPER_LUNGO_E_SEGRETO
 neurodesk.admin.codice=scuola

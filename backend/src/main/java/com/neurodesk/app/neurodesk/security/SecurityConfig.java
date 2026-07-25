@@ -47,6 +47,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/public/contact").permitAll()
                         // Dispatch interno di Spring Boot quando un controller lancia un'eccezione.
                         .requestMatchers("/error").permitAll()
+                        // Endpoint interno servizio-a-servizio (companion -> backend): NON usa il
+                        // JWT utente ma un token condiviso verificato dentro InternalController.
+                        // Caddy lo blocca verso l'esterno; qui e' permitAll per non richiedere un
+                        // bearer utente. La protezione vera e' il token nell'header X-Internal-Token.
+                        .requestMatchers("/api/internal/**").permitAll()
                         // Solo l'health check e' pubblico; ogni altro endpoint actuator richiede auth.
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         // Gestione codici tester: solo l'admin SCUOLA.

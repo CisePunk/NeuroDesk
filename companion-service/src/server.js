@@ -1,7 +1,6 @@
 import http from 'node:http';
 import { generateCompanionReply } from './aiProvider.js';
 import { normalizeMode } from './modes.js';
-import { assessRisk } from './safety.js';
 import { consentito } from './rateLimiter.js';
 import { verificaJwt, estraiBearer, SEGRETO_MIN_BYTE } from './auth.js';
 
@@ -12,6 +11,45 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
 // l'endpoint AI resta chiuso: meglio non funzionare che lasciare i crediti aperti.
 const JWT_SECRET = process.env.JWT_SECRET || '';
 const JWT_SECRET_OK = Buffer.byteLength(JWT_SECRET, 'utf8') >= SEGRETO_MIN_BYTE;
+// Backend Spring per il controllo live "utente ancora attivo / consenso valido".
+// Entrambi girano su 127.0.0.1: la latenza e' trascurabile.
+const BACKEND_URL = (process.env.BACKEND_URL || 'http://127.0.0.1:8080').replace(/\/+$/, '');
+// Token condiviso per l'endpoint interno del backend. Di default e' lo stesso
+// segreto JWT (gia' noto a entrambi): nessun nuovo segreto da distribuire.
+const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || JWT_SECRET;
+// Cache breve dello stato: interroga il DB al massimo una volta al minuto per utente,
+// cosi' una revoca ha effetto entro ~60s invece che dopo la scadenza del token (24h).
+const STATO_TTL_MS = 60_000;
+const statoCache = new Map();
+
+/**
+ * Stato reale dell'utente dal backend: { attivo, consenso }. Con cache di 60s.
+ * Se il backend non risponde, usa l'ultimo stato noto (anche scaduto) per non
+ * bloccare gli utenti a ogni riavvio del backend; null solo se non l'ha mai visto.
+ */
+async function statoUtente(id) {
+  const now = Date.now();
+  const cached = statoCache.get(id);
+  if (cached && now - cached.ts < STATO_TTL_MS) {
+    return cached;
+  }
+  try {
+    const resp = await fetch(`${BACKEND_URL}/api/internal/utente/${encodeURIComponent(id)}/stato`, {
+      headers: { 'X-Internal-Token': INTERNAL_TOKEN },
+    });
+    if (resp.ok) {
+      const j = await resp.json();
+      const val = { attivo: Boolean(j.attivo), consenso: Boolean(j.consenso), ts: now };
+      statoCache.set(id, val);
+      return val;
+    }
+    // Errore lato backend (es. 401/5xx): meglio l'ultimo stato noto che chiudere tutto.
+    return cached || null;
+  } catch {
+    // Backend irraggiungibile (riavvio in corso): idem, usa lo stato noto se c'e'.
+    return cached || null;
+  }
+}
 // Dietro un reverse proxy FIDATO (Caddy/nginx) l'IP della connessione e' sempre
 // quello del proxy: il rate limiter per-IP diventerebbe un unico bucket condiviso.
 // Imposta TRUST_PROXY_HEADER (es. "x-forwarded-for") SOLO se davanti c'e' un proxy
@@ -101,8 +139,31 @@ const server = http.createServer(async (req, res) => {
 
     // 1b) CONSENSO (Art. 9): uno STUDENTE deve aver dato il consenso, verificato
     //     dal claim firmato. La SCUOLA (admin) e' esente. Cosi' il consenso e'
-    //     imposto lato server, non solo dall'interfaccia.
+    //     imposto lato server, non solo dall'interfaccia. (Controllo veloce.)
     if (utente.ruolo === 'STUDENTE' && utente.consenso !== true) {
+      return sendJson(res, 403, {
+        error: 'consenso_mancante',
+        message: 'Serve il consenso prima di usare il Companion.',
+      });
+    }
+
+    // 1c) STATO LIVE: il JWT vale fino a 24h, ma revoca e ritiro del consenso
+    //     devono avere effetto SUBITO. Chiediamo al backend lo stato reale (cache 60s).
+    const stato = await statoUtente(String(utente.sub));
+    if (!stato) {
+      // Non l'abbiamo mai visto e il backend non risponde: fail-closed.
+      return sendJson(res, 503, {
+        error: 'stato_non_verificabile',
+        message: 'Servizio momentaneamente non disponibile. Riprova tra poco.',
+      });
+    }
+    if (!stato.attivo) {
+      return sendJson(res, 401, {
+        error: 'accesso_revocato',
+        message: 'Il tuo accesso è stato revocato. Contatta chi ti ha dato il codice.',
+      });
+    }
+    if (utente.ruolo === 'STUDENTE' && !stato.consenso) {
       return sendJson(res, 403, {
         error: 'consenso_mancante',
         message: 'Serve il consenso prima di usare il Companion.',
@@ -129,17 +190,6 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 400, { error: 'message_too_long', maxLength: 2000 });
       }
 
-      const risk = assessRisk(message);
-      if (risk.level === 'high') {
-        return sendJson(res, 200, {
-          mode,
-          risk,
-          reply: risk.guidance,
-          provider: null,
-          nextAction: 'Se te la senti, parlane con una persona di cui ti fidi o con il tuo medico.',
-        });
-      }
-
       // Override del provider per-richiesta ('mock' | 'openai' | 'anthropic'):
       // consentito SOLO all'admin SCUOLA (per le prove A/B). Un tester non puo'
       // forzare un provider a pagamento -> il costo resta sotto controllo.
@@ -155,7 +205,6 @@ const server = http.createServer(async (req, res) => {
 
       return sendJson(res, 200, {
         mode,
-        risk,
         reply: ai.text,
         provider: ai.provider,
         model: ai.model,
