@@ -234,6 +234,8 @@ www.${DOMINIO} {
 ${APP} {
     encode gzip
     root * /var/www/neurodesk
+    # SPA: no-cache così un nuovo deploy si vede subito (gli asset hanno hash nel nome).
+    header Cache-Control "no-cache"
 
     handle /api/companion/* {
         reverse_proxy 127.0.0.1:8090

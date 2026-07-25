@@ -206,7 +206,11 @@ function CompanionPage() {
             <div className="page-header companion-header">
                 <div>
                     <h2>Companion</h2>
-                    <p className="subtitle">Un passo piccolo quando tutto sembra troppo.</p>
+                    <p className="subtitle">
+                        Il tuo aiuto pratico, un passo piccolo quando tutto sembra troppo.
+                        <br />
+                        <strong>Come si usa:</strong> scegli l'area qui sotto, scrivi cosa ti blocca e premi il pulsante — ricevi <strong>un solo piccolo passo</strong> da fare. 👇
+                    </p>
                 </div>
                 <span className="badge badge-secondary">
                     {lastMeta?.provider ? `Provider: ${lastMeta.provider}` : 'AI mock attiva'}
