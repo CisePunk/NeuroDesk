@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getStudenti, getTestMode } from '../api/studentiApi';
+import { getTestMode } from '../api/studentiApi';
+import { getUtenti } from '../api/utentiApi';
 import { getModuli } from '../api/moduliApi';
 import { getTask } from '../api/taskApi';
 import { useAsyncData } from '../ui/useAsyncData';
@@ -15,8 +16,8 @@ function greeting() {
 
 // Loader stabile (a livello di modulo): carica i tre insiemi in parallelo.
 const caricaDashboard = () =>
-    Promise.all([getStudenti(), getModuli(), getTask()]).then(([studenti, moduli, task]) => ({
-        studenti,
+    Promise.all([getUtenti(), getModuli(), getTask()]).then(([utenti, moduli, task]) => ({
+        utenti,
         moduli,
         task,
     }));
@@ -44,7 +45,7 @@ const STATO_CLASS = { DA_FARE: 'badge-muted', IN_CORSO: 'badge-warning', COMPLET
 
 function Dashboard() {
     const { dati, caricamento, errore, ricarica } = useAsyncData(caricaDashboard);
-    const data = dati ?? { studenti: [], moduli: [], task: [] };
+    const data = dati ?? { utenti: [], moduli: [], task: [] };
 
     // Moduli e Task sono strumenti solo di test: in produzione la dashboard mostra i soli utenti.
     const [testMode, setTestMode] = useState(false);
@@ -52,7 +53,7 @@ function Dashboard() {
         getTestMode().then(setTestMode);
     }, []);
 
-    const nStudenti = useCountUp(data.studenti.length);
+    const nStudenti = useCountUp(data.utenti.length);
     const nModuli   = useCountUp(data.moduli.length);
     const nTask     = useCountUp(data.task.length);
 
@@ -75,7 +76,7 @@ function Dashboard() {
                     <div className="hero-actions">
                         <div className="hero-actions-label">Aggiungi</div>
                         <div className="quick-actions">
-                            <Link to="/studenti/nuovo" className="quick-action quick-action--violet">
+                            <Link to="/utenti" className="quick-action quick-action--violet">
                                 <IconPlus className="qa-icon" /> Utente
                             </Link>
                             {testMode && (
@@ -105,7 +106,7 @@ function Dashboard() {
             ) : (
                 <>
                     <div className="dashboard-grid">
-                        <Link to="/studenti" className="stat-card stat-card--violet">
+                        <Link to="/utenti" className="stat-card stat-card--violet">
                             <div className="stat-card-top">
                                 <div className="stat-icon-wrap stat-icon--violet">
                                     <IconStudenti />
@@ -114,9 +115,9 @@ function Dashboard() {
                             </div>
                             <div className="stat-label">Utenti</div>
                             <div className="stat-desc">
-                                {data.studenti.length === 0
+                                {data.utenti.length === 0
                                     ? 'Nessun utente'
-                                    : `${data.studenti.filter(s => s.attivo).length} attivi`}
+                                    : `${data.utenti.filter(s => s.attivo).length} attivi`}
                             </div>
                         </Link>
 

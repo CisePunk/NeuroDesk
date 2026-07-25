@@ -3,10 +3,9 @@ import './App.css';
 import { useAuth } from './auth/AuthContext';
 import MainLayout from './layouts/MainLayout';
 import Dashboard from './pages/Dashboard';
-import StudentiPage from './pages/StudentiPage';
+import UtentiPage from './pages/UtentiPage';
 import ModuliPage from './pages/ModuliPage';
 import TaskPage from './pages/TaskPage';
-import StudentiFormPage from './pages/StudentiFormPage';
 import ModuliFormPage from './pages/ModuliFormPage';
 import TaskFormPage from './pages/TaskFormPage';
 import CompanionPage from './pages/CompanionPage';
@@ -50,8 +49,7 @@ function App() {
         {ruolo === 'SCUOLA' ? (
           <>
             <Route path="/" element={<Dashboard />} />
-            <Route path="/studenti" element={<StudentiPage />} />
-            <Route path="/studenti/nuovo" element={<StudentiFormPage />} />
+            <Route path="/utenti" element={<UtentiPage />} />
             <Route path="/moduli" element={<ModuliPage />} />
             <Route path="/moduli/nuovo" element={<ModuliFormPage />} />
             <Route path="/task" element={<TaskPage />} />

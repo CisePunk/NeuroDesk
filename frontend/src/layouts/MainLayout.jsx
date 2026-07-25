@@ -48,7 +48,7 @@ function MainLayout({ children }) {
                                 <IconDashboard className="nav-icon" />
                                 <span>Dashboard</span>
                             </NavLink>
-                            <NavLink to="/studenti" className={navClass}>
+                            <NavLink to="/utenti" className={navClass}>
                                 <IconStudenti className="nav-icon" />
                                 <span>Utenti</span>
                             </NavLink>

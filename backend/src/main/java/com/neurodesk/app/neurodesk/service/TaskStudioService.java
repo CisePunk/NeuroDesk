@@ -9,7 +9,9 @@ import com.neurodesk.app.neurodesk.repository.ModuloRepository;
 import com.neurodesk.app.neurodesk.repository.StudenteRepository;
 import com.neurodesk.app.neurodesk.repository.TaskStudioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -31,10 +33,10 @@ public class TaskStudioService {
 
     public TaskStudioDto save(TaskStudioDto dto) {
         Studente studente = studenteRepository.findById(dto.getStudenteId())
-                .orElseThrow(() -> new RuntimeException("Studente non trovato"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Studente non trovato"));
 
         Modulo modulo = moduloRepository.findById(dto.getModuloId())
-                .orElseThrow(() -> new RuntimeException("Modulo non trovato"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Modulo non trovato"));
 
         TaskStudio task = TaskStudio.builder()
                 .titolo(dto.getTitolo())
