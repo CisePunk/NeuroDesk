@@ -194,7 +194,7 @@ function CompanionPage() {
         const righe = conversation.map(m =>
             (m.role === 'user' ? 'Tu:\n' : 'Companion:\n') + m.content
         );
-        const testo = ['NeuroDesk Companion — i tuoi passaggi', '', ...righe].join('\n\n');
+        const testo = ['NeuroDesk Companion — la tua conversazione', '', ...righe].join('\n\n');
         const blob = new Blob([testo], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -309,7 +309,7 @@ function CompanionPage() {
                     {!vuota && (
                         <div className="companion-thread-actions">
                             <button type="button" className="btn-secondary" onClick={scaricaIstruzioni}>
-                                ↓ Scarica le istruzioni
+                                ↓ Scarica la conversazione
                             </button>
                             <button type="button" className="btn-ghost" onClick={nuovaConversazione}>
                                 Nuova conversazione
