@@ -64,8 +64,16 @@ systemctl reload caddy
 REMOTO
 
 # --- 4. Verifico che sia davvero vivo ---------------------------------------
+# Il backend ci mette ~12s a partire: aspetto che risponda UP invece di un
+# tempo fisso, cosi' la verifica non stampa un 503 spurio solo perche' e' presto.
 msg "Aspetto che il backend finisca di avviarsi"
-sleep 12
+ssh "$SERVER" bash -euo pipefail <<'REMOTO'
+for i in $(seq 1 30); do
+  code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/actuator/health || true)
+  [ "$code" = "200" ] && { echo "  backend UP dopo ~$((i*2))s"; break; }
+  sleep 2
+done
+REMOTO
 
 msg "Verifica"
 ssh "$SERVER" bash -euo pipefail <<'REMOTO'
