@@ -90,6 +90,9 @@ function CompanionPage() {
     const [providerConfigurato, setProviderConfigurato] = useState(null); // stato reale da /health
     const [errore, setErrore] = useState('');
     const [caricamento, setCaricamento] = useState(false);
+    const [parlando, setParlando] = useState(false); // TTS: sta leggendo la risposta ad alta voce
+    // Voce del dispositivo (SpeechSynthesis): gira in locale, non tocca il server.
+    const ttsDisponibile = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
     const activeMode = MODES.find(item => item.value === mode);
 
@@ -101,6 +104,9 @@ function CompanionPage() {
             .catch(() => { /* stato ignoto: il badge non afferma nulla */ });
         return () => { attivo = false; };
     }, []);
+
+    // Ferma la voce se si lascia la pagina: niente audio che continua a sorpresa.
+    useEffect(() => () => { window.speechSynthesis?.cancel(); }, []);
 
     // Se non c'era nulla nel browser, provo a riprendere l'ultima sessione dal server.
     useEffect(() => {
@@ -180,6 +186,8 @@ function CompanionPage() {
     }
 
     function nuovaConversazione() {
+        window.speechSynthesis?.cancel();
+        setParlando(false);
         setConversation([]);
         setSessioneId(null);
         setMessage('');
@@ -187,6 +195,27 @@ function CompanionPage() {
         setErrore('');
         sessionStorage.removeItem(ACTIVE_KEY);
         setTimeout(() => textareaRef.current?.focus(), 50);
+    }
+
+    // Legge ad alta voce l'ultima risposta del Companion. La voce è quella del
+    // dispositivo (browser/OS): nessuna chiamata al server, nessun costo.
+    function ascolta() {
+        const synth = window.speechSynthesis;
+        if (!synth) return;
+        if (parlando) { synth.cancel(); setParlando(false); return; }
+        let testo = '';
+        for (let i = conversation.length - 1; i >= 0; i -= 1) {
+            if (conversation[i].role === 'assistant') { testo = conversation[i].content; break; }
+        }
+        if (!testo) return;
+        synth.cancel();
+        const u = new SpeechSynthesisUtterance(testo);
+        u.lang = 'it-IT';
+        u.rate = 0.95; // un filo più lento: aiuta la comprensione
+        u.onend = () => setParlando(false);
+        u.onerror = () => setParlando(false);
+        setParlando(true);
+        synth.speak(u);
     }
 
     function scaricaIstruzioni() {
@@ -309,6 +338,11 @@ function CompanionPage() {
 
                     {!vuota && (
                         <div className="companion-thread-actions">
+                            {ttsDisponibile && (
+                                <button type="button" className="btn-secondary" onClick={ascolta}>
+                                    <span aria-hidden="true">{parlando ? '⏹' : '🔊'}</span> {parlando ? 'Ferma' : 'Ascolta la risposta'}
+                                </button>
+                            )}
                             <button type="button" className="btn-secondary" onClick={scaricaIstruzioni}>
                                 ↓ Scarica la conversazione
                             </button>
