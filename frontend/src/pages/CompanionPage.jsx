@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { sendCompanionMessage } from '../api/companionApi';
+import { sendCompanionMessage, getCompanionHealth } from '../api/companionApi';
 import {
     salvaScambio,
     getSessioni,
     getSessione,
     cancellaCronologia,
 } from '../api/companionSessionApi';
+import { revocaConsenso } from '../api/authApi';
+import { useAuth } from '../auth/AuthContext';
 import { useToast } from '../ui/ToastProvider';
 
 const MODES = [
@@ -74,6 +76,7 @@ function leggiCache() {
 
 function CompanionPage() {
     const toast = useToast();
+    const { ruolo, segnaRevocaConsenso } = useAuth();
     const textareaRef = useRef(null);
     // Stato iniziale ripristinato dal browser (istantaneo, regge refresh e disconnessioni).
     const [mode, setMode] = useState(() => leggiCache()?.mode ?? 'crisis_mode');
@@ -84,10 +87,20 @@ function CompanionPage() {
     const [conversation, setConversation] = useState(() => leggiCache()?.conversation ?? []); // [{ role, content }]
     const [sessioneId, setSessioneId] = useState(() => leggiCache()?.sessioneId ?? null);
     const [lastMeta, setLastMeta] = useState(null); // { provider, usage }
+    const [providerConfigurato, setProviderConfigurato] = useState(null); // stato reale da /health
     const [errore, setErrore] = useState('');
     const [caricamento, setCaricamento] = useState(false);
 
     const activeMode = MODES.find(item => item.value === mode);
+
+    // Stato reale del servizio: così il badge non afferma "mock" quando l'AI è vera.
+    useEffect(() => {
+        let attivo = true;
+        getCompanionHealth()
+            .then(h => { if (attivo) setProviderConfigurato(h?.provider ?? null); })
+            .catch(() => { /* stato ignoto: il badge non afferma nulla */ });
+        return () => { attivo = false; };
+    }, []);
 
     // Se non c'era nulla nel browser, provo a riprendere l'ultima sessione dal server.
     useEffect(() => {
@@ -193,6 +206,20 @@ function CompanionPage() {
         URL.revokeObjectURL(url);
     }
 
+    async function revocaMioConsenso() {
+        if (!window.confirm('Vuoi revocare il consenso all\'uso del Companion? Potrai ridarlo quando vuoi. Le conversazioni già salvate restano finché non le cancelli tu.')) {
+            return;
+        }
+        try {
+            const res = await revocaConsenso();
+            // Nuovo token con consenso=false: da qui l'app riporta alla pagina del consenso.
+            segnaRevocaConsenso(res?.token);
+            toast.successo('Consenso revocato. Puoi ridarlo quando vuoi.');
+        } catch (err) {
+            toast.errore(err.message);
+        }
+    }
+
     async function cancellaTutto() {
         if (!window.confirm('Vuoi cancellare tutta la tua cronologia salvata? L\'operazione non è reversibile.')) {
             return;
@@ -219,9 +246,14 @@ function CompanionPage() {
                         <strong>Come si usa:</strong> scegli l'area qui sotto, scrivi cosa ti blocca e premi il pulsante — ricevi <strong>un solo piccolo passo</strong> da fare. 👇
                     </p>
                 </div>
-                <span className="badge badge-secondary">
-                    {lastMeta?.provider ? `Provider: ${lastMeta.provider}` : 'AI mock attiva'}
-                </span>
+                {(() => {
+                    // Verità sul provider: dopo un messaggio uso il dato reale (lastMeta);
+                    // prima, lo stato letto da /health; se ancora ignoto, non affermo nulla.
+                    const p = lastMeta?.provider ?? providerConfigurato;
+                    if (!p) return null;
+                    const testo = p === 'mock' ? 'AI di prova (mock)' : `Provider: ${p}`;
+                    return <span className="badge badge-secondary">{testo}</span>;
+                })()}
             </div>
 
             <div className="companion-grid">
@@ -307,6 +339,11 @@ function CompanionPage() {
                                 <button type="button" className="companion-clear-history" onClick={cancellaTutto}>
                                     Cancella la mia cronologia
                                 </button>
+                                {ruolo === 'STUDENTE' && (
+                                    <button type="button" className="companion-clear-history" onClick={revocaMioConsenso}>
+                                        Revoca il consenso
+                                    </button>
+                                )}
                             </>
                         )}
                     </div>

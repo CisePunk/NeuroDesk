@@ -71,6 +71,16 @@ export function AuthProvider({ children }) {
     setConsensoDato(true);
   }, []);
 
+  // Revoca del consenso: il backend rilascia un token NUOVO (con consenso=false).
+  // Salvandolo e azzerando consensoDato, uno STUDENTE torna alla pagina del consenso.
+  const segnaRevocaConsenso = useCallback((nuovoToken) => {
+    if (nuovoToken) {
+      saveToken(nuovoToken);
+      setTokenState(nuovoToken);
+    }
+    setConsensoDato(false);
+  }, []);
+
   const value = {
     isAuth: !!token,
     ruolo,
@@ -79,6 +89,7 @@ export function AuthProvider({ children }) {
     login,
     logout,
     segnaConsenso,
+    segnaRevocaConsenso,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

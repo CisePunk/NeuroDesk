@@ -57,11 +57,7 @@ function ConsentPage() {
               e si <strong>cancellano da sole dopo 30 giorni</strong>. Puoi cancellarle quando vuoi dalle
               opzioni del Companion.
             </li>
-            <li>
-              Se scrivi qualcosa che riguarda un rischio immediato per te, il messaggio
-              <strong> resta sui nostri server</strong> e non viene inviato ad Anthropic né a OpenAI.
-            </li>
-            <li>Puoi <strong>smettere quando vuoi</strong> e chiedere di cancellare il tuo accesso.</li>
+            <li>Puoi <strong>smettere quando vuoi</strong>, revocare il consenso dalle opzioni del Companion e chiedere di cancellare il tuo accesso.</li>
             <li>NeuroDesk <strong>non fa diagnosi</strong> e non sostituisce medici, psicologi o servizi.</li>
           </ul>
         </div>

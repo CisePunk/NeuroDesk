@@ -20,6 +20,10 @@ const INTERNAL_TOKEN = process.env.INTERNAL_TOKEN || JWT_SECRET;
 // Cache breve dello stato: interroga il DB al massimo una volta al minuto per utente,
 // cosi' una revoca ha effetto entro ~60s invece che dopo la scadenza del token (24h).
 const STATO_TTL_MS = 60_000;
+// Tetto alla cache SCADUTA usata quando il backend non risponde: tolleriamo un
+// riavvio del backend, ma dopo 5 minuti fail-closed. Cosi' una revoca ha effetto
+// entro 5 minuti anche se il backend resta giu' (buco delimitato, non aperto).
+const STATO_STALE_MAX_MS = 5 * 60_000;
 const statoCache = new Map();
 
 /**
@@ -43,12 +47,21 @@ async function statoUtente(id) {
       statoCache.set(id, val);
       return val;
     }
-    // Errore lato backend (es. 401/5xx): meglio l'ultimo stato noto che chiudere tutto.
-    return cached || null;
+    // Errore lato backend (es. 401/5xx): usa l'ultimo stato noto, ma solo se
+    // abbastanza recente (<=5 min). Oltre, fail-closed: non lasciare il buco aperto.
+    return statoRecente(cached, now);
   } catch {
-    // Backend irraggiungibile (riavvio in corso): idem, usa lo stato noto se c'e'.
-    return cached || null;
+    // Backend irraggiungibile (riavvio in corso): idem, stato noto se recente.
+    return statoRecente(cached, now);
   }
+}
+
+/** Ritorna lo stato in cache solo se non piu' vecchio di STATO_STALE_MAX_MS. */
+function statoRecente(cached, now) {
+  if (cached && now - cached.ts < STATO_STALE_MAX_MS) {
+    return cached;
+  }
+  return null;
 }
 // Dietro un reverse proxy FIDATO (Caddy/nginx) l'IP della connessione e' sempre
 // quello del proxy: il rate limiter per-IP diventerebbe un unico bucket condiviso.
@@ -107,7 +120,9 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 204, {});
   }
 
-  if (req.method === 'GET' && req.url === '/health') {
+  // /health interno; /api/companion/health raggiungibile dal frontend via Caddy,
+  // cosi' la UI puo' dire la verita' sul provider reale (mock vs anthropic/openai).
+  if (req.method === 'GET' && (req.url === '/health' || req.url === '/api/companion/health')) {
     return sendJson(res, 200, {
       status: 'ok',
       service: 'neurodesk-companion-service',

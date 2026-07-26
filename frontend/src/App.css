@@ -950,6 +950,7 @@ main h1, main h2 { margin-top: 0; }
 ═══════════════════════════════════════════════════════════════ */
 .companion-header {
   align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .companion-grid {
@@ -962,6 +963,7 @@ main h1, main h2 { margin-top: 0; }
 .companion-form {
   max-width: none;
   margin: 0;
+  min-width: 0; /* consente alla colonna di comprimersi invece di sforare */
 }
 
 /* ─── Step ────────────────────────────────────────────────── */
@@ -1140,6 +1142,7 @@ main h1, main h2 { margin-top: 0; }
 /* ─── Panel ───────────────────────────────────────────────── */
 .companion-panel {
   min-height: 360px;
+  min-width: 0; /* come la form: evita lo sforamento a destra quando lo spazio è poco */
   padding: 22px;
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
@@ -1255,7 +1258,9 @@ main h1, main h2 { margin-top: 0; }
 
   .dashboard-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   .stat-number { font-size: 34px; }
-  .companion-grid { grid-template-columns: 1fr; }
+  /* minmax(0,1fr) e non "1fr": un "1fr" puro non scende sotto il min-content
+     dei figli e il contenuto sfora a destra (~890px). Cosi' invece si comprime. */
+  .companion-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ═══════════════════════════════════════════════════════════════

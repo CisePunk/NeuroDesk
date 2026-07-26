@@ -50,6 +50,13 @@ public class AuthController {
         return authService.registraConsenso(utente);
     }
 
+    @DeleteMapping("/consenso")
+    public LoginResponse revocaConsenso(@AuthenticationPrincipal Utente utente) {
+        // Art. 7(3) GDPR: revocare dev'essere facile quanto dare il consenso.
+        // Ritorna un token con consenso=false che il frontend deve salvare.
+        return authService.revocaConsenso(utente);
+    }
+
     /**
      * IP reale della connessione. NON usiamo X-Forwarded-For preso dal client:
      * sarebbe falsificabile e permetterebbe di aggirare il rate limiting cambiando

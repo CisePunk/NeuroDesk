@@ -15,3 +15,7 @@ export function getMe() {
 export function daiConsenso() {
   return apiFetch('/api/auth/consenso', { method: 'POST' });
 }
+
+export function revocaConsenso() {
+  return apiFetch('/api/auth/consenso', { method: 'DELETE' });
+}

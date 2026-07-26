@@ -40,3 +40,11 @@ export async function sendCompanionMessage({ message, mode, profile, history }) 
 
     return response.json();
 }
+
+// Stato reale del servizio: quale provider AI è configurato (mock vs anthropic/openai).
+// Serve a NON mentire nel badge prima del primo messaggio. Non richiede token.
+export async function getCompanionHealth() {
+    const response = await fetch(`${BASE_URL}/health`);
+    if (!response.ok) throw new Error('health non disponibile');
+    return response.json();
+}

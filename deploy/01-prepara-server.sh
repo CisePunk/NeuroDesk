@@ -78,6 +78,9 @@ msg "Genero i segreti di produzione"
 JWT_SECRET=$(openssl rand -base64 48 | tr -d '\n')
 CRYPTO_SECRET=$(openssl rand -base64 48 | tr -d '\n')
 LOGIN_PEPPER=$(openssl rand -base64 48 | tr -d '\n')
+# Token DEDICATO per l'endpoint interno companion<->backend. NON riusa il JWT:
+# se trapelasse, chi lo ha potrebbe firmare token arbitrari (anche ruolo SCUOLA).
+INTERNAL_TOKEN=$(openssl rand -base64 48 | tr -d '\n')
 DB_PASSWORD=$(openssl rand -base64 24 | tr -d '\n/+=')
 ADMIN_PASSWORD=$(openssl rand -base64 18 | tr -d '\n/+=')
 ADMIN_CODICE="nd-$(openssl rand -hex 4)"
@@ -126,6 +129,7 @@ NEURODESK_SECURITY_STRICT=true
 NEURODESK_TEST_MODE=false
 NEURODESK_JWT_SECRET=${JWT_SECRET}
 NEURODESK_CRYPTO_SECRET=${CRYPTO_SECRET}
+NEURODESK_INTERNAL_TOKEN=${INTERNAL_TOKEN}
 NEURODESK_LOGIN_PEPPER=${LOGIN_PEPPER}
 NEURODESK_ADMIN_CODICE=${ADMIN_CODICE}
 NEURODESK_ADMIN_PASSWORD=${ADMIN_PASSWORD}
@@ -146,6 +150,8 @@ PORT=8090
 HOST=127.0.0.1
 CORS_ORIGIN=https://${APP}
 JWT_SECRET=${JWT_SECRET}
+BACKEND_URL=http://127.0.0.1:8080
+INTERNAL_TOKEN=${INTERNAL_TOKEN}
 TRUST_PROXY_HEADER=x-forwarded-for
 AI_PROVIDER=anthropic
 AI_TIMEOUT_MS=30000

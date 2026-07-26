@@ -71,6 +71,23 @@ public class AuthService {
         return new LoginResponse(jwtService.generate(utente), utente.getRuolo(), false);
     }
 
+    /**
+     * Revoca il consenso (Art. 7(3) GDPR: dev'essere facile quanto darlo). Azzera
+     * consensoIl e restituisce un token NUOVO col claim consenso=false, cosi' il
+     * companion blocca la chat subito (oltre al controllo live entro ~60s). Le
+     * conversazioni gia' salvate NON vengono toccate: le cancella l'utente col
+     * proprio pulsante "Cancella la mia cronologia".
+     */
+    @Transactional
+    public LoginResponse revocaConsenso(Utente utente) {
+        if (utente.getConsensoIl() != null) {
+            utente.setConsensoIl(null);
+            utenteRepository.save(utente);
+        }
+        boolean consensoRichiesto = utente.getRuolo() == Ruolo.STUDENTE;
+        return new LoginResponse(jwtService.generate(utente), utente.getRuolo(), consensoRichiesto);
+    }
+
     private ResponseStatusException unauthorized() {
         return new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenziali non valide");
     }
