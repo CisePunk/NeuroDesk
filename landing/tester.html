@@ -130,6 +130,13 @@
 
   @media (max-width: 760px) { .hero-grid { grid-template-columns: 1fr; } .chat-mock { order: -1; } }
   @media (prefers-reduced-motion: reduce) { * { transition-duration: 0.001ms !important; } .reveal { opacity: 1; transform: none; } }
+
+  /* Cornice per lo screenshot dell'app (stesso stile della pagina partner) */
+  .shot-frame { border-radius: 1rem; overflow: hidden; border: 1px solid var(--border-soft); box-shadow: var(--shadow); background: var(--surface); max-width: 56rem; margin: 1.8rem auto 0; }
+  .shot-bar { display: flex; gap: 0.4rem; padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--border-soft); background: var(--bg-2); }
+  .shot-bar span { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--text-3); opacity: 0.45; }
+  .shot-img { display: block; width: 100%; height: auto; }
+  .shot-cap { margin: 1rem auto 0; max-width: 40rem; text-align: center; color: var(--text-2); font-size: 0.98rem; }
 </style>
 
 <script>
@@ -234,6 +241,35 @@
         <div class="step-row"><div class="step-num">2</div><div><h3>Lo usi quando vuoi</h3><p>Scrivi come ti viene, anche poche parole. Ricevi un passo alla volta.</p></div></div>
         <div class="step-row"><div class="step-num">3</div><div><h3>Ci dici com'è andata</h3><p>Poche domande con dei pulsanti, e uno spazio per scrivere. Non servono relazioni.</p></div></div>
       </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Pensato per te</span>
+        <h2>Facile da usare, anche nei giorni no</h2>
+      </div>
+      <div class="reassure reveal">
+        <div class="box">
+          <h3>Puoi ascoltarlo</h3>
+          <p>Se leggere stanca, tocca <strong>Ascolta la risposta</strong>: NeuroDesk te la legge ad alta voce, con la voce del tuo dispositivo. Niente da installare.</p>
+        </div>
+        <div class="box">
+          <h3>Testo grande, colori morbidi</h3>
+          <p>Caratteri grandi e leggibili, poco movimento. C'è anche il tema scuro, per quando la luce dà fastidio.</p>
+        </div>
+        <div class="box">
+          <h3>Funziona con i lettori di schermo</h3>
+          <p>Compatibile con gli screen reader e con la navigazione da tastiera. Nessuno resta fuori.</p>
+        </div>
+      </div>
+      <div class="shot-frame reveal">
+        <div class="shot-bar" aria-hidden="true"><span></span><span></span><span></span></div>
+        <img class="shot-img" src="assets/companion-ascolta.png" width="2480" height="1720" loading="lazy"
+             alt="Schermata del Companion: le aree tra cui scegliere, lo spazio dove scrivere e, sotto la risposta, il pulsante Ascolta la risposta per farsela leggere ad alta voce.">
+      </div>
+      <p class="shot-cap reveal">Il pulsante <strong>Ascolta la risposta</strong> compare sotto ogni risposta: un tocco e te la legge.</p>
     </div>
   </section>
 
