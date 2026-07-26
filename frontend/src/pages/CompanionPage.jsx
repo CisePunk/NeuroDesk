@@ -239,11 +239,11 @@ function CompanionPage() {
         <div className="page companion-page">
             <div className="page-header companion-header">
                 <div>
-                    <h2>Companion</h2>
+                    <h1>Companion</h1>
                     <p className="subtitle">
                         Il tuo aiuto pratico, un passo piccolo quando tutto sembra troppo.
                         <br />
-                        <strong>Come si usa:</strong> scegli l'area qui sotto, scrivi cosa ti blocca e premi il pulsante — ricevi <strong>un solo piccolo passo</strong> da fare. 👇
+                        <strong>Come si usa:</strong> scegli l'area qui sotto, scrivi cosa ti blocca e premi il pulsante — ricevi <strong>un solo piccolo passo</strong> da fare. <span aria-hidden="true">👇</span>
                     </p>
                 </div>
                 {(() => {
@@ -278,8 +278,9 @@ function CompanionPage() {
                     </div>
 
                     <div className="companion-step">
-                        <span className="companion-step-label">2 — Cosa non riesci a fare adesso?</span>
+                        <label className="companion-step-label" htmlFor="companion-input">2 — Cosa non riesci a fare adesso?</label>
                         <textarea
+                            id="companion-input"
                             ref={textareaRef}
                             className="companion-textarea"
                             value={message}
@@ -322,11 +323,13 @@ function CompanionPage() {
                             type="button"
                             className="companion-advanced-toggle"
                             onClick={() => setShowAdvanced(v => !v)}
+                            aria-expanded={showAdvanced}
+                            aria-controls="companion-advanced-panel"
                         >
                             {showAdvanced ? '▾' : '▸'} Opzioni avanzate
                         </button>
                         {showAdvanced && (
-                            <>
+                            <div id="companion-advanced-panel">
                                 <label className="companion-profile-check">
                                     <input
                                         type="checkbox"
@@ -344,7 +347,7 @@ function CompanionPage() {
                                         Revoca il consenso
                                     </button>
                                 )}
-                            </>
+                            </div>
                         )}
                     </div>
 
@@ -365,7 +368,7 @@ function CompanionPage() {
                             <p className="companion-empty-cta">Descrivi il blocco nel form e invia.</p>
                         </div>
                     ) : (
-                        <div className="companion-thread">
+                        <div className="companion-thread" aria-live="polite" aria-atomic="false" aria-busy={caricamento}>
                             {conversation.map((m, i) => (
                                 <div
                                     key={i}

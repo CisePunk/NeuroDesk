@@ -36,7 +36,7 @@ function LoginPage() {
     <div className="auth-screen">
       <div className="auth-card">
         <div className="auth-brand">
-          <span className="auth-logo">NeuroDesk</span>
+          <h1 className="auth-logo">NeuroDesk</h1>
           <span className="auth-tagline">Entra con il tuo codice</span>
         </div>
 

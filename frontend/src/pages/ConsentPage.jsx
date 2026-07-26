@@ -31,7 +31,7 @@ function ConsentPage() {
     <div className="auth-screen">
       <div className="auth-card auth-card--wide">
         <div className="auth-brand">
-          <span className="auth-logo">Prima di iniziare</span>
+          <h1 className="auth-logo">Prima di iniziare</h1>
         </div>
 
         <div className="consent-text">

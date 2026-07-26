@@ -31,6 +31,8 @@ function MainLayout({ children }) {
 
     return (
         <div className="app">
+            {/* Salta la barra laterale: visibile solo quando riceve il focus da tastiera. */}
+            <a className="skip-link" href="#contenuto-principale">Salta al contenuto</a>
             <aside>
                 <div className="sidebar-shimmer" />
 
@@ -110,7 +112,7 @@ function MainLayout({ children }) {
                 </div>
             </aside>
 
-            <main>
+            <main id="contenuto-principale" tabIndex={-1}>
                 {children}
             </main>
         </div>
