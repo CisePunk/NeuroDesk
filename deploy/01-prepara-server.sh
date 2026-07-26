@@ -157,7 +157,9 @@ AI_PROVIDER=anthropic
 AI_TIMEOUT_MS=30000
 ANTHROPIC_API_KEY=${ANTHROPIC_KEY}
 ANTHROPIC_MODEL=claude-sonnet-5
-ANTHROPIC_MAX_TOKENS=1024
+# Tetto per-chiamata. Se una risposta si tronca comunque, il servizio la continua
+# in automatico (vedi aiProvider.js): niente risposte tagliate a meta'.
+ANTHROPIC_MAX_TOKENS=2048
 OPENAI_API_KEY=${OPENAI_KEY}
 OPENAI_MODEL=gpt-4.1-mini
 ENV

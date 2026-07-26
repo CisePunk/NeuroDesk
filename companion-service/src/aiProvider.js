@@ -188,7 +188,7 @@ export async function generateCompanionReply({ message, mode, profile, history, 
     }
 
     const model = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
-    const tetto = Number(process.env.OPENAI_MAX_TOKENS || 1024);
+    const tetto = Number(process.env.OPENAI_MAX_TOKENS || 1536);
     // I modelli di ragionamento (gpt-5.x, o1/o3/o4) rifiutano con 400 sia
     // `max_tokens` (vogliono `max_completion_tokens`) sia `temperature`.
     // Senza questa distinzione, mettere un gpt-5 in OPENAI_MODEL romperebbe
@@ -235,41 +235,66 @@ export async function generateCompanionReply({ message, mode, profile, history, 
     }
 
     const model = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5';
+    const maxTokens = Number(process.env.ANTHROPIC_MAX_TOKENS || 2048);
     const { system, messages } = splitSystemAndMessages({ message, mode, profile, history });
 
-    const response = await fetchProvider(
-      'https://api.anthropic.com/v1/messages',
-      {
-        method: 'POST',
-        headers: {
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json',
+    // Una singola chiamata all'API: ritorna testo, motivo di stop e usage grezzo.
+    const chiamata = async (msgs) => {
+      const response = await fetchProvider(
+        'https://api.anthropic.com/v1/messages',
+        {
+          method: 'POST',
+          headers: {
+            'x-api-key': process.env.ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify({ model, max_tokens: maxTokens, system, messages: msgs }),
         },
-        body: JSON.stringify({
-          model,
-          max_tokens: Number(process.env.ANTHROPIC_MAX_TOKENS || 1024),
-          system,
-          messages,
-        }),
-      },
-      'Anthropic',
-    );
+        'Anthropic',
+      );
+      const data = await response.json();
+      const testo = (data.content || [])
+        .filter((block) => block.type === 'text')
+        .map((block) => block.text)
+        .join('');
+      return { testo, stop: data.stop_reason, inTok: data.usage?.input_tokens, outTok: data.usage?.output_tokens };
+    };
 
-    const data = await response.json();
-    const text = (data.content || [])
-      .filter((block) => block.type === 'text')
-      .map((block) => block.text)
-      .join('')
-      .trim();
+    // Continuazione AUTOMATICA se la risposta si tronca (stop_reason=max_tokens).
+    // Un utente neurodivergente puo' non sapere di dover scrivere "continua": la
+    // risposta troncata a meta' (es. una bozza interrotta) non deve mai arrivargli.
+    // I modelli recenti (sonnet-5) NON accettano il prefill assistant, quindi la
+    // continuazione e' un nuovo turno utente con istruzione esplicita a non ripetere.
+    // Il tetto a 2048 fa completare in un colpo quasi ogni risposta; questa e' la
+    // rete per i casi rari. Una sola continuazione: basta e limita costi/duplicazioni.
+    const MAX_CONTINUAZIONI = 1;
+    const NUDGE_CONTINUA =
+      'La tua risposta si è interrotta per limite di spazio. Continua da dove eri rimasta, '
+      + 'riprendendo dall\'ultima frase incompleta. Non ripetere ciò che hai già scritto e non aggiungere saluti o premesse.';
+    let msgs = messages;
+    let completo = '';
+    let inTokPrimo = null;
+    let outTokTot = 0;
+
+    for (let giro = 0; giro <= MAX_CONTINUAZIONI; giro += 1) {
+      const r = await chiamata(msgs);
+      const chunk = r.testo.trim();
+      completo = completo ? `${completo}\n${chunk}` : chunk;
+      if (inTokPrimo === null) inTokPrimo = r.inTok ?? null;
+      outTokTot += r.outTok ?? 0;
+      if (r.stop !== 'max_tokens') break;
+      // Riparte da un nuovo turno utente: la conversazione DEVE finire con "user".
+      msgs = [...msgs, { role: 'assistant', content: chunk }, { role: 'user', content: NUDGE_CONTINUA }];
+    }
 
     return {
       provider: 'anthropic',
       model,
-      text,
+      text: completo.trim(),
       usage: normalizeUsage({
-        inputTokens: data.usage?.input_tokens,
-        outputTokens: data.usage?.output_tokens,
+        inputTokens: inTokPrimo,
+        outputTokens: outTokTot,
         message,
         note: 'Conteggio reale dal provider (Anthropic).',
       }),
