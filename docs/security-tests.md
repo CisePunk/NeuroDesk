@@ -2,12 +2,12 @@
 
 | Campo | Valore |
 |---|---|
-| Data esecuzione | 2026-06-29 · aggiornato 2026-07-25 |
+| Data esecuzione | 2026-06-29 · aggiornato 2026-07-26 |
 | Branch | `main` |
-| Commit HEAD | `main` (luglio 2026 — dopo modello Utenti a codice + fix rate-limiter) |
+| Commit HEAD | `main` (26 luglio 2026 — dopo audit sicurezza/accessibilità, Ascolta, continuazione automatica) |
 | Runtime | Node v24.14.1, npm 11.11.0 |
 | Tipo di verifica | Live + analisi statica (nessuna modifica al codice durante i test) |
-| Esito complessivo | **35/35 test superati** |
+| Esito complessivo | **48/48 test superati** |
 
 Questo documento elenca i test di sicurezza condotti sul progetto NeuroDesk
 (frontend React, companion-service Node.js, backend Spring Boot) e il loro esito.
@@ -136,7 +136,43 @@ nome + generazione di un codice di accesso anonimo collegato).
 
 ---
 
-## 7. Sintesi
+## 7. Novità 26 luglio 2026 — accessibilità, Ascolta, irrigidimenti da audit
+
+Controlli sulle funzioni aggiunte dopo il 25 luglio. Le voci client (36–39) sono
+analisi statica del codice; le voci infrastruttura/backend (40–48) sono state
+verificate **dal vivo** in produzione durante l'audit (Playwright, `curl`).
+
+### 7.1 Lettura vocale ("Ascolta") e accessibilità (client)
+
+| # | Test | Verifica | Esito |
+|---|------|----------|-------|
+| 36 | TTS solo locale (privacy) | `ascolta()` usa **solo** `window.speechSynthesis`; nessun `fetch`/XHR/WebSocket nel percorso. Nessun dato della conversazione lascia il browser | ✅ |
+| 37 | TTS nessuna injection | `SpeechSynthesisUtterance` pronuncia testo grezzo: nessuna interpretazione di HTML/script | ✅ |
+| 38 | TTS nessun audio residuo | `speechSynthesis.cancel()` allo smontaggio della pagina e a "Nuova conversazione" | ✅ |
+| 39 | Accessibilità: nessuna nuova superficie | attributi `aria-*`/`label`/`for`/anchor inerti; **nessun** `dangerouslySetInnerHTML` nel frontend; skip-link = fragment interno (`#contenuto-principale`) | ✅ |
+
+### 7.2 Irrigidimenti da audit (infrastruttura / backend), verificati live
+
+| # | Test | Verifica | Esito |
+|---|------|----------|-------|
+| 40 | CSP stretta sull'app | Playwright: **zero violazioni**; `connect-src 'self'` blocca l'esfiltrazione via pagina; hash `sha256` per il solo script inline del tema | ✅ |
+| 41 | Header di sicurezza | HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` su app e landing (`curl -I`) | ✅ |
+| 42 | Endpoint interno non esposto | Caddy: `/api/internal/*` → **404** dall'esterno; raggiungibile solo in loopback dal companion | ✅ |
+| 43 | Token interno dedicato | `X-Internal-Token` ≠ segreto JWT; assente/errato → **401**; confronto a tempo costante (`MessageDigest.isEqual`) | ✅ |
+| 44 | Revoca live sul Companion | il companion interroga lo stato dal backend (cache 60s, tetto sulla cache scaduta 5 min → poi **fail-closed**): revoca effettiva entro ~60s invece che dopo la scadenza del token (24h) | ✅ |
+| 45 | Consenso revocabile (Art. 7(3)) | `DELETE /api/auth/consenso` azzera `consensoIl` e rilascia token `consenso=false`; il companion blocca (403) sia via claim sia via controllo live | ✅ |
+| 46 | Chiave di cifratura obbligatoria | `SecurityGuard` rifiuta l'avvio se `neurodesk.crypto.secret` è vuota, < 32 caratteri o uguale al JWT | ✅ |
+| 47 | Conversazione fuori da `localStorage` | cache attiva in `sessionStorage` (muore con la scheda) + bonifica una-tantum delle copie legacy; `logout` pulisce entrambe | ✅ |
+| 48 | Continuazione automatica: costo limitato | max 1 continuazione = **2 chiamate/richiesta** (tetto rigido); il loop termina sempre; il "nudge" di continuazione è una stringa fissa (nessuna injection) | ✅ |
+
+Nota — **rilevatore di crisi rimosso**: `safety.js` non c'è più (scelta di prodotto). Le
+frasi di rischio vanno all'AI, che ha i propri filtri; sparisce anche la classe di falsi
+positivi ("farla finita con questa pratica INPS" → risposta di crisi). Non è un test di
+sicurezza in senso stretto, ma cambia il comportamento e va registrato.
+
+---
+
+## 8. Sintesi
 
 | Area | Test | Superati |
 |------|------|----------|
@@ -146,9 +182,17 @@ nome + generazione di un codice di accesso anonimo collegato).
 | Gestione segreti | 6 | 6 |
 | Form contatti pubblico (statici) | 7 | 7 |
 | Gestionale utenti (statici) | 6 | 6 |
-| **Totale** | **35** | **35** |
+| Ascolta + accessibilità (client) | 4 | 4 |
+| Irrigidimenti da audit (live) | 9 | 9 |
+| **Totale** | **48** | **48** |
 
-Nessuna vulnerabilità **critica** né aperta bloccante. Restano da chiudere prima del
-go-live i tre finding sopra (config proxy per il rate-limiting, vigilanza XSS su una
-futura vista contatti, migrazione DROP COLUMN) e le aree già note (rate limiting sulle
-altre API REST, migrazioni schema `ddl-auto` → Flyway, DPA con i fornitori AI).
+Nessuna vulnerabilità **critica** né aperta bloccante.
+
+**Chiuso il 26 luglio:** il finding [MEDIA] sul rate-limiting dietro reverse proxy —
+`SERVER_FORWARD_HEADERS_STRATEGY=NATIVE` è impostato in produzione e l'IP client reale
+viene risolto (rate limiting per-IP funzionante dietro Caddy). Aggiunti inoltre header di
+sicurezza (CSP/HSTS/…), token interno dedicato e revoca live sul Companion (§7.2).
+
+**Ancora aperti (non bloccanti):** vigilanza XSS su una futura vista contatti (rendering
+solo testuale), migrazione `DROP COLUMN` per `profiloNeurodivergente`, migrazioni schema
+`ddl-auto` → Flyway/Liquibase prima di dati reali, e DPA con i fornitori AI.
