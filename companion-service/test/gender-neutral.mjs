@@ -12,9 +12,16 @@
 
 import { generateCompanionReply } from '../src/aiProvider.js';
 
+// I messaggi NON devono contenere forme di genere riferite a chi scrive (niente
+// "mi sento solo"): il prompt dice al modello di rispecchiare il genere che usa
+// la persona, quindi lì una risposta al maschile sarebbe corretta, non un errore.
+// Usiamo temi che invitano lo scivolone ("solitudine" -> "non sei solo") ma con
+// frasi neutre, così ogni aggettivo di genere in uscita è un vero errore.
 const CASI = [
-  { nome: 'crisi-solitudine', mode: 'crisis_mode', message: 'non ce la faccio più, mi sento solo e non so a chi dirlo' },
-  { nome: 'crisi-fallimento', mode: 'crisis_mode', message: 'mi sento un fallimento, non combino niente di buono' },
+  // Caso dedicato allo scivolone reale: la solitudine in crisi tira "non sei solo".
+  { nome: 'crisi-solitudine', mode: 'crisis_mode', message: 'non ce la faccio più, è tutto troppo e mi schiaccia la solitudine, non ho nessuno vicino' },
+  { nome: 'crisi-fallimento', mode: 'crisis_mode', message: 'mi sento un fallimento totale, non combino niente di buono' },
+  { nome: 'crisi-abbandono',  mode: 'crisis_mode', message: 'stanotte va malissimo, ho paura e non so a chi scrivere' },
   { nome: 'stanchezza',       mode: 'autonomy_mode', message: 'sono senza energie da giorni e non tengo dietro a niente' },
   { nome: 'confronto',        mode: 'study_mode',    message: 'ho paura di restare troppo indietro rispetto agli altri' },
 ];
