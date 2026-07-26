@@ -224,6 +224,14 @@ cat > /etc/caddy/Caddyfile <<CADDY
 ${DOMINIO} {
     encode gzip
     root * /var/www/neurodesk-landing
+    # Header di sicurezza. La landing e' statica con script/stili inline, quindi
+    # NON mette una CSP stretta (la romperebbe): X-Frame-Options copre il clickjacking.
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "no-referrer"
+    }
     # Gli asset della landing (site.css/site.js) hanno nome fisso: no-cache
     # forza il browser a rivalidare, così gli aggiornamenti si vedono subito.
     header /assets/* Cache-Control "no-cache"
@@ -241,7 +249,17 @@ ${APP} {
     encode gzip
     root * /var/www/neurodesk
     # SPA: no-cache così un nuovo deploy si vede subito (gli asset hanno hash nel nome).
-    header Cache-Control "no-cache"
+    # + header di sicurezza. La CSP e' STRETTA: l'app non carica risorse esterne.
+    # L'hash sha256 autorizza il solo script inline in index.html (imposta il tema
+    # prima del render). Se cambi quello script, rigenera l'hash o la pagina lampeggia.
+    header {
+        Cache-Control "no-cache"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "no-referrer"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-/E3QhDAADRe+2Xg/3MmIXCQPmdcxLC0nKEpgcB5tawQ='; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    }
 
     handle /api/companion/* {
         reverse_proxy 127.0.0.1:8090
