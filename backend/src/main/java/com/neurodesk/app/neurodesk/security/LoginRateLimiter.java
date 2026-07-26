@@ -60,6 +60,11 @@ public class LoginRateLimiter {
         }
     }
 
+    // Un login riuscito azzera il contatore dell'IP. Chi possiede un codice valido
+    // puo' cosi' ripulire i propri tentativi falliti dopo ogni successo: ininfluente,
+    // perche' per indovinare un altro codice (~80 bit) il freno per-IP e' comunque
+    // irrilevante rispetto allo spazio delle chiavi. Serve a non penalizzare l'utente
+    // legittimo che ha solo sbagliato a digitare prima di entrare.
     public void registraSuccesso(String ip) {
         contatori.remove(ip);
     }

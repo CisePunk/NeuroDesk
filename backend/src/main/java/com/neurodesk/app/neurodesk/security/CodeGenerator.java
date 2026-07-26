@@ -6,7 +6,7 @@ import java.security.SecureRandom;
 /**
  * Genera codici di accesso anonimi ad alta entropia con {@link SecureRandom}.
  * Formato: "neuro-xxxx-xxxx-xxxx-xxxx" (16 caratteri casuali su alfabeto di 32
- * = ~80 bit). Alfabeto senza caratteri ambigui (niente 0/o, 1/l/i) e tutto
+ * = ~80 bit). Alfabeto senza caratteri ambigui (niente 0/o, 1/l; la i resta) e tutto
  * minuscolo, coerente con la normalizzazione di {@link HashService}.
  */
 @Component

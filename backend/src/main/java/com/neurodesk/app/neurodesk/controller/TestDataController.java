@@ -29,7 +29,11 @@ public class TestDataController {
 
     private final TestDataService testDataService;
 
-    /** Sempre 200: permette al frontend di sapere se mostrare i comandi di test. */
+    /**
+     * Dice al frontend se mostrare i comandi di test. NON e' pubblico: come tutto
+     * /api/test/** richiede il ruolo SCUOLA, quindi per chiunque altro risponde 401.
+     * Il frontend tratta l'errore come "test-mode spento" (nessun comando mostrato).
+     */
     @GetMapping("/status")
     public Map<String, Boolean> status() {
         return Map.of("enabled", testMode);
