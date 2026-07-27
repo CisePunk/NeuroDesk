@@ -4,14 +4,21 @@ NeuroDesk e' una piattaforma full stack nata come progetto finale per un corso F
 
 Il progetto e' stato pensato e curato da Cinzia Cipri.
 
+**Online:** [neurodesk.it](https://neurodesk.it) (sito pubblico, IT/EN/FR) ·
+[app.neurodesk.it](https://app.neurodesk.it) (applicazione, si entra con un codice) ·
+[guida per i tester](https://neurodesk.it/aiuto.html)
+
+![Il Companion: si sceglie l'area, si scrive cosa blocca, si riceve un solo passo da fare](landing/assets/companion-ascolta.png)
+
 ## Nota sullo stato dell'AI (importante)
 
 Il Companion funziona **da subito in modalita' demo (`mock`)**: risponde in locale,
 in modo deterministico, senza chiavi e senza consumare token. Questa modalita' e'
 pensata per mostrare l'architettura completa, i flussi e l'interfaccia senza costi.
 
-Le **risposte AI reali** (generate da un modello linguistico) richiedono di collegare
-una chiave API OpenAI compatibile. Basta inserire la chiave nel file
+Le **risposte AI reali** (generate da un modello linguistico) richiedono una chiave API.
+Il servizio parla con **Anthropic** (provider usato in produzione) oppure con un endpoint
+**OpenAI compatibile**: si sceglie con `AI_PROVIDER`. Basta inserire la chiave nel file
 `companion-service/.env` e avviare il
 servizio con il flag che carica le variabili d'ambiente:
 
@@ -37,15 +44,18 @@ Questa struttura permette di rappresentare uno studio piu' realistico: non tutti
 
 ## A cosa e' arrivato
 
-Il progetto oggi e' composto da tre parti:
+Il progetto oggi e' composto da quattro parti:
 
 1. Backend Spring Boot
 2. Frontend React + Vite
 3. Companion Service Node.js per funzioni AI
+4. Sito pubblico statico (`landing/`), in italiano, inglese e francese
 
 La prima parte resta un gestionale di studio. La seconda parte rende il gestionale navigabile da interfaccia web. La terza parte aggiunge un servizio AI separato, pensato per trasformare blocchi, confusione e sovraccarico in micro-azioni sostenibili.
 
-Il Companion non e' ancora integrato come pagina React definitiva. Al momento espone API funzionanti e documentate, pronte per essere collegate al frontend.
+Il Companion e' integrato nel frontend come pagina React, protetto da login e da
+consenso esplicito, con le conversazioni salvate cifrate sul server. Il sistema e'
+in prova con un piccolo gruppo di tester su un server pubblico.
 
 ## Perche' e' stato esteso con AI
 
@@ -63,14 +73,22 @@ NeuroDesk Companion nasce per questo: non per sostituire professionisti, tutor, 
 
 ### Gestionale principale
 
-- gestione studenti
-- gestione moduli
-- gestione task di studio
-- dashboard con contatori
-- progressione task completati
-- tema chiaro/scuro
-- interfaccia responsive
+- emissione e revoca dei **codici di accesso anonimi** (pagina *Codici*)
+- dashboard con i codici emessi, quanti attivi e quanti hanno dato il consenso
+- gestione moduli e task di studio (strumenti di test, nascosti in produzione)
+- tema chiaro/scuro, interfaccia responsive
 - campi specifici per energia, focus e carico cognitivo
+
+### Accesso e consenso
+
+- si entra con un **codice**, non con nome ed email: l'account e' anonimo
+- del codice il database conserva solo un hash con pepper, mai il valore in chiaro
+- schermata di **consenso informato** obbligatoria per gli utenti, revocabile in
+  qualsiasi momento dalle opzioni del Companion
+- il consenso viaggia firmato dentro il JWT ed e' verificato anche dal Companion,
+  che ricontrolla lo stato reale sul backend (revoca efficace entro ~60s)
+- conversazioni **cifrate** (AES-256-GCM) e cancellate automaticamente dopo 30 giorni
+- l'utente puo' scaricare la conversazione e cancellare la propria cronologia
 
 ### Companion Service
 
@@ -83,7 +101,8 @@ NeuroDesk Companion nasce per questo: non per sostituire professionisti, tutor, 
   - `work_mode`
   - `autonomy_mode`
 - modalita' `mock` senza consumo token
-- modalita' `openai` predisposta tramite API key lato server
+- provider `anthropic` (usato in produzione) e `openai` compatibile
+- endpoint protetto da JWT e da rate limiting per IP
 - prompt di sistema dedicato al target neurodivergente/adulto fragile
 - filtro safety base prima della chiamata AI
 - stima token in modalita' mock
@@ -111,14 +130,20 @@ backend
 API principali:
 
 ```text
-GET  /api/studenti
-POST /api/studenti
+POST   /api/auth/login              accesso con codice (o codice + password per l'admin)
+GET    /api/auth/me                 ruolo e stato del consenso
+POST   /api/auth/consenso           da' il consenso (rilascia un token nuovo)
+DELETE /api/auth/consenso           revoca il consenso
 
-GET  /api/moduli
-POST /api/moduli
+GET    /api/tester                  codici emessi (solo admin)
+POST   /api/tester                  emette un codice (in chiaro una volta sola)
+PUT    /api/tester/{id}/stato       revoca o riattiva
 
-GET  /api/task
-POST /api/task
+GET    /api/companion-sessions      le proprie conversazioni (cifrate a riposo)
+POST   /api/companion-sessions/scambio
+DELETE /api/companion-sessions      diritto all'oblio
+
+GET    /api/moduli · POST /api/moduli · GET /api/task · POST /api/task
 ```
 
 ### Frontend
@@ -129,6 +154,7 @@ POST /api/task
 - CSS custom con variabili tema
 - dark/light mode con `localStorage`
 - proxy Vite per il Companion Service
+- error boundary: un errore non lascia mai una pagina bianca
 
 Cartella:
 
@@ -143,7 +169,9 @@ frontend
 - nessuna dipendenza esterna
 - `node --env-file=.env`
 - provider mock
+- provider Anthropic (usato in produzione)
 - provider OpenAI compatibile
+- verifica JWT scritta a mano con il solo modulo `crypto` (algoritmo pinnato a HS256)
 
 Cartella:
 
@@ -184,36 +212,42 @@ NeuroDesk Companion non:
 
 In caso di rischio immediato per la sicurezza personale, il servizio invita a contattare il 112 o una persona fidata.
 
-## Gestione utenti e privacy
+## Gestione degli accessi
 
-Allo stato attuale **non esiste registrazione pubblica**. Gli utenti (studenti)
-li inserisce soltanto la scuola/ente, che ha gia' firmato l'accordo di
-riservatezza sul trattamento dei dati. Questa e' una scelta deliberata: il
+**Non esiste registrazione pubblica.** Gli accessi li rilascia soltanto chi
+gestisce il servizio, dalla pagina *Codici*, ed e' una scelta deliberata: il
 Companion tratta dati di categoria particolare (neurodivergenza, salute,
-difficolta' cognitive — Art. 9 GDPR), quindi la raccolta deve avvenire dentro
-il perimetro di consenso dell'ente, non tramite auto-iscrizione libera.
+difficolta' cognitive — Art. 9 GDPR), quindi la raccolta deve avvenire dentro un
+perimetro di consenso, non tramite auto-iscrizione libera.
 
-Per i **test** e' disponibile un generatore di utenti **fittizi**, attivo solo
-quando il backend ha `neurodesk.test-mode=true` (vedi
-`backend/src/main/resources/application.properties`). In quella modalita', nella
-pagina *Studenti* compaiono i comandi «Crea 5 utenti di test» e «Rimuovi utenti
-di test». Gli utenti generati hanno email sul dominio riservato
-`@test.neurodesk.local`, cosi' sono riconoscibili e cancellabili in blocco senza
-toccare dati reali.
+Un accesso **e'** un codice (`neuro-xxxx-xxxx-xxxx-xxxx`, ~80 bit di entropia):
+niente nome, niente email. Il codice in chiaro esiste solo nell'istante in cui
+viene emesso — nel database ne resta un hash SHA-256 con pepper — quindi non e'
+recuperabile e va consegnato subito. Un'etichetta facoltativa («Clelia»,
+«tester 3») serve solo a chi amministra per ricordarsi a chi l'ha dato: non
+viaggia col codice e non entra nelle conversazioni.
+
+La revoca e' immediata sul backend, che ricontrolla `attivo` a ogni richiesta, e
+arriva al Companion entro ~60s tramite l'endpoint interno servizio-a-servizio.
 
 In produzione `neurodesk.test-mode` **deve restare `false`**: gli endpoint
 `/api/test/**` rispondono allora `404`, come se non esistessero.
 
 ## Stato attuale
 
-Verifiche eseguite il 20 giugno 2026:
+In prova con un piccolo gruppo di tester, su server pubblico con HTTPS, provider
+AI reale (Anthropic), backup notturni e controllo periodico dei servizi.
 
-- frontend `npm run lint`: passato
-- frontend `npm run build`: passato
-- backend `./mvnw test`: passato
-- Companion Service `GET /health`: passato
-- Companion Service `POST /api/companion/respond`: passato in modalita' mock
-- pagina React `/companion`: integrata nel frontend
+Verifiche eseguite il 27 luglio 2026:
+
+- frontend `npm run lint` e `npm run build`: passati
+- pagina *Codici*: provata end-to-end (il codice emesso fa login, dopo la revoca
+  il login risponde 401, la riattivazione lo rimette in funzione)
+- Companion: provato con Playwright da desktop e da telefono, in sviluppo e sulla
+  build di produzione con la CSP reale
+- landing: controllo automatico su tutte e 21 le pagine (link, ancore, selettore
+  di lingua, errori JS)
+- `POST /api/companion/respond` senza token: risponde `401`, nessun consumo di token AI
 
 ## Documentazione
 
@@ -223,28 +257,42 @@ Verifiche eseguite il 20 giugno 2026:
 - Contratto API: `docs/api-contract.md`
 - Piano di integrazione: `docs/integration-plan.md`
 - Esempi di flussi: `docs/example-flows.md`
+- Checklist di messa in produzione: `docs/DEPLOY_CHECKLIST.md`
+- Prove di sicurezza svolte: `docs/security-tests.md`
+- Guida pubblica per i tester: `landing/aiuto.html` (IT), `.en` e `.fr`
 
 ## Struttura progetto
 
 ```text
 neurodesk
-├── backend
-├── frontend
-├── companion-service
+├── backend             Spring Boot: accessi, codici, conversazioni cifrate, feedback
+├── frontend            React + Vite: gestionale e Companion
+├── companion-service   Node: il ponte verso il provider AI, senza dipendenze esterne
+├── landing             sito pubblico statico, IT/EN/FR (compresa la guida ai tester)
+├── deploy              preparazione del server, pubblicazione, controllo periodico
 ├── docs
 ├── screenshots
 └── README.md
 ```
 
+Pubblicazione: `bash deploy/02-pubblica.sh root@IP` compila in locale, carica gli
+artefatti e riavvia i servizi. I segreti restano sul server e non passano mai da qui.
+
 ## Prossimi passi tecnici
 
-1. Migliorare la pagina Companion con storico conversazioni.
-2. Salvare le sessioni Companion nel backend Spring Boot.
-3. Aggiungere una tabella `CompanionSession`.
-4. Aggiungere una tabella `MicroAction`.
-5. Aggiungere rate limiting prima di qualsiasi deploy remoto.
-6. Valutare provider AI alternativi oltre OpenAI compatibile.
-7. Aggiungere consenso esplicito persistente per dati sensibili e token.
+Fatti nel frattempo: storico delle conversazioni, salvataggio cifrato lato Spring
+Boot, tabelle `CompanionSession`/`CompanionMessaggio`, rate limiting, consenso
+esplicito e revocabile, provider Anthropic, deploy con HTTPS.
+
+Restano:
+
+1. Migrazioni di schema esplicite (Flyway) al posto di `ddl-auto=update`, prima del
+   primo cambio di schema con dati reali dentro.
+2. Aggiungere una tabella `MicroAction` per tracciare i passi proposti e completati.
+3. Tradurre l'applicazione: oggi e' solo in italiano, mentre il sito e la guida
+   sono anche in inglese e francese.
+4. Aggiornare gli screenshot in `screenshots/`: risalgono alla prima versione
+   gestionale e mostrano pagine che non esistono piu'.
 
 ## Autrice
 
