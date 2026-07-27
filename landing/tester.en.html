@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="NeuroDesk: a practical, gentle tool for neurodivergent adults — ADHD, autism, AuDHD, ODD, SLD. Try it and tell us what helps and what doesn't.">
+<meta name="keywords" content="NeuroDesk, neurodivergenza, neurodivergente, adulti neurodivergenti, ADHD, ADHD adulti, autismo, autismo adulti, spettro autistico, AuDHD, DOP, disturbo oppositivo provocatorio, DSA, dislessia, discalculia, supporto neurodivergenti, strumento ADHD">
+<meta property="og:title" content="NeuroDesk — try it with us">
+<meta property="og:description" content="NeuroDesk: a practical, gentle tool for neurodivergent adults — ADHD, autism, AuDHD, ODD, SLD. Try it and tell us what helps and what doesn't.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://neurodesk.it/tester.en.html">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://neurodesk.it/assets/neurodesk-share-en.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="NeuroDesk — dal sovraccarico al prossimo piccolo passo">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
+<title>NeuroDesk — try it with us</title>
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  :root {
+    --bg: #faf8f4; --bg-2: #f2eee6; --surface: #ffffff;
+    --border: rgba(95,130,121,0.22); --border-soft: rgba(95,130,121,0.14);
+    --accent: #5f8279; --accent-deep: #45625a; --accent-soft: rgba(95,130,121,0.10);
+    --text: #2f2f36; --text-2: #5c5c64; --text-3: #8a8a90;
+    --shadow: 0 1px 2px rgba(60,55,45,0.05), 0 12px 32px -18px rgba(60,55,45,0.28);
+    --serif: "Iowan Old Style","Palatino Linotype","Palatino","Georgia",ui-serif,serif;
+    --sans: ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --page: 62rem;
+  }
+  :root[data-theme="dark"] {
+    --bg: #191c21; --bg-2: #20242b; --surface: #262b32;
+    --border: rgba(230,227,220,0.13); --border-soft: rgba(230,227,220,0.08);
+    --accent: #8aa8a1; --accent-deep: #a6bfb8; --accent-soft: rgba(138,168,161,0.14);
+    --text: #e8e5de; --text-2: #aeaca4; --text-3: #7d7b75;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 14px 34px -18px rgba(0,0,0,0.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 1.08rem; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: var(--page); margin: 0 auto; padding: 0 1.5rem; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; margin: 0; }
+  p { margin: 0; }
+  a { color: inherit; }
+  .eyebrow { font-family: var(--sans); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.16em; font-weight: 600; color: var(--accent-deep); }
+
+  header.top { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); background: color-mix(in srgb, var(--bg) 82%, transparent); border-bottom: 1px solid var(--border-soft); }
+  .top-inner { display: flex; align-items: center; justify-content: space-between; height: 4rem; }
+  .brand { display: flex; align-items: center; gap: 0.6rem; font-family: var(--serif); font-size: 1.25rem; font-weight: 600; }
+  .brand .bdot { width: 0.85rem; height: 0.85rem; border-radius: 50%; background: radial-gradient(circle at 35% 30%, var(--accent-deep), var(--accent)); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .top-right { display: flex; align-items: center; gap: 0.6rem; }
+  .theme-btn { display: inline-grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); cursor: pointer; }
+  .theme-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .theme-btn svg { width: 1.15rem; height: 1.15rem; }
+  .theme-btn .ic-sun { display: none; }
+  :root[data-theme="dark"] .theme-btn .ic-moon { display: none; }
+  :root[data-theme="dark"] .theme-btn .ic-sun { display: block; }
+
+  .btn { font-family: var(--sans); font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 999px; padding: 0.85rem 1.6rem; border: 1px solid transparent; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: transform 0.15s ease, background 0.2s ease; }
+  .btn-primary { background: var(--accent); color: #fbfdfb; box-shadow: var(--shadow); }
+  .btn-primary:hover { background: var(--accent-deep); transform: translateY(-1px); }
+  /* Ingresso per chi il codice ce l'ha gia': secondario, ma sempre visibile. */
+  .btn-secondary { background: var(--surface); color: var(--accent-deep); border-color: var(--border); }
+  .btn-secondary:hover { background: var(--accent-soft); border-color: var(--accent); transform: translateY(-1px); }
+  .cta-link { font-family: var(--sans); font-size: 0.92rem; font-weight: 600; text-decoration: none; color: var(--accent-deep); padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 999px; }
+  .cta-link:hover { background: var(--accent-soft); border-color: var(--accent); }
+
+  .tagline { background: var(--accent-soft); border-bottom: 1px solid var(--border-soft); }
+  .tagline p { max-width: var(--page); margin: 0 auto; padding: 0.75rem 1.5rem; text-align: center; font-family: var(--serif); font-style: italic; font-size: 1.03rem; color: var(--accent-deep); }
+
+  section { padding: clamp(3rem, 7vw, 5rem) 0; }
+  .band { background: var(--bg-2); }
+
+  .hero { padding: clamp(3.5rem, 9vw, 6rem) 0 clamp(2.5rem, 6vw, 4rem); }
+  .hero-grid { display: grid; grid-template-columns: 1fr 0.9fr; gap: clamp(2rem, 5vw, 3.5rem); align-items: center; }
+  .hero h1 { font-size: clamp(2.3rem, 5vw, 3.5rem); line-height: 1.06; letter-spacing: -0.02em; }
+  .hero .lede { margin-top: 1.3rem; font-size: 1.18rem; color: var(--text-2); max-width: 28rem; }
+  .hero .eyebrow { display: inline-block; margin-bottom: 1rem; }
+  .hero-actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; }
+
+  /* mockup chat in CSS */
+  .chat-mock { background: var(--surface); border: 1px solid var(--border); border-radius: 1.25rem; box-shadow: var(--shadow); overflow: hidden; }
+  .chat-head { display: flex; align-items: center; gap: 0.55rem; padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--border-soft); font-size: 0.9rem; font-weight: 600; color: var(--text-2); }
+  .chat-head .bdot { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--accent); }
+  .chat-body { padding: 1.2rem 1.1rem; display: flex; flex-direction: column; gap: 0.35rem; }
+  .cm-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-top: 0.5rem; }
+  .cm-bubble { border-radius: 0.85rem; padding: 0.8rem 0.95rem; line-height: 1.5; font-size: 0.98rem; }
+  .cm-user { background: var(--accent-soft); color: var(--text); }
+  .cm-bot { background: var(--bg-2); color: var(--text); border: 1px solid var(--border-soft); }
+
+  .lead-line { font-family: var(--serif); font-size: clamp(1.5rem, 3.2vw, 2.1rem); line-height: 1.34; letter-spacing: -0.01em; max-width: 40rem; }
+
+  .steps { display: grid; gap: 1.3rem; margin-top: 2.2rem; max-width: 44rem; }
+  .step-row { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: start; }
+  .step-num { font-family: var(--serif); font-size: 1.05rem; font-weight: 600; color: var(--accent-deep); width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid var(--border); display: grid; place-items: center; background: var(--surface); flex: none; }
+  .step-row h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 700; margin-bottom: 0.2rem; }
+  .step-row p { color: var(--text-2); font-size: 1rem; }
+
+  .section-head { max-width: 40rem; margin-bottom: 1.6rem; }
+  .section-head h2 { font-size: clamp(1.7rem, 3.5vw, 2.3rem); line-height: 1.14; letter-spacing: -0.015em; }
+  .section-head .eyebrow { display: block; margin-bottom: 0.8rem; }
+
+  .reassure { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.1rem; }
+  .reassure .box { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 1rem; padding: 1.2rem 1.3rem; box-shadow: var(--shadow); }
+  .reassure h3 { font-family: var(--sans); font-size: 1.02rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .reassure p { color: var(--text-2); font-size: 0.96rem; }
+
+  .cta-box { background: var(--surface); border: 1px solid var(--border); border-radius: 1.5rem; box-shadow: var(--shadow); padding: clamp(2rem, 5vw, 3.2rem); text-align: center; max-width: 42rem; margin: 0 auto; }
+  .cta-box h2 { font-size: clamp(1.7rem, 3.6vw, 2.3rem); line-height: 1.16; }
+  .cta-box p { color: var(--text-2); margin: 1rem auto 0; max-width: 30rem; }
+  .cta-box .btn { margin-top: 1.8rem; }
+  .cta-note { font-size: 0.82rem; color: var(--text-3); margin-top: 1.2rem; }
+
+  .brand-nav { display: flex; align-items: center; gap: 0.7rem; }
+  .back-btn { display: inline-grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); text-decoration: none; font-size: 1.15rem; line-height: 1; }
+  .back-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .hero-art { margin: 0 auto; max-width: 26rem; color: var(--accent); }
+  .hero-art svg { width: 100%; height: auto; display: block; }
+  .switch-band { background: var(--bg-2); border-top: 1px solid var(--border-soft); }
+  .switch-band .wrap { padding: 1.7rem 1.5rem; display: flex; flex-wrap: wrap; gap: 0.7rem 1.4rem; align-items: center; justify-content: center; text-align: center; }
+  .switch-band p { color: var(--text-2); margin: 0; }
+  .brand-home { text-decoration: none; color: inherit; }
+  .crumbs { border-bottom: 1px solid var(--border-soft); background: var(--bg); }
+  .crumbs .wrap { padding: 0.6rem 1.5rem; font-size: 0.86rem; color: var(--text-3); display: flex; gap: 0.5rem; align-items: center; }
+  .crumbs a { color: var(--accent-deep); text-decoration: none; font-weight: 600; }
+  .crumbs a:hover { text-decoration: underline; }
+  .crumbs .sep { opacity: 0.55; }
+  .crumbs [aria-current="page"] { color: var(--text-2); }
+  .mail-btn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--sans); font-weight: 600; font-size: 0.92rem; color: var(--accent-deep); background: var(--accent-soft); border: 1px solid var(--border); border-radius: 999px; padding: 0.45rem 1rem; text-decoration: none; transition: background 0.2s ease, border-color 0.2s ease; }
+  .mail-btn:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: var(--accent); }
+  footer { padding: 2.5rem 0 3rem; border-top: 1px solid var(--border-soft); color: var(--text-3); font-size: 0.88rem; }
+  .foot-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; align-items: center; }
+
+  .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  @media (max-width: 760px) { .hero-grid { grid-template-columns: 1fr; } .chat-mock { order: -1; } }
+  @media (prefers-reduced-motion: reduce) { * { transition-duration: 0.001ms !important; } .reveal { opacity: 1; transform: none; } }
+
+  /* Cornice per lo screenshot dell'app (stesso stile della pagina partner) */
+  .shot-frame { border-radius: 1rem; overflow: hidden; border: 1px solid var(--border-soft); box-shadow: var(--shadow); background: var(--surface); max-width: 56rem; margin: 1.8rem auto 0; }
+  .shot-bar { display: flex; gap: 0.4rem; padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--border-soft); background: var(--bg-2); }
+  .shot-bar span { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--text-3); opacity: 0.45; }
+  .shot-img { display: block; width: 100%; height: auto; }
+  .shot-cap { margin: 1rem auto 0; max-width: 40rem; text-align: center; color: var(--text-2); font-size: 0.98rem; }
+
+  .lang-switch { display: flex; align-items: center; gap: 0.15rem; font-family: var(--sans); }
+  .lang-switch a { font-size: 0.82rem; font-weight: 600; color: var(--text-3); text-decoration: none; padding: 0.3rem 0.5rem; border-radius: 999px; white-space: nowrap; }
+  .lang-switch a:hover { color: var(--accent-deep); background: var(--accent-soft); }
+  .lang-switch a[aria-current] { color: var(--accent-deep); background: var(--accent-soft); }
+  @media (max-width: 560px) { .lang-switch a { padding: 0.3rem 0.4rem; font-size: 0.78rem; } }
+</style>
+
+<script>
+  (function () { try { var t = localStorage.getItem('nd-theme'); document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light'); } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); } })();
+</script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="brand-nav">
+      <a class="back-btn" href="index.en.html" aria-label="Back to home">←</a>
+      <a class="brand brand-home" href="index.en.html"><span class="bdot" aria-hidden="true"></span> NeuroDesk</a>
+    </div>
+    <div class="top-right">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav class="site-nav" id="siteNav" aria-label="Navigation">
+        <a href="index.en.html" data-nav="index.en.html">Home</a>
+        <a href="tester.en.html" data-nav="tester.en.html">Testers</a>
+        <a href="finanziatori.html" data-nav="finanziatori.html">Partners</a>
+        <a href="chi-siamo.html" data-nav="chi-siamo.html">About</a>
+        <a href="contatti.html" data-nav="contatti.html">Contact</a>
+      </nav>
+      <div class="lang-switch" aria-label="Lingua / Language"><a href="tester.en.html" hreflang="it">Italiano</a><a href="tester.en.html" hreflang="en" aria-current="true">English</a><a href="tester.fr.html" hreflang="fr">Français</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme">
+        <svg class="ic-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 12.5A7.5 7.5 0 0 1 7.5 2.5a7.5 7.5 0 1 0 10 10z"/></svg>
+        <svg class="ic-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.22 4.22l1.06 1.06M14.72 14.72l1.06 1.06M4.22 15.78l1.06-1.06M14.72 5.28l1.06-1.06"/></svg>
+      </button>
+      <a class="cta-link" href="mailto:hello@neurodesk.it?subject=Voglio%20provare%20NeuroDesk">I want to try it</a>
+    </div>
+  </div>
+</header>
+
+<div class="tagline"><p>When the step ahead feels too big, NeuroDesk helps you find one you can take.</p></div>
+
+<nav class="crumbs" aria-label="Path"><div class="wrap"><a href="index.en.html">Home</a><span class="sep">/</span><span aria-current="page">Testers</span></div></nav>
+
+<div class="mobile-cta">
+  <a href="mailto:hello@neurodesk.it?subject=Voglio%20provare%20NeuroDesk">
+    <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M3 6l7 5 7-5"/></svg>
+    Write to us
+  </a>
+</div>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">Looking for testers</span>
+        <h1>Fancy trying NeuroDesk?</h1>
+        <p class="lede">
+          NeuroDesk is already being tested by a small group. We're looking for more neurodivergent people —
+          with ADHD, autism, AuDHD, ODD, SLD — to use it and tell us, without beating around the bush,
+          what helps and what doesn't.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="mailto:hello@neurodesk.it?subject=Voglio%20provare%20NeuroDesk">I want to try it</a>
+          <a class="btn btn-secondary" href="https://app.neurodesk.it">I already have a code</a>
+        </div>
+      </div>
+
+      <div class="chat-mock" aria-label="Example conversation with the Companion">
+        <div class="chat-head"><span class="bdot" aria-hidden="true"></span> NeuroDesk Companion</div>
+        <div class="chat-body">
+          <div class="cm-label">You</div>
+          <div class="cm-bubble cm-user">I have an exam in three days and I can't start studying.</div>
+          <div class="cm-label">Companion</div>
+          <div class="cm-bubble cm-bot">I believe you, and it's not your fault.<br><br>Next step (2 minutes): open the book to the first page of the chapter. Don't read yet. Just open it.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-block:1rem 0">
+    <div class="wrap">
+      <div class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 480 120" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 96 C 110 96, 120 40, 200 40 S 300 92, 380 60 460 30 460 30" opacity="0.9"/>
+          <circle cx="20" cy="96" r="7" fill="currentColor" stroke="none" opacity="0.55"/>
+          <circle cx="200" cy="40" r="7" fill="currentColor" stroke="none" opacity="0.75"/>
+          <circle cx="380" cy="60" r="7" fill="currentColor" stroke="none"/>
+          <path d="M452 16 l18 12 -18 12 z" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap reveal">
+      <p class="lead-line">Write down the task you can't start. NeuroDesk replies with <strong>a single small step</strong> to take, not a long list.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">What it's like</span>
+        <h2>Simple, and no rush</h2>
+      </div>
+      <div class="steps reveal">
+        <div class="step-row"><div class="step-num">1</div><div><h3>We give you a code</h3><p>You enter with a code, without giving your name. No sign-up.</p></div></div>
+        <div class="step-row"><div class="step-num">2</div><div><h3>You use it whenever you want</h3><p>Write however it comes, even just a few words. You get one step at a time.</p></div></div>
+        <div class="step-row"><div class="step-num">3</div><div><h3>You tell us how it went</h3><p>A few questions with buttons, and space to write. No reports needed.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Made for you</span>
+        <h2>Easy to use, even on bad days</h2>
+      </div>
+      <div class="reassure reveal">
+        <div class="box">
+          <h3>You can listen to it</h3>
+          <p>If reading is tiring, tap <strong>Listen</strong>: NeuroDesk reads the reply out loud, with your device's voice. Nothing to install.</p>
+        </div>
+        <div class="box">
+          <h3>Large text, soft colours</h3>
+          <p>Large, readable type, little movement. There's a dark theme too, for when light bothers you.</p>
+        </div>
+        <div class="box">
+          <h3>Works with screen readers</h3>
+          <p>Compatible with screen readers and keyboard navigation. Nobody is left out.</p>
+        </div>
+      </div>
+      <div class="shot-frame reveal">
+        <div class="shot-bar" aria-hidden="true"><span></span><span></span><span></span></div>
+        <img class="shot-img" src="assets/companion-ascolta.png" width="2480" height="1720" loading="lazy"
+             alt="The Companion screen: the areas to choose from, the space to write, and — below the reply — the Listen button to have it read out loud.">
+      </div>
+      <p class="shot-cap reveal">The <strong>Listen</strong> button appears under every reply: one tap and it reads it to you.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="cta-box reveal">
+        <span class="eyebrow">Let us know</span>
+        <h2 style="margin-top:0.7rem">Want to try it?</h2>
+        <p>Write to us and we'll send you a code to start. It only takes a few minutes when you feel like it.</p>
+        <a class="btn btn-primary" href="mailto:hello@neurodesk.it?subject=Voglio%20provare%20NeuroDesk">I want to try it</a>
+        <p class="cta-note">A real person will reply.</p>
+        <p class="cta-note">Already have a code? <a href="https://app.neurodesk.it" style="color:var(--accent-deep);font-weight:600">Enter here</a>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">What to know</span>
+        <h2>A few things, clearly</h2>
+      </div>
+      <div class="reassure reveal">
+        <div class="box"><h3>No need to be an expert</h3><p>There's no right or wrong way to use it. We just want to understand what it's like for you.</p></div>
+        <div class="box"><h3>Your data stays yours</h3><p>You enter without a name. Conversations are encrypted on our server and you can delete them whenever you want.</p></div>
+        <div class="box"><h3>It's not therapy</h3><p>NeuroDesk is a practical tool. It doesn't replace doctors, psychologists or services.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<section class="switch-band"><div class="wrap"><p>Are you a company, organisation or funder?</p><a class="cta-link" href="finanziatori.html">Go to the partners page →</a></div></section>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div class="brand" style="font-size:1.05rem"><span class="bdot" aria-hidden="true"></span> NeuroDesk</div>
+    <a class="mail-btn" href="mailto:hello@neurodesk.it"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M3 6l7 5 7-5"/></svg> Write to us</a>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var btn = document.getElementById('themeBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      var next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('nd-theme', next); } catch (e) {}
+    });
+  })();
+  (function () {
+    var els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); }); return; }
+    var io = new IntersectionObserver(function (en) { en.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } }); }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(function (e) { io.observe(e); });
+  })();
+</script>
+
+<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Cookie notice" hidden>
+  <p>We only use <strong>technical cookies</strong> needed for the site to work. No advertising tracking. <a href="privacy.html#cookie">More details</a>.</p>
+  <button id="cookieOk" type="button">Got it</button>
+</div>
+<script src="assets/site.js" defer></script>
+
+</body>
+</html>
