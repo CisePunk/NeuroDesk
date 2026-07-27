@@ -5,15 +5,20 @@ import './index.css'
 import App from './App.jsx'
 import { AuthProvider } from './auth/AuthContext'
 import { ToastProvider } from './ui/ToastProvider'
+import ErrorBoundary from './ui/ErrorBoundary'
 
+// ErrorBoundary sta piu' in alto di tutto (router e provider compresi): cosi'
+// nessun errore puo' lasciare l'utente davanti a una pagina bianca.
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
-      <ToastProvider>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </ToastProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ToastProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </ToastProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   </StrictMode>,
 )

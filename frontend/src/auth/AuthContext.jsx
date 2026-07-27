@@ -15,8 +15,10 @@ export function AuthProvider({ children }) {
     // Pulisce la conversazione Companion salvata nel browser: su un dispositivo
     // condiviso non deve restare materiale sensibile dell'utente precedente.
     // sessionStorage e' l'archivio attuale; localStorage per le copie legacy.
-    sessionStorage.removeItem('nd-companion-active');
-    localStorage.removeItem('nd-companion-active');
+    try {
+      sessionStorage.removeItem('nd-companion-active');
+      localStorage.removeItem('nd-companion-active');
+    } catch { /* archivio non disponibile: non c'e' nulla da ripulire */ }
     setTokenState(null);
     setRuolo(null);
     setConsensoDato(true);

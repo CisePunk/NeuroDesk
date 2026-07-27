@@ -110,7 +110,9 @@ function CompanionPage() {
 
     // Se non c'era nulla nel browser, provo a riprendere l'ultima sessione dal server.
     useEffect(() => {
-        if (sessionStorage.getItem(ACTIVE_KEY)) return; // già ripristinata dalla cache locale
+        try {
+            if (sessionStorage.getItem(ACTIVE_KEY)) return; // già ripristinata dalla cache locale
+        } catch { /* nessuna cache leggibile: si riprende dal server */ }
         let attivo = true;
         getSessioni()
             .then(list => {
@@ -126,12 +128,17 @@ function CompanionPage() {
     }, []);
 
     // Salvo in locale a ogni cambiamento, così un refresh o una caduta non perde nulla.
+    // La scrittura può fallire (quota piena, Safari privato): se l'eccezione uscisse
+    // da un effetto, React smonterebbe l'app e l'utente vedrebbe una pagina bianca.
+    // La copia autorevole è comunque cifrata sul server, quindi qui si può ignorare.
     useEffect(() => {
-        if (conversation.length === 0 && sessioneId == null) {
-            sessionStorage.removeItem(ACTIVE_KEY);
-            return;
-        }
-        sessionStorage.setItem(ACTIVE_KEY, JSON.stringify({ sessioneId, mode, conversation }));
+        try {
+            if (conversation.length === 0 && sessioneId == null) {
+                sessionStorage.removeItem(ACTIVE_KEY);
+                return;
+            }
+            sessionStorage.setItem(ACTIVE_KEY, JSON.stringify({ sessioneId, mode, conversation }));
+        } catch { /* niente copia locale: resta quella sul server */ }
     }, [conversation, sessioneId, mode]);
 
     async function handleSubmit(event) {
@@ -193,7 +200,7 @@ function CompanionPage() {
         setMessage('');
         setLastMeta(null);
         setErrore('');
-        sessionStorage.removeItem(ACTIVE_KEY);
+        try { sessionStorage.removeItem(ACTIVE_KEY); } catch { /* ignora */ }
         setTimeout(() => textareaRef.current?.focus(), 50);
     }
 

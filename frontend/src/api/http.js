@@ -16,14 +16,30 @@ export class ApiError extends Error {
   }
 }
 
+// L'archivio del browser puo' RIFIUTARE una scrittura (quota piena, Safari in
+// navigazione privata, cookie di terze parti bloccati in un iframe). Se l'eccezione
+// esce da qui, arriva a React che smonta tutto: pagina bianca. Meglio degradare:
+// l'app resta usabile nella scheda aperta, si perde solo la persistenza.
+let tokenInMemoria = null;
+
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  try {
+    return localStorage.getItem(TOKEN_KEY) ?? tokenInMemoria;
+  } catch {
+    return tokenInMemoria;
+  }
 }
 export function setToken(token) {
-  localStorage.setItem(TOKEN_KEY, token);
+  tokenInMemoria = token;
+  try {
+    localStorage.setItem(TOKEN_KEY, token);
+  } catch { /* niente persistenza: resta valido finche' la scheda e' aperta */ }
 }
 export function clearToken() {
-  localStorage.removeItem(TOKEN_KEY);
+  tokenInMemoria = null;
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+  } catch { /* ignora */ }
 }
 
 export function messaggioAmichevole(status, serverMessage) {

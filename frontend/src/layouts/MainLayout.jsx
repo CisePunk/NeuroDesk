@@ -14,9 +14,14 @@ function MainLayout({ children }) {
         if (isScuola) getTestMode().then(setTestMode);
     }, [isScuola]);
 
+    // L'archivio del browser puo' rifiutare lettura e scrittura (quota piena, Safari
+    // privato). Non e' un motivo per far cadere l'app: al massimo si perde la scelta
+    // del tema. Senza try/catch l'eccezione smonterebbe l'albero -> pagina bianca.
     const [isLight, setIsLight] = useState(() => {
-        const saved = localStorage.getItem('nd-theme');
-        if (saved) return saved === 'light';
+        try {
+            const saved = localStorage.getItem('nd-theme');
+            if (saved) return saved === 'light';
+        } catch { /* nessuna preferenza salvata */ }
         // Default: chiaro morbido a bassa stimolazione (indipendente dall'OS).
         return true;
     });
@@ -24,7 +29,9 @@ function MainLayout({ children }) {
     useEffect(() => {
         const theme = isLight ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('nd-theme', theme);
+        try {
+            localStorage.setItem('nd-theme', theme);
+        } catch { /* il tema vale per questa sessione */ }
     }, [isLight]);
 
     const navClass = ({ isActive }) => isActive ? 'nav-link active' : 'nav-link';
