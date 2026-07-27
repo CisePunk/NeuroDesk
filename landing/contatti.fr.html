@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta property="og:locale" content="fr_FR">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Contactez NeuroDesk : écrivez-nous ou remplissez le formulaire. Une vraie personne vous répond.">
+<meta name="robots" content="index,follow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
+<title>NeuroDesk — Contact</title>
+<link rel="stylesheet" href="assets/site.css">
+<style>
+  :root {
+    --bg: #faf8f4; --bg-2: #f2eee6; --surface: #ffffff;
+    --border: rgba(95,130,121,0.22); --border-soft: rgba(95,130,121,0.14);
+    --accent: #5f8279; --accent-deep: #45625a; --accent-soft: rgba(95,130,121,0.10);
+    --text: #2f2f36; --text-2: #5c5c64; --text-3: #8a8a90;
+    --shadow: 0 1px 2px rgba(60,55,45,0.05), 0 12px 32px -18px rgba(60,55,45,0.28);
+    --serif: "Iowan Old Style","Palatino Linotype","Palatino","Georgia",ui-serif,serif;
+    --sans: ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --page: 62rem;
+  }
+  :root[data-theme="dark"] {
+    --bg: #191c21; --bg-2: #20242b; --surface: #262b32;
+    --border: rgba(230,227,220,0.13); --border-soft: rgba(230,227,220,0.08);
+    --accent: #8aa8a1; --accent-deep: #a6bfb8; --accent-soft: rgba(138,168,161,0.14);
+    --text: #e8e5de; --text-2: #aeaca4; --text-3: #7d7b75;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 14px 34px -18px rgba(0,0,0,0.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 1.08rem; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: var(--page); margin: 0 auto; padding: 0 1.5rem; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; margin: 0; }
+  p { margin: 0; }
+  a { color: inherit; }
+  .eyebrow { font-family: var(--sans); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.16em; font-weight: 600; color: var(--accent-deep); }
+
+  header.top { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); background: color-mix(in srgb, var(--bg) 82%, transparent); border-bottom: 1px solid var(--border-soft); }
+  .top-inner { display: flex; align-items: center; justify-content: space-between; height: 4rem; }
+  .brand { display: flex; align-items: center; gap: 0.6rem; font-family: var(--serif); font-size: 1.25rem; font-weight: 600; }
+  .brand .bdot { width: 0.85rem; height: 0.85rem; border-radius: 50%; background: radial-gradient(circle at 35% 30%, var(--accent-deep), var(--accent)); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .top-right { display: flex; align-items: center; gap: 0.6rem; }
+  .theme-btn { display: inline-grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); cursor: pointer; }
+  .theme-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .theme-btn svg { width: 1.15rem; height: 1.15rem; }
+  .theme-btn .ic-sun { display: none; }
+  :root[data-theme="dark"] .theme-btn .ic-moon { display: none; }
+  :root[data-theme="dark"] .theme-btn .ic-sun { display: block; }
+
+  .btn { font-family: var(--sans); font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 999px; padding: 0.85rem 1.6rem; border: 1px solid transparent; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: transform 0.15s ease, background 0.2s ease; }
+  .btn-primary { background: var(--accent); color: #fbfdfb; box-shadow: var(--shadow); }
+  .btn-primary:hover { background: var(--accent-deep); transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+  .brand-nav { display: flex; align-items: center; gap: 0.7rem; }
+  .back-btn { display: inline-grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); text-decoration: none; font-size: 1.15rem; line-height: 1; }
+  .back-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .brand-home { text-decoration: none; color: inherit; }
+
+  .crumbs { border-bottom: 1px solid var(--border-soft); background: var(--bg); }
+  .crumbs .wrap { padding: 0.6rem 1.5rem; font-size: 0.86rem; color: var(--text-3); display: flex; gap: 0.5rem; align-items: center; }
+  .crumbs a { color: var(--accent-deep); text-decoration: none; font-weight: 600; }
+  .crumbs a:hover { text-decoration: underline; }
+  .crumbs .sep { opacity: 0.55; }
+  .crumbs [aria-current="page"] { color: var(--text-2); }
+
+  section { padding: clamp(2.5rem, 6vw, 4rem) 0; }
+  .page-head { max-width: 42rem; margin-bottom: 2rem; }
+  .page-head h1 { font-size: clamp(2rem, 4.6vw, 3rem); line-height: 1.08; letter-spacing: -0.02em; margin-top: 0.7rem; }
+  .page-head .lede { margin-top: 1rem; font-size: 1.15rem; color: var(--text-2); max-width: 34rem; }
+  .contact-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(1.6rem, 4vw, 3rem); align-items: start; }
+  .contact-aside h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 700; }
+  .contact-aside p { color: var(--text-2); margin-top: 0.6rem; }
+  .contact-aside .mail-big { display: inline-block; margin-top: 0.4rem; font-weight: 700; color: var(--accent-deep); text-decoration: none; }
+  .contact-aside .mail-big:hover { text-decoration: underline; }
+
+  footer { padding: 2.5rem 0 3rem; border-top: 1px solid var(--border-soft); color: var(--text-3); font-size: 0.88rem; }
+  .foot-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; align-items: center; }
+  .mail-btn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--sans); font-weight: 600; font-size: 0.92rem; color: var(--accent-deep); background: var(--accent-soft); border: 1px solid var(--border); border-radius: 999px; padding: 0.45rem 1rem; text-decoration: none; }
+  .mail-btn:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  @media (max-width: 760px) { .contact-grid { grid-template-columns: 1fr; } }
+
+  .lang-switch { display: flex; align-items: center; gap: 0.15rem; font-family: var(--sans); }
+  .lang-switch a { font-size: 0.82rem; font-weight: 600; color: var(--text-3); text-decoration: none; padding: 0.3rem 0.5rem; border-radius: 999px; white-space: nowrap; }
+  .lang-switch a:hover { color: var(--accent-deep); background: var(--accent-soft); }
+  .lang-switch a[aria-current] { color: var(--accent-deep); background: var(--accent-soft); }
+  @media (max-width: 560px) { .lang-switch a { padding: 0.3rem 0.4rem; font-size: 0.78rem; } }
+</style>
+
+<script>
+  (function () { try { var t = localStorage.getItem('nd-theme'); document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light'); } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); } })();
+</script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="brand-nav">
+      <a class="back-btn" href="index.fr.html" aria-label="Retour à l’accueil">←</a>
+      <a class="brand brand-home" href="index.fr.html"><span class="bdot" aria-hidden="true"></span> NeuroDesk</a>
+    </div>
+    <div class="top-right">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="siteNav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav class="site-nav" id="siteNav" aria-label="Navigation">
+        <a href="index.fr.html" data-nav="index.fr.html">Accueil</a>
+        <a href="tester.fr.html" data-nav="tester.fr.html">Testeurs</a>
+        <a href="finanziatori.html" data-nav="finanziatori.html">Partenaires</a>
+        <a href="chi-siamo.fr.html" data-nav="chi-siamo.fr.html">À propos</a>
+        <a href="contatti.fr.html" data-nav="contatti.fr.html">Contact</a>
+      </nav>
+      <div class="lang-switch" aria-label="Lingua / Language"><a href="contatti.fr.html" hreflang="it">Italiano</a><a href="contatti.en.html" hreflang="en">English</a><a href="contatti.fr.html" hreflang="fr" aria-current="true">Français</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Changer de thème clair ou sombre">
+        <svg class="ic-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 12.5A7.5 7.5 0 0 1 7.5 2.5a7.5 7.5 0 1 0 10 10z"/></svg>
+        <svg class="ic-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.22 4.22l1.06 1.06M14.72 14.72l1.06 1.06M4.22 15.78l1.06-1.06M14.72 5.28l1.06-1.06"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="crumbs" aria-label="Parcours"><div class="wrap"><a href="index.fr.html">Accueil</a><span class="sep">/</span><span aria-current="page">Contact</span></div></nav>
+
+<main>
+  <section>
+    <div class="wrap">
+      <div class="page-head">
+        <span class="eyebrow">Parlons-en</span>
+        <h1>Écrivez-nous</h1>
+        <p class="lede">Remplissez le formulaire ci-dessous ou envoyez-nous un e-mail. Une vraie personne vous répond — aucune réponse automatique.</p>
+      </div>
+
+      <div class="contact-grid">
+        <div class="form-card">
+          <form class="contact-form" id="contactForm" novalidate>
+            <div class="field">
+              <label for="cf-nome">Nom <span class="req" aria-hidden="true">*</span></label>
+              <input id="cf-nome" name="nome" type="text" required autocomplete="name" maxlength="80">
+            </div>
+            <div class="field">
+              <label for="cf-email">E-mail <span class="req" aria-hidden="true">*</span></label>
+              <input id="cf-email" name="email" type="email" required autocomplete="email" maxlength="120">
+            </div>
+            <div class="field">
+              <label for="cf-messaggio">Message <span class="req" aria-hidden="true">*</span></label>
+              <textarea id="cf-messaggio" name="messaggio" required maxlength="2000" placeholder="Dites-nous en deux lignes comment on peut vous aider."></textarea>
+            </div>
+            <label class="consent">
+              <input id="cf-consenso" name="consenso" type="checkbox" required>
+              <span>J'ai lu la <a href="privacy.html" target="_blank" rel="noopener">politique de confidentialité</a> et je consens au traitement de mes données pour répondre à ma demande. <span class="req" aria-hidden="true">*</span></span>
+            </label>
+            <div class="form-status" id="cfStatus" role="status" aria-live="polite" hidden></div>
+            <button class="btn btn-primary" type="submit">Envoyer la demande</button>
+            <p class="form-note">Ou écrivez-nous à <a href="mailto:hello@neurodesk.it">hello@neurodesk.it</a>. Les champs marqués <span class="req" aria-hidden="true">*</span> sont obligatoires.</p>
+          </form>
+        </div>
+
+        <aside class="contact-aside">
+          <h3>Vous préférez l'e-mail ?</h3>
+          <p>C'est parfait. Écrivez quand vous voulez, sans vous presser :</p>
+          <a class="mail-big" href="mailto:hello@neurodesk.it">hello@neurodesk.it</a>
+          <h3 style="margin-top:1.8rem">I tuoi dati restano tuoi</h3>
+          <p>Nous utilisons ce que vous écrivez uniquement pour vous répondre. Pas de newsletters non sollicitées, aucune cession à des tiers. Vous pouvez demander la suppression quand vous voulez.</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div class="brand" style="font-size:1.05rem"><span class="bdot" aria-hidden="true"></span> NeuroDesk</div>
+    <a class="mail-btn" href="mailto:hello@neurodesk.it"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M3 6l7 5 7-5"/></svg> Écrivez-nous</a>
+  </div>
+</footer>
+
+<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Avis sur les cookies" hidden>
+  <p>Nous utilisons uniquement des <strong>cookies techniques</strong> nécessaires au fonctionnement du site. Aucun traçage publicitaire. <a href="privacy.html#cookie">Plus de détails</a>.</p>
+  <button class="btn btn-primary" id="cookieOk" type="button">J’ai compris</button>
+</div>
+
+<script>
+  (function () {
+    var btn = document.getElementById('themeBtn');
+    if (btn) btn.addEventListener('click', function () {
+      var cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      var next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('nd-theme', next); } catch (e) {}
+    });
+  })();
+  (function () {
+    var form = document.getElementById('contactForm');
+    if (!form) return;
+    var status = document.getElementById('cfStatus');
+    function show(msg, ok) { status.textContent = msg; status.className = 'form-status ' + (ok ? 'ok' : 'err'); status.hidden = false; }
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!form.checkValidity()) { show('Vérifiez les champs obligatoires et la case de consentement.', false); form.reportValidity(); return; }
+      var data = { nome: form.nome.value.trim(), email: form.email.value.trim(), messaggio: form.messaggio.value.trim(), consenso: form.consenso.checked };
+      var btn = form.querySelector('button[type=submit]');
+      btn.disabled = true;
+      fetch('/api/public/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+        .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); })
+        .then(function () { form.reset(); show('Merci ! Nous avons bien reçu votre demande, nous répondons bientôt.', true); })
+        .catch(function () { show('Échec de l'envoi. Écrivez-nous directement à hello@neurodesk.it et nous vous répondrons.', false); })
+        .finally(function () { btn.disabled = false; });
+    });
+  })();
+</script>
+<script src="assets/site.js" defer></script>
+</body>
+</html>
