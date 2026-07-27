@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { IconDashboard, IconStudenti, IconModuli, IconTask, IconCompanion, IconFeedback, IconSun, IconMoon, IconCodici } from '../components/Icons';
+import { IconDashboard, IconModuli, IconTask, IconCompanion, IconFeedback, IconSun, IconMoon, IconCodici } from '../components/Icons';
 import { useAuth } from '../auth/AuthContext';
 import { getTestMode } from '../api/studentiApi';
 
@@ -60,10 +60,6 @@ function MainLayout({ children }) {
                             <NavLink to="/codici" className={navClass}>
                                 <IconCodici className="nav-icon" />
                                 <span>Codici</span>
-                            </NavLink>
-                            <NavLink to="/utenti" className={navClass}>
-                                <IconStudenti className="nav-icon" />
-                                <span>Utenti</span>
                             </NavLink>
                             {testMode && (
                                 <>

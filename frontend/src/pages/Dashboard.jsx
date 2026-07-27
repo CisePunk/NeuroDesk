@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { getTestMode } from '../api/studentiApi';
-import { getUtenti } from '../api/utentiApi';
+import { getCodici } from '../api/codiciApi';
 import { getModuli } from '../api/moduliApi';
 import { getTask } from '../api/taskApi';
 import { useAsyncData } from '../ui/useAsyncData';
-import { IconStudenti, IconModuli, IconTask, IconPlus } from '../components/Icons';
+import { IconCodici, IconModuli, IconTask, IconPlus } from '../components/Icons';
 
 function greeting() {
     const h = new Date().getHours();
@@ -16,8 +16,8 @@ function greeting() {
 
 // Loader stabile (a livello di modulo): carica i tre insiemi in parallelo.
 const caricaDashboard = () =>
-    Promise.all([getUtenti(), getModuli(), getTask()]).then(([utenti, moduli, task]) => ({
-        utenti,
+    Promise.all([getCodici(), getModuli(), getTask()]).then(([codici, moduli, task]) => ({
+        codici,
         moduli,
         task,
     }));
@@ -45,15 +45,15 @@ const STATO_CLASS = { DA_FARE: 'badge-muted', IN_CORSO: 'badge-warning', COMPLET
 
 function Dashboard() {
     const { dati, caricamento, errore, ricarica } = useAsyncData(caricaDashboard);
-    const data = dati ?? { utenti: [], moduli: [], task: [] };
+    const data = dati ?? { codici: [], moduli: [], task: [] };
 
-    // Moduli e Task sono strumenti solo di test: in produzione la dashboard mostra i soli utenti.
+    // Moduli e Task sono strumenti solo di test: in produzione la dashboard mostra i soli codici.
     const [testMode, setTestMode] = useState(false);
     useEffect(() => {
         getTestMode().then(setTestMode);
     }, []);
 
-    const nStudenti = useCountUp(data.utenti.length);
+    const nCodici = useCountUp(data.codici.length);
     const nModuli   = useCountUp(data.moduli.length);
     const nTask     = useCountUp(data.task.length);
 
@@ -76,8 +76,8 @@ function Dashboard() {
                     <div className="hero-actions">
                         <div className="hero-actions-label">Aggiungi</div>
                         <div className="quick-actions">
-                            <Link to="/utenti" className="quick-action quick-action--violet">
-                                <IconPlus className="qa-icon" /> Utente
+                            <Link to="/codici" className="quick-action quick-action--violet">
+                                <IconPlus className="qa-icon" /> Codice
                             </Link>
                             {testMode && (
                                 <>
@@ -106,18 +106,18 @@ function Dashboard() {
             ) : (
                 <>
                     <div className="dashboard-grid">
-                        <Link to="/utenti" className="stat-card stat-card--violet">
+                        <Link to="/codici" className="stat-card stat-card--violet">
                             <div className="stat-card-top">
                                 <div className="stat-icon-wrap stat-icon--violet">
-                                    <IconStudenti />
+                                    <IconCodici />
                                 </div>
-                                <div className="stat-number">{nStudenti}</div>
+                                <div className="stat-number">{nCodici}</div>
                             </div>
-                            <div className="stat-label">Utenti</div>
+                            <div className="stat-label">Codici</div>
                             <div className="stat-desc">
-                                {data.utenti.length === 0
-                                    ? 'Nessun utente'
-                                    : `${data.utenti.filter(s => s.attivo).length} attivi`}
+                                {data.codici.length === 0
+                                    ? 'Nessun codice emesso'
+                                    : `${data.codici.filter(c => c.attivo).length} attivi · ${data.codici.filter(c => c.consensoDato).length} con consenso`}
                             </div>
                         </Link>
 
