@@ -31,11 +31,15 @@
   }
 
   // --- Pulsante "Accedi" all'applicazione, su tutte le pagine ---
+  // L'etichetta segue la lingua della pagina (<html lang>): sulle versioni EN/FR
+  // comparirebbe altrimenti una parola italiana in mezzo a un menu tradotto.
+  var ETICHETTA_ACCEDI = { it: 'Accedi', en: 'Sign in', fr: 'Se connecter' };
   if (nav && !nav.querySelector('.nav-accedi')) {
+    var lingua = (document.documentElement.getAttribute('lang') || 'it').slice(0, 2).toLowerCase();
     var accedi = document.createElement('a');
     accedi.href = 'https://app.neurodesk.it';
     accedi.className = 'nav-accedi';
-    accedi.textContent = 'Accedi';
+    accedi.textContent = ETICHETTA_ACCEDI[lingua] || ETICHETTA_ACCEDI.it;
     nav.appendChild(accedi);
   }
 

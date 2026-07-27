@@ -69,6 +69,11 @@
   .mail-btn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--sans); font-weight: 600; font-size: 0.92rem; color: var(--accent-deep); background: var(--accent-soft); border: 1px solid var(--border); border-radius: 999px; padding: 0.45rem 1rem; text-decoration: none; }
   .mail-btn:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: var(--accent); }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+  .lang-switch { display: flex; align-items: center; gap: 0.15rem; font-family: var(--sans); }
+  .lang-switch a { font-size: 0.82rem; font-weight: 600; color: var(--text-3); text-decoration: none; padding: 0.3rem 0.5rem; border-radius: 999px; white-space: nowrap; }
+  .lang-switch a:hover { color: var(--accent-deep); background: var(--accent-soft); }
+  .lang-switch a[aria-current] { color: var(--accent-deep); background: var(--accent-soft); }
+  @media (max-width: 560px) { .lang-switch a { padding: 0.3rem 0.4rem; font-size: 0.78rem; } }
 </style>
 
 <script>
@@ -94,6 +99,7 @@
         <a href="chi-siamo.html" data-nav="chi-siamo.html">Chi siamo</a>
         <a href="contatti.html" data-nav="contatti.html">Contatti</a>
       </nav>
+      <div class="lang-switch" aria-label="Lingua / Language"><a href="privacy.html" hreflang="it" aria-current="true">Italiano</a><a href="privacy.en.html" hreflang="en">English</a><a href="privacy.fr.html" hreflang="fr">Français</a></div>
       <button class="theme-btn" id="themeBtn" type="button" aria-label="Cambia tema chiaro o scuro">
         <svg class="ic-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 12.5A7.5 7.5 0 0 1 7.5 2.5a7.5 7.5 0 1 0 10 10z"/></svg>
         <svg class="ic-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.22 4.22l1.06 1.06M14.72 14.72l1.06 1.06M4.22 15.78l1.06-1.06M14.72 5.28l1.06-1.06"/></svg>
