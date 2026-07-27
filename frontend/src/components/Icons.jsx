@@ -79,3 +79,13 @@ export function IconFeedback(props) {
         </svg>
     );
 }
+
+// Chiave: i codici di accesso emessi.
+export function IconCodici(props) {
+    return (
+        <svg {...base} {...props}>
+            <circle cx="6.5" cy="10" r="3.5" />
+            <path d="M10 10h7.5M15 10v3M12.5 10v2.2" />
+        </svg>
+    );
+}
