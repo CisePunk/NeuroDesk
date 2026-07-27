@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta property="og:locale" content="fr_FR">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Guide pour les testeurs de NeuroDesk : se connecter, demander un pas, et quoi faire si ça coince.">
+<meta name="robots" content="index,follow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
+<title>NeuroDesk — Aide</title>
+<link rel="stylesheet" href="assets/site.css">
+<style>
+/* Blocco <style> comune alle tre pagine di aiuto — un passo alla volta:
+   molta aria, una sola azione per riquadro, i problemi dentro voci richiudibili. */
+  :root {
+    --bg: #faf8f4; --bg-2: #f2eee6; --surface: #ffffff;
+    --border: rgba(95,130,121,0.22); --border-soft: rgba(95,130,121,0.14);
+    --accent: #5f8279; --accent-deep: #45625a; --accent-soft: rgba(95,130,121,0.10);
+    --text: #2f2f36; --text-2: #5c5c64; --text-3: #8a8a90;
+    --shadow: 0 1px 2px rgba(60,55,45,0.05), 0 12px 32px -18px rgba(60,55,45,0.28);
+    --serif: "Iowan Old Style","Palatino Linotype","Palatino","Georgia",ui-serif,serif;
+    --sans: ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --page: 62rem;
+    --testo: 34rem; /* riga corta: si legge senza perdere il segno */
+  }
+  :root[data-theme="dark"] {
+    --bg: #191c21; --bg-2: #20242b; --surface: #262b32;
+    --border: rgba(230,227,220,0.13); --border-soft: rgba(230,227,220,0.08);
+    --accent: #8aa8a1; --accent-deep: #a6bfb8; --accent-soft: rgba(138,168,161,0.14);
+    --text: #e8e5de; --text-2: #aeaca4; --text-3: #7d7b75;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 14px 34px -18px rgba(0,0,0,0.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 1.08rem; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: var(--page); margin: 0 auto; padding: 0 1.5rem; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; margin: 0; }
+  p { margin: 0; }
+  a { color: inherit; }
+  .eyebrow { font-family: var(--sans); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.16em; font-weight: 600; color: var(--accent-deep); }
+
+  header.top { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); background: color-mix(in srgb, var(--bg) 82%, transparent); border-bottom: 1px solid var(--border-soft); }
+  .top-inner { display: flex; align-items: center; justify-content: space-between; height: 4rem; }
+  .brand { display: flex; align-items: center; gap: 0.6rem; font-family: var(--serif); font-size: 1.25rem; font-weight: 600; }
+  .brand .bdot { width: 0.85rem; height: 0.85rem; border-radius: 50%; background: radial-gradient(circle at 35% 30%, var(--accent-deep), var(--accent)); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .top-right { display: flex; align-items: center; gap: 0.6rem; }
+  .theme-btn { display: inline-grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); cursor: pointer; }
+  .theme-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .theme-btn svg { width: 1.15rem; height: 1.15rem; }
+  .theme-btn .ic-sun { display: none; }
+  :root[data-theme="dark"] .theme-btn .ic-moon { display: none; }
+  :root[data-theme="dark"] .theme-btn .ic-sun { display: block; }
+
+  .brand-nav { display: flex; align-items: center; gap: 0.7rem; }
+  .back-btn { display: inline-grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); text-decoration: none; font-size: 1.15rem; line-height: 1; }
+  .back-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .brand-home { text-decoration: none; color: inherit; }
+
+  .crumbs { border-bottom: 1px solid var(--border-soft); background: var(--bg); }
+  .crumbs .wrap { padding: 0.6rem 1.5rem; font-size: 0.86rem; color: var(--text-3); display: flex; gap: 0.5rem; align-items: center; }
+  .crumbs a { color: var(--accent-deep); text-decoration: none; font-weight: 600; }
+  .crumbs a:hover { text-decoration: underline; }
+  .crumbs .sep { opacity: 0.55; }
+  .crumbs [aria-current="page"] { color: var(--text-2); }
+
+  footer { padding: 2.5rem 0 3rem; border-top: 1px solid var(--border-soft); color: var(--text-3); font-size: 0.88rem; }
+  .foot-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; align-items: center; }
+  .mail-btn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--sans); font-weight: 600; font-size: 0.92rem; color: var(--accent-deep); background: var(--accent-soft); border: 1px solid var(--border); border-radius: 999px; padding: 0.45rem 1rem; text-decoration: none; }
+  .mail-btn:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  .lang-switch { display: flex; align-items: center; gap: 0.15rem; font-family: var(--sans); }
+  .lang-switch a { font-size: 0.82rem; font-weight: 600; color: var(--text-3); text-decoration: none; padding: 0.3rem 0.5rem; border-radius: 999px; white-space: nowrap; }
+  .lang-switch a:hover { color: var(--accent-deep); background: var(--accent-soft); }
+  .lang-switch a[aria-current] { color: var(--accent-deep); background: var(--accent-soft); }
+  @media (max-width: 560px) { .lang-switch a { padding: 0.3rem 0.4rem; font-size: 0.78rem; } }
+
+  /* ---- Testa della pagina ---- */
+  main { padding-bottom: 1rem; }
+  .page-head { max-width: var(--testo); padding: clamp(2rem, 5vw, 3rem) 0 0; }
+  .page-head h1 { font-size: clamp(1.9rem, 4.4vw, 2.6rem); line-height: 1.12; letter-spacing: -0.02em; margin-top: 0.6rem; }
+  .page-head .lede { margin-top: 0.9rem; font-size: 1.08rem; color: var(--text-2); }
+
+  /* ---- La sola cosa da ricordare ---- */
+  .tldr { max-width: var(--testo); margin-top: 1.6rem; background: var(--accent-soft); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 0.9rem; padding: 1.1rem 1.3rem; }
+  .tldr-titolo { font-family: var(--sans); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; color: var(--accent-deep); margin-bottom: 0.55rem; }
+  .tldr strong { color: var(--text); }
+  .tldr p { color: var(--text-2); }
+  .tldr p + p { margin-top: 0.5rem; }
+
+  /* ---- Sezioni: una alla volta, ben distanziate ---- */
+  .blocco { max-width: var(--testo); padding: clamp(2.2rem, 5vw, 3.2rem) 0 0; }
+  .blocco > h2 { font-size: clamp(1.45rem, 3.2vw, 1.85rem); }
+  .blocco > .intro { margin-top: 0.6rem; color: var(--text-2); }
+
+  /* ---- Un passo alla volta ---- */
+  .passi { list-style: none; margin: 1.2rem 0 0; padding: 0; display: grid; gap: 0.8rem; counter-reset: passo; }
+  .passi > li { counter-increment: passo; background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: var(--shadow); padding: 1.1rem 1.2rem 1.1rem 3.9rem; position: relative; }
+  .passi > li::before { content: counter(passo); position: absolute; left: 1.1rem; top: 1.05rem; width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 999px; background: var(--accent); color: #fbfdfb; font-family: var(--sans); font-weight: 700; font-size: 1rem; }
+  .passi h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 700; line-height: 1.35; }
+  .passi p { margin-top: 0.35rem; color: var(--text-2); font-size: 0.98rem; }
+  .passi .poi { margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-3); }
+
+  /* Esito del gruppo di passi: chiude il percorso, così si sa quando si è finito. */
+  .esito { margin-top: 0.9rem; font-family: var(--sans); font-weight: 700; color: var(--accent-deep); display: flex; gap: 0.5rem; align-items: baseline; }
+  .esito::before { content: "✓"; }
+
+  /* ---- Cose che puoi fare quando vuoi: una riga ciascuna ---- */
+  .righe { list-style: none; margin: 1.1rem 0 0; padding: 0; display: grid; gap: 0.5rem; }
+  .righe > li { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 0.8rem; padding: 0.85rem 1.05rem; color: var(--text-2); font-size: 0.98rem; }
+  .righe strong { color: var(--text); }
+
+  /* ---- Problemi: aperti solo quando servono ---- */
+  .faq { margin-top: 1.1rem; display: grid; gap: 0.5rem; }
+  .faq details { background: var(--surface); border: 1px solid var(--border); border-radius: 0.9rem; overflow: hidden; }
+  .faq details[open] { box-shadow: var(--shadow); }
+  .faq summary { cursor: pointer; list-style: none; padding: 0.95rem 2.6rem 0.95rem 1.1rem; font-family: var(--sans); font-weight: 700; font-size: 1rem; position: relative; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "＋"; position: absolute; right: 1rem; top: 0.9rem; color: var(--accent-deep); font-weight: 700; }
+  .faq details[open] summary::after { content: "−"; }
+  .faq summary:hover { background: var(--accent-soft); }
+  .faq .corpo { padding: 0 1.1rem 1.1rem; }
+  .faq .corpo p { color: var(--text-2); font-size: 0.98rem; }
+  .faq .corpo p + p { margin-top: 0.55rem; }
+  .faq .msg { font-family: var(--sans); font-size: 0.88rem; color: var(--text-3); font-weight: 600; display: block; padding: 0 1.1rem 0.85rem; margin-top: -0.35rem; }
+
+  /* ---- Segnalare: quattro cose, una per riga ---- */
+  .quattro { list-style: none; margin: 1.1rem 0 0; padding: 0; display: grid; gap: 0.45rem; counter-reset: q; }
+  .quattro > li { position: relative; padding-left: 1.7rem; color: var(--text-2); }
+  .quattro > li::before { content: "→"; position: absolute; left: 0; color: var(--accent-deep); font-weight: 700; }
+  .quattro strong { color: var(--text); }
+
+  .azione { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.2rem; font-family: var(--sans); font-weight: 700; font-size: 1rem; color: #fbfdfb; background: var(--accent); border-radius: 999px; padding: 0.75rem 1.4rem; text-decoration: none; box-shadow: var(--shadow); }
+  .azione:hover { background: var(--accent-deep); }
+
+  /* Etichetta di un pulsante dell'app, citato letteralmente. */
+  .btn-label { font-family: var(--sans); font-weight: 700; background: var(--accent-soft); border: 1px solid var(--border-soft); border-radius: 0.4rem; padding: 0.05rem 0.4rem; white-space: nowrap; }
+  .trad { color: var(--text-3); font-style: italic; }
+
+  .aggiornato { max-width: var(--testo); margin-top: 3rem; color: var(--text-3); font-size: 0.88rem; }
+</style>
+
+<script>
+  (function () { try { var t = localStorage.getItem('nd-theme'); document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light'); } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); } })();
+</script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="brand-nav">
+      <a class="back-btn" href="index.fr.html" aria-label="Retour à l'accueil">←</a>
+      <a class="brand brand-home" href="index.fr.html"><span class="bdot" aria-hidden="true"></span> NeuroDesk</a>
+    </div>
+    <div class="top-right">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="siteNav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav class="site-nav" id="siteNav" aria-label="Navigation">
+        <a href="index.fr.html" data-nav="index.fr.html">Accueil</a>
+        <a href="tester.fr.html" data-nav="tester.fr.html">Testeurs</a>
+        <a href="aiuto.fr.html" data-nav="aiuto.fr.html">Aide</a>
+        <a href="finanziatori.fr.html" data-nav="finanziatori.fr.html">Partenaires</a>
+        <a href="chi-siamo.fr.html" data-nav="chi-siamo.fr.html">À propos</a>
+        <a href="contatti.fr.html" data-nav="contatti.fr.html">Contact</a>
+      </nav>
+      <div class="lang-switch" aria-label="Lingua / Language"><a href="aiuto.html" hreflang="it">Italiano</a><a href="aiuto.en.html" hreflang="en">English</a><a href="aiuto.fr.html" hreflang="fr" aria-current="true">Français</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Basculer le thème clair ou sombre">
+        <svg class="ic-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 12.5A7.5 7.5 0 0 1 7.5 2.5a7.5 7.5 0 1 0 10 10z"/></svg>
+        <svg class="ic-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.22 4.22l1.06 1.06M14.72 14.72l1.06 1.06M4.22 15.78l1.06-1.06M14.72 5.28l1.06-1.06"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="crumbs" aria-label="Chemin"><div class="wrap"><a href="index.fr.html">Accueil</a><span class="sep">/</span><a href="tester.fr.html">Testeurs</a><span class="sep">/</span><span aria-current="page">Aide</span></div></nav>
+
+<main>
+  <div class="wrap">
+    <div class="page-head">
+      <span class="eyebrow">Guide</span>
+      <h1>Comment utiliser NeuroDesk</h1>
+      <p class="lede">Un pas à la fois, comme l'application. Ne lisez que ce dont vous avez besoin maintenant.</p>
+    </div>
+
+    <div class="tldr">
+      <h2 class="tldr-titolo">Si vous ne lisez qu'une chose</h2>
+      <p><strong>Page blanche ? Rechargez la page.</strong></p>
+      <p>Rien n'est perdu : ce que vous avez écrit est déjà enregistré.</p>
+    </div>
+      <p class="intro" style="max-width:var(--testo);margin-top:1rem">L'application est en italien. Quand un bouton compte, vous avez les mots italiens <span class="trad">avec le sens en français à côté</span>.</p>
+
+  <section class="blocco">
+    <h2>Entrer</h2>
+    <p class="intro">Trois choses, la première fois seulement.</p>
+    <ol class="passi">
+      <li>
+        <h3>Ouvrez l'application</h3>
+        <p>Allez sur <a href="https://app.neurodesk.it"><strong>app.neurodesk.it</strong></a>, sur téléphone ou ordinateur.</p>
+      </li>
+      <li>
+        <h3>Collez votre code</h3>
+        <p>Le code ressemble à ceci : <code>neuro-xxxx-xxxx-xxxx-xxxx</code>. Copiez-le en entier, tirets compris.</p>
+        <p class="poi">Puis touchez <span class="btn-label">Entra</span> <span class="trad">(Entrer)</span>.</p>
+      </li>
+      <li>
+        <h3>Cochez la case</h3>
+        <p>Une page « Prima di iniziare » <span class="trad">(avant de commencer)</span> explique ce qu'il advient de ce que vous écrivez.</p>
+        <p class="poi">Puis touchez <span class="btn-label">Continua</span> <span class="trad">(Continuer)</span>. Seulement la première fois.</p>
+      </li>
+    </ol>
+    <p class="esito"><span>Vous y êtes.</span></p>
+  </section>
+
+  <section class="blocco">
+    <h2>Demander un pas</h2>
+    <ol class="passi">
+      <li>
+        <h3>Choisissez le domaine</h3>
+        <p><em>Blocco</em> blocage · <em>Studio</em> études · <em>Burocrazia</em> démarches · <em>Lavoro</em> travail · <em>Autonomie</em> argent, logement, routines. Dans le doute, laissez <em>Blocco</em>.</p>
+      </li>
+      <li>
+        <h3>Écrivez ce que vous n'arrivez pas à faire</h3>
+        <p>Quelques mots suffisent. Pas besoin d'être précis·e. Le français convient : on vous répond dans la langue que vous employez.</p>
+      </li>
+      <li>
+        <h3>Touchez le bouton</h3>
+        <p><span class="btn-label">Aiutami a fare il prossimo passo</span> <span class="trad">(aidez-moi à faire le pas suivant)</span>. Puis patientez quelques secondes : trois points bougent.</p>
+      </li>
+    </ol>
+    <p class="esito"><span>Vous recevez un seul pas. Petit, faisable tout de suite.</span></p>
+    <p class="intro">C'est fait ? Dites-le et touchez <span class="btn-label">Continua</span>. Le pas suivant tiendra compte de ce qui s'est passé.</p>
+  </section>
+
+  <section class="blocco">
+    <h2>Quand vous voulez</h2>
+    <p class="intro">Rien de tout cela n'est obligatoire. C'est là si besoin.</p>
+    <ul class="righe">
+      <li><strong>🔊 Ascolta la risposta</strong> <span class="trad">(écouter)</span> — lit la réponse à voix haute.</li>
+      <li><strong>↓ Scarica la conversazione</strong> <span class="trad">(télécharger)</span> — l'enregistre en fichier sur votre appareil.</li>
+      <li><strong>Nuova conversazione</strong> <span class="trad">(nouvelle conversation)</span> — repartir de zéro.</li>
+      <li><strong>Cancella la mia cronologia</strong> <span class="trad">(effacer mon historique)</span> — supprime tout. Sans retour.</li>
+      <li><strong>Revoca il consenso</strong> <span class="trad">(retirer le consentement)</span> — arrêter quand vous voulez. Vous pourrez le redonner.</li>
+    </ul>
+    <p class="intro">Les deux dernières sont sous <span class="btn-label">▸ Opzioni avanzate</span> <span class="trad">(options avancées)</span>.</p>
+  </section>
+
+  <section class="blocco">
+    <h2>Si quelque chose ne va pas</h2>
+    <p class="intro">N'ouvrez que la ligne qui vous concerne.</p>
+    <div class="faq">
+      <details>
+        <summary>Je vois une page blanche</summary>
+        <div class="corpo">
+          <p><strong>Rechargez la page.</strong> Sur téléphone : tirez vers le bas. Sur ordinateur : F5.</p>
+          <p>Tout revient là où c'était. C'est un défaut de notre côté, on y travaille : si cela arrive, <a href="#segnalare">dites-nous quel bouton vous aviez touché</a>.</p>
+        </div>
+      </details>
+      <details>
+        <summary>La réponse n'arrive pas</summary>
+        <div class="corpo">
+          <p>Attendez une vingtaine de secondes : c'est plus lent quand il y a du monde.</p>
+          <p>Si rien ne se passe, rechargez et renvoyez le même message. Aucun doublon ne sera créé.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Mon code est refusé</summary>
+        <span class="msg">«&nbsp;Codice o password non validi.&nbsp;»</span>
+        <div class="corpo">
+          <p>Recopiez le code en entier, avec tous les tirets et sans espace.</p>
+          <p>Attention au correcteur du téléphone : il change parfois des lettres ou met une majuscule.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Il dit ne pas nous joindre</summary>
+        <span class="msg">«&nbsp;Server non raggiungibile. / Companion non raggiungibile.&nbsp;»</span>
+        <div class="corpo">
+          <p>Vérifiez la connexion et réessayez dans une minute.</p>
+          <p>Si cela dure plus longtemps, écrivez-nous.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Il dit qu'il y a trop de requêtes</summary>
+        <span class="msg">«&nbsp;Troppi tentativi. / Troppe richieste.&nbsp;»</span>
+        <div class="corpo">
+          <p>Attendez deux minutes et réessayez.</p>
+          <p>Vous n'avez rien fait de mal : c'est une limite qui évite l'emballement des coûts de l'IA.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Il me demande de me reconnecter</summary>
+        <span class="msg">«&nbsp;Sessione non valida o scaduta.&nbsp;»</span>
+        <div class="corpo">
+          <p>Reconnectez-vous avec votre code.</p>
+          <p>Vos conversations vous attendent là où elles étaient.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Il redemande le consentement</summary>
+        <span class="msg">«&nbsp;Serve il consenso prima di usare il Companion.&nbsp;»</span>
+        <div class="corpo">
+          <p>Rechargez la page : « Prima di iniziare » revient.</p>
+          <p>Cochez la case et touchez <span class="btn-label">Continua</span>.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Il dit que mon accès a été révoqué</summary>
+        <span class="msg">«&nbsp;Il tuo accesso è stato revocato.&nbsp;»</span>
+        <div class="corpo">
+          <p>Écrivez-nous. C'est presque toujours une erreur de notre part, et nous la corrigeons.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Il dit que le service ne répond pas</summary>
+        <span class="msg">«&nbsp;Il servizio non risponde in questo momento. / Errore del server.&nbsp;»</span>
+        <div class="corpo">
+          <p>Réessayez dans quelques minutes.</p>
+          <p>Ce que vous aviez écrit reste dans le cadre : pas besoin de le retaper.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Il refuse d'envoyer</summary>
+        <span class="msg">«&nbsp;Serve almeno una parola per continuare.&nbsp;»</span>
+        <div class="corpo">
+          <p>Le cadre était vide. Écrivez quelque chose, même très peu : « je n'y arrive pas » suffit.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Il dit que le message est trop long</summary>
+        <div class="corpo">
+          <p>La limite est de 2000 caractères. Envoyez-le en deux fois.</p>
+          <p>Cela marche même mieux : le Companion travaille bien sur des textes courts.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Le texte est petit, ou la lumière gêne</summary>
+        <div class="corpo">
+          <p>Au bout du menu se trouve l'interrupteur clair / sombre.</p>
+          <p>Pour agrandir, utilisez le zoom du navigateur ou les réglages du téléphone : l'application suit les deux.</p>
+        </div>
+      </details>
+      <details>
+        <summary>J'ai perdu mon code</summary>
+        <div class="corpo">
+          <p>Écrivez-nous et nous vous en donnons un nouveau.</p>
+          <p>Nous ne pouvons pas récupérer l'ancien : la base n'en garde qu'une empreinte chiffrée.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="blocco" id="segnalare">
+    <h2>Nous signaler un problème</h2>
+    <p class="intro">Quelques lignes suffisent. Avec ces quatre éléments, c'est bien plus simple pour nous.</p>
+    <ul class="quattro">
+      <li><strong>Ce que vous faisiez</strong> — quel bouton vous avez touché.</li>
+      <li><strong>Ce que vous avez vu</strong> — le message exact, ou « page blanche ».</li>
+      <li><strong>Avec quoi</strong> — téléphone ou ordinateur, et quel navigateur.</li>
+      <li><strong>À peu près quand</strong> — le jour et l'heure suffisent.</li>
+    </ul>
+    <p><a class="azione" href="mailto:hello@neurodesk.it?subject=Signalement%20NeuroDesk">Écrivez-nous</a></p>
+    <p class="intro">Inutile de nous envoyer le contenu de votre conversation : il ne sert pas à corriger un défaut. Si vous voulez nous dire ce que vous en avez pensé, la section <strong>Feedback</strong> est dans l'application.</p>
+  </section>
+
+    <p class="aggiornato">Dernière mise à jour : 27 juillet 2026.</p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div class="brand" style="font-size:1.05rem"><span class="bdot" aria-hidden="true"></span> NeuroDesk</div>
+    <a class="mail-btn" href="mailto:hello@neurodesk.it"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M3 6l7 5 7-5"/></svg> Écrivez-nous</a>
+  </div>
+</footer>
+
+<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Informations sur les cookies" hidden>
+  <p>Nous utilisons uniquement des <strong>cookies techniques</strong> nécessaires au fonctionnement du site. Aucun traçage publicitaire. <a href="privacy.fr.html#cookie">Plus de détails</a>.</p>
+  <button id="cookieOk" type="button">J'ai compris</button>
+</div>
+
+<script>
+  (function () {
+    var btn = document.getElementById('themeBtn');
+    if (btn) btn.addEventListener('click', function () {
+      var cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      var next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('nd-theme', next); } catch (e) {}
+    });
+  })();
+</script>
+<script src="assets/site.js" defer></script>
+</body>
+</html>

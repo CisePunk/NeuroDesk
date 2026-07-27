@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta property="og:locale" content="it_IT">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Guida per i tester di NeuroDesk: entrare, chiedere un passo, e cosa fare se qualcosa non va.">
+<meta name="robots" content="index,follow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
+<title>NeuroDesk — Guida</title>
+<link rel="stylesheet" href="assets/site.css">
+<style>
+/* Blocco <style> comune alle tre pagine di aiuto — un passo alla volta:
+   molta aria, una sola azione per riquadro, i problemi dentro voci richiudibili. */
+  :root {
+    --bg: #faf8f4; --bg-2: #f2eee6; --surface: #ffffff;
+    --border: rgba(95,130,121,0.22); --border-soft: rgba(95,130,121,0.14);
+    --accent: #5f8279; --accent-deep: #45625a; --accent-soft: rgba(95,130,121,0.10);
+    --text: #2f2f36; --text-2: #5c5c64; --text-3: #8a8a90;
+    --shadow: 0 1px 2px rgba(60,55,45,0.05), 0 12px 32px -18px rgba(60,55,45,0.28);
+    --serif: "Iowan Old Style","Palatino Linotype","Palatino","Georgia",ui-serif,serif;
+    --sans: ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --page: 62rem;
+    --testo: 34rem; /* riga corta: si legge senza perdere il segno */
+  }
+  :root[data-theme="dark"] {
+    --bg: #191c21; --bg-2: #20242b; --surface: #262b32;
+    --border: rgba(230,227,220,0.13); --border-soft: rgba(230,227,220,0.08);
+    --accent: #8aa8a1; --accent-deep: #a6bfb8; --accent-soft: rgba(138,168,161,0.14);
+    --text: #e8e5de; --text-2: #aeaca4; --text-3: #7d7b75;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 14px 34px -18px rgba(0,0,0,0.6);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 1.08rem; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: var(--page); margin: 0 auto; padding: 0 1.5rem; }
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; margin: 0; }
+  p { margin: 0; }
+  a { color: inherit; }
+  .eyebrow { font-family: var(--sans); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.16em; font-weight: 600; color: var(--accent-deep); }
+
+  header.top { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); background: color-mix(in srgb, var(--bg) 82%, transparent); border-bottom: 1px solid var(--border-soft); }
+  .top-inner { display: flex; align-items: center; justify-content: space-between; height: 4rem; }
+  .brand { display: flex; align-items: center; gap: 0.6rem; font-family: var(--serif); font-size: 1.25rem; font-weight: 600; }
+  .brand .bdot { width: 0.85rem; height: 0.85rem; border-radius: 50%; background: radial-gradient(circle at 35% 30%, var(--accent-deep), var(--accent)); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .top-right { display: flex; align-items: center; gap: 0.6rem; }
+  .theme-btn { display: inline-grid; place-items: center; width: 2.3rem; height: 2.3rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); cursor: pointer; }
+  .theme-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .theme-btn svg { width: 1.15rem; height: 1.15rem; }
+  .theme-btn .ic-sun { display: none; }
+  :root[data-theme="dark"] .theme-btn .ic-moon { display: none; }
+  :root[data-theme="dark"] .theme-btn .ic-sun { display: block; }
+
+  .brand-nav { display: flex; align-items: center; gap: 0.7rem; }
+  .back-btn { display: inline-grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); text-decoration: none; font-size: 1.15rem; line-height: 1; }
+  .back-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .brand-home { text-decoration: none; color: inherit; }
+
+  .crumbs { border-bottom: 1px solid var(--border-soft); background: var(--bg); }
+  .crumbs .wrap { padding: 0.6rem 1.5rem; font-size: 0.86rem; color: var(--text-3); display: flex; gap: 0.5rem; align-items: center; }
+  .crumbs a { color: var(--accent-deep); text-decoration: none; font-weight: 600; }
+  .crumbs a:hover { text-decoration: underline; }
+  .crumbs .sep { opacity: 0.55; }
+  .crumbs [aria-current="page"] { color: var(--text-2); }
+
+  footer { padding: 2.5rem 0 3rem; border-top: 1px solid var(--border-soft); color: var(--text-3); font-size: 0.88rem; }
+  .foot-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; align-items: center; }
+  .mail-btn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--sans); font-weight: 600; font-size: 0.92rem; color: var(--accent-deep); background: var(--accent-soft); border: 1px solid var(--border); border-radius: 999px; padding: 0.45rem 1rem; text-decoration: none; }
+  .mail-btn:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  .lang-switch { display: flex; align-items: center; gap: 0.15rem; font-family: var(--sans); }
+  .lang-switch a { font-size: 0.82rem; font-weight: 600; color: var(--text-3); text-decoration: none; padding: 0.3rem 0.5rem; border-radius: 999px; white-space: nowrap; }
+  .lang-switch a:hover { color: var(--accent-deep); background: var(--accent-soft); }
+  .lang-switch a[aria-current] { color: var(--accent-deep); background: var(--accent-soft); }
+  @media (max-width: 560px) { .lang-switch a { padding: 0.3rem 0.4rem; font-size: 0.78rem; } }
+
+  /* ---- Testa della pagina ---- */
+  main { padding-bottom: 1rem; }
+  .page-head { max-width: var(--testo); padding: clamp(2rem, 5vw, 3rem) 0 0; }
+  .page-head h1 { font-size: clamp(1.9rem, 4.4vw, 2.6rem); line-height: 1.12; letter-spacing: -0.02em; margin-top: 0.6rem; }
+  .page-head .lede { margin-top: 0.9rem; font-size: 1.08rem; color: var(--text-2); }
+
+  /* ---- La sola cosa da ricordare ---- */
+  .tldr { max-width: var(--testo); margin-top: 1.6rem; background: var(--accent-soft); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 0.9rem; padding: 1.1rem 1.3rem; }
+  .tldr-titolo { font-family: var(--sans); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.14em; font-weight: 700; color: var(--accent-deep); margin-bottom: 0.55rem; }
+  .tldr strong { color: var(--text); }
+  .tldr p { color: var(--text-2); }
+  .tldr p + p { margin-top: 0.5rem; }
+
+  /* ---- Sezioni: una alla volta, ben distanziate ---- */
+  .blocco { max-width: var(--testo); padding: clamp(2.2rem, 5vw, 3.2rem) 0 0; }
+  .blocco > h2 { font-size: clamp(1.45rem, 3.2vw, 1.85rem); }
+  .blocco > .intro { margin-top: 0.6rem; color: var(--text-2); }
+
+  /* ---- Un passo alla volta ---- */
+  .passi { list-style: none; margin: 1.2rem 0 0; padding: 0; display: grid; gap: 0.8rem; counter-reset: passo; }
+  .passi > li { counter-increment: passo; background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: var(--shadow); padding: 1.1rem 1.2rem 1.1rem 3.9rem; position: relative; }
+  .passi > li::before { content: counter(passo); position: absolute; left: 1.1rem; top: 1.05rem; width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 999px; background: var(--accent); color: #fbfdfb; font-family: var(--sans); font-weight: 700; font-size: 1rem; }
+  .passi h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 700; line-height: 1.35; }
+  .passi p { margin-top: 0.35rem; color: var(--text-2); font-size: 0.98rem; }
+  .passi .poi { margin-top: 0.5rem; font-size: 0.9rem; color: var(--text-3); }
+
+  /* Esito del gruppo di passi: chiude il percorso, così si sa quando si è finito. */
+  .esito { margin-top: 0.9rem; font-family: var(--sans); font-weight: 700; color: var(--accent-deep); display: flex; gap: 0.5rem; align-items: baseline; }
+  .esito::before { content: "✓"; }
+
+  /* ---- Cose che puoi fare quando vuoi: una riga ciascuna ---- */
+  .righe { list-style: none; margin: 1.1rem 0 0; padding: 0; display: grid; gap: 0.5rem; }
+  .righe > li { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 0.8rem; padding: 0.85rem 1.05rem; color: var(--text-2); font-size: 0.98rem; }
+  .righe strong { color: var(--text); }
+
+  /* ---- Problemi: aperti solo quando servono ---- */
+  .faq { margin-top: 1.1rem; display: grid; gap: 0.5rem; }
+  .faq details { background: var(--surface); border: 1px solid var(--border); border-radius: 0.9rem; overflow: hidden; }
+  .faq details[open] { box-shadow: var(--shadow); }
+  .faq summary { cursor: pointer; list-style: none; padding: 0.95rem 2.6rem 0.95rem 1.1rem; font-family: var(--sans); font-weight: 700; font-size: 1rem; position: relative; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "＋"; position: absolute; right: 1rem; top: 0.9rem; color: var(--accent-deep); font-weight: 700; }
+  .faq details[open] summary::after { content: "−"; }
+  .faq summary:hover { background: var(--accent-soft); }
+  .faq .corpo { padding: 0 1.1rem 1.1rem; }
+  .faq .corpo p { color: var(--text-2); font-size: 0.98rem; }
+  .faq .corpo p + p { margin-top: 0.55rem; }
+  .faq .msg { font-family: var(--sans); font-size: 0.88rem; color: var(--text-3); font-weight: 600; display: block; padding: 0 1.1rem 0.85rem; margin-top: -0.35rem; }
+
+  /* ---- Segnalare: quattro cose, una per riga ---- */
+  .quattro { list-style: none; margin: 1.1rem 0 0; padding: 0; display: grid; gap: 0.45rem; counter-reset: q; }
+  .quattro > li { position: relative; padding-left: 1.7rem; color: var(--text-2); }
+  .quattro > li::before { content: "→"; position: absolute; left: 0; color: var(--accent-deep); font-weight: 700; }
+  .quattro strong { color: var(--text); }
+
+  .azione { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1.2rem; font-family: var(--sans); font-weight: 700; font-size: 1rem; color: #fbfdfb; background: var(--accent); border-radius: 999px; padding: 0.75rem 1.4rem; text-decoration: none; box-shadow: var(--shadow); }
+  .azione:hover { background: var(--accent-deep); }
+
+  /* Etichetta di un pulsante dell'app, citato letteralmente. */
+  .btn-label { font-family: var(--sans); font-weight: 700; background: var(--accent-soft); border: 1px solid var(--border-soft); border-radius: 0.4rem; padding: 0.05rem 0.4rem; white-space: nowrap; }
+  .trad { color: var(--text-3); font-style: italic; }
+
+  .aggiornato { max-width: var(--testo); margin-top: 3rem; color: var(--text-3); font-size: 0.88rem; }
+</style>
+
+<script>
+  (function () { try { var t = localStorage.getItem('nd-theme'); document.documentElement.setAttribute('data-theme', t === 'dark' ? 'dark' : 'light'); } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); } })();
+</script>
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-inner">
+    <div class="brand-nav">
+      <a class="back-btn" href="index.html" aria-label="Torna alla home">←</a>
+      <a class="brand brand-home" href="index.html"><span class="bdot" aria-hidden="true"></span> NeuroDesk</a>
+    </div>
+    <div class="top-right">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Apri il menu" aria-expanded="false" aria-controls="siteNav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav class="site-nav" id="siteNav" aria-label="Navigazione">
+        <a href="index.html" data-nav="index.html">Home</a>
+        <a href="tester.html" data-nav="tester.html">Tester</a>
+        <a href="aiuto.html" data-nav="aiuto.html">Aiuto</a>
+        <a href="finanziatori.html" data-nav="finanziatori.html">Partner</a>
+        <a href="chi-siamo.html" data-nav="chi-siamo.html">Chi siamo</a>
+        <a href="contatti.html" data-nav="contatti.html">Contatti</a>
+      </nav>
+      <div class="lang-switch" aria-label="Lingua / Language"><a href="aiuto.html" hreflang="it" aria-current="true">Italiano</a><a href="aiuto.en.html" hreflang="en">English</a><a href="aiuto.fr.html" hreflang="fr">Français</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Cambia tema chiaro o scuro">
+        <svg class="ic-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 12.5A7.5 7.5 0 0 1 7.5 2.5a7.5 7.5 0 1 0 10 10z"/></svg>
+        <svg class="ic-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.22 4.22l1.06 1.06M14.72 14.72l1.06 1.06M4.22 15.78l1.06-1.06M14.72 5.28l1.06-1.06"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="crumbs" aria-label="Percorso"><div class="wrap"><a href="index.html">Home</a><span class="sep">/</span><a href="tester.html">Tester</a><span class="sep">/</span><span aria-current="page">Aiuto</span></div></nav>
+
+<main>
+  <div class="wrap">
+    <div class="page-head">
+      <span class="eyebrow">Guida</span>
+      <h1>Come si usa NeuroDesk</h1>
+      <p class="lede">Un passo alla volta, come l'app. Leggi solo il pezzo che ti serve adesso.</p>
+    </div>
+
+    <div class="tldr">
+      <h2 class="tldr-titolo">Se leggi una cosa sola, questa</h2>
+      <p><strong>Vedi una pagina bianca? Ricarica la pagina.</strong></p>
+      <p>Non perdi niente: quello che hai scritto è già salvato.</p>
+    </div>
+
+  <section class="blocco">
+    <h2>Entrare</h2>
+    <p class="intro">Tre cose, la prima volta.</p>
+    <ol class="passi">
+      <li>
+        <h3>Apri l'app</h3>
+        <p>Vai su <a href="https://app.neurodesk.it"><strong>app.neurodesk.it</strong></a>, dal telefono o dal computer.</p>
+      </li>
+      <li>
+        <h3>Incolla il codice</h3>
+        <p>Il codice è fatto così: <code>neuro-xxxx-xxxx-xxxx-xxxx</code>. Copialo tutto intero, trattini compresi.</p>
+        <p class="poi">Poi tocca <span class="btn-label">Entra</span>.</p>
+      </li>
+      <li>
+        <h3>Metti la spunta</h3>
+        <p>Compare la pagina «Prima di iniziare»: dice cosa succede a quello che scrivi.</p>
+        <p class="poi">Poi tocca <span class="btn-label">Continua</span>. Succede solo la prima volta.</p>
+      </li>
+    </ol>
+    <p class="esito"><span>Sei dentro.</span></p>
+  </section>
+
+  <section class="blocco">
+    <h2>Chiedere un passo</h2>
+    <ol class="passi">
+      <li>
+        <h3>Scegli l'area</h3>
+        <p>Blocco, Studio, Burocrazia, Lavoro, Autonomie. Nel dubbio lascia <em>Blocco</em>.</p>
+      </li>
+      <li>
+        <h3>Scrivi cosa non riesci a fare adesso</h3>
+        <p>Anche poche parole. Non serve essere precisa.</p>
+      </li>
+      <li>
+        <h3>Tocca il pulsante</h3>
+        <p><span class="btn-label">Aiutami a fare il prossimo passo</span>. Poi aspetta qualche secondo: vedi tre puntini che si muovono.</p>
+      </li>
+    </ol>
+    <p class="esito"><span>Ricevi un passo solo, piccolo, da fare adesso.</span></p>
+    <p class="intro">Fatto il passo? Scrivilo e tocca <span class="btn-label">Continua</span>. Il passo dopo tiene conto di com'è andata.</p>
+  </section>
+
+  <section class="blocco">
+    <h2>Quando vuoi</h2>
+    <p class="intro">Non serve fare niente di tutto questo. È lì se ti serve.</p>
+    <ul class="righe">
+      <li><strong>🔊 Ascolta la risposta</strong> — te la legge ad alta voce.</li>
+      <li><strong>↓ Scarica la conversazione</strong> — la salva in un file sul tuo dispositivo.</li>
+      <li><strong>Nuova conversazione</strong> — riparti da zero.</li>
+      <li><strong>Cancella la mia cronologia</strong> — elimina tutto. Non si torna indietro.</li>
+      <li><strong>Revoca il consenso</strong> — smetti quando vuoi. Puoi ridarlo dopo.</li>
+    </ul>
+    <p class="intro">Le ultime due stanno sotto <span class="btn-label">▸ Opzioni avanzate</span>.</p>
+  </section>
+
+  <section class="blocco">
+    <h2>Se qualcosa non va</h2>
+    <p class="intro">Apri solo la riga che ti riguarda.</p>
+    <div class="faq">
+      <details>
+        <summary>Vedo una pagina bianca</summary>
+        <div class="corpo">
+          <p><strong>Ricarica la pagina.</strong> Sul telefono: tira giù col dito. Sul computer: F5.</p>
+          <p>Ritrovi tutto dov'era. È un difetto nostro, ci stiamo lavorando: se ti capita, <a href="#segnalare">dicci quale pulsante avevi toccato</a>.</p>
+        </div>
+      </details>
+      <details>
+        <summary>La risposta non arriva</summary>
+        <div class="corpo">
+          <p>Aspetta una ventina di secondi: quando c'è traffico è più lento.</p>
+          <p>Se non succede niente, ricarica e rimanda lo stesso messaggio. Non si creano doppioni.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Il codice non viene accettato</summary>
+        <span class="msg">«&nbsp;Codice o password non validi.&nbsp;»</span>
+        <div class="corpo">
+          <p>Ricopia il codice per intero, con tutti i trattini e senza spazi.</p>
+          <p>Attenzione al correttore del telefono: a volte cambia le lettere o mette la maiuscola.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Dice che non ci arriva</summary>
+        <span class="msg">«&nbsp;Server non raggiungibile. / Companion non raggiungibile.&nbsp;»</span>
+        <div class="corpo">
+          <p>Controlla la connessione e riprova tra un minuto.</p>
+          <p>Se dura più a lungo, scrivici.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Dice che sono troppe richieste</summary>
+        <span class="msg">«&nbsp;Troppi tentativi. / Troppe richieste.&nbsp;»</span>
+        <div class="corpo">
+          <p>Aspetta due minuti e riprova.</p>
+          <p>Non hai fatto niente di male: è un limite che teniamo per non far esplodere i costi dell'IA.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Mi chiede di rientrare</summary>
+        <span class="msg">«&nbsp;Sessione non valida o scaduta.&nbsp;»</span>
+        <div class="corpo">
+          <p>Rientra con il tuo codice.</p>
+          <p>Le conversazioni ti aspettano dov'erano.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Mi chiede di nuovo il consenso</summary>
+        <span class="msg">«&nbsp;Serve il consenso prima di usare il Companion.&nbsp;»</span>
+        <div class="corpo">
+          <p>Ricarica la pagina: torna «Prima di iniziare».</p>
+          <p>Metti la spunta e tocca <span class="btn-label">Continua</span>.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Dice che il mio accesso è stato revocato</summary>
+        <span class="msg">«&nbsp;Il tuo accesso è stato revocato.&nbsp;»</span>
+        <div class="corpo">
+          <p>Scrivici. Quasi sempre è un errore nostro e lo rimettiamo a posto.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Dice che il servizio non risponde</summary>
+        <span class="msg">«&nbsp;Il servizio non risponde in questo momento. / Errore del server.&nbsp;»</span>
+        <div class="corpo">
+          <p>Riprova tra qualche minuto.</p>
+          <p>Quello che avevi scritto resta nel riquadro: non devi riscriverlo.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Non mi fa mandare il messaggio</summary>
+        <span class="msg">«&nbsp;Serve almeno una parola per continuare.&nbsp;»</span>
+        <div class="corpo">
+          <p>Il riquadro era vuoto. Scrivi qualcosa, anche pochissimo: «non ci riesco» va benissimo.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Dice che il messaggio è troppo lungo</summary>
+        <div class="corpo">
+          <p>Il limite è 2000 caratteri. Mandalo in due volte.</p>
+          <p>Funziona anche meglio: sulle cose corte il Companion lavora bene.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Il testo è piccolo, o la luce dà fastidio</summary>
+        <div class="corpo">
+          <p>In fondo al menu c'è l'interruttore chiaro / scuro.</p>
+          <p>Per ingrandire usa lo zoom del browser o le impostazioni del telefono: l'app li segue.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Ho perso il codice</summary>
+        <div class="corpo">
+          <p>Scrivici e te ne diamo uno nuovo.</p>
+          <p>Non possiamo recuperare il vecchio: nel nostro database ne resta solo un'impronta cifrata.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="blocco" id="segnalare">
+    <h2>Segnalarci un problema</h2>
+    <p class="intro">Bastano poche righe. Se ci metti queste quattro cose, per noi è molto più facile.</p>
+    <ul class="quattro">
+      <li><strong>Cosa stavi facendo</strong> — quale pulsante hai toccato.</li>
+      <li><strong>Cosa hai visto</strong> — il messaggio esatto, o «pagina bianca».</li>
+      <li><strong>Con cosa</strong> — telefono o computer, e quale browser.</li>
+      <li><strong>Più o meno quando</strong> — giorno e ora ci bastano.</li>
+    </ul>
+    <p><a class="azione" href="mailto:hello@neurodesk.it?subject=Segnalazione%20NeuroDesk">Scrivici</a></p>
+    <p class="intro">Non serve mandarci il contenuto della conversazione: per sistemare un difetto non ci serve. Se invece vuoi dirci com'è andata nel merito, c'è <strong>Feedback</strong> dentro l'app.</p>
+  </section>
+
+    <p class="aggiornato">Ultimo aggiornamento: 27 luglio 2026.</p>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot-inner">
+    <div class="brand" style="font-size:1.05rem"><span class="bdot" aria-hidden="true"></span> NeuroDesk</div>
+    <a class="mail-btn" href="mailto:hello@neurodesk.it"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M3 6l7 5 7-5"/></svg> Scrivici</a>
+  </div>
+</footer>
+
+<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Informativa cookie" hidden>
+  <p>Usiamo solo <strong>cookie tecnici</strong> necessari al funzionamento del sito. Nessun tracciamento pubblicitario. <a href="privacy.html#cookie">Maggiori dettagli</a>.</p>
+  <button id="cookieOk" type="button">Ho capito</button>
+</div>
+
+<script>
+  (function () {
+    var btn = document.getElementById('themeBtn');
+    if (btn) btn.addEventListener('click', function () {
+      var cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+      var next = cur === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      try { localStorage.setItem('nd-theme', next); } catch (e) {}
+    });
+  })();
+</script>
+<script src="assets/site.js" defer></script>
+</body>
+</html>
