@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta property="og:locale" content="fr_FR">
+<meta property="og:locale" content="en_US">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Contactez NeuroDesk : écrivez-nous ou remplissez le formulaire. Une vraie personne vous répond.">
+<meta name="description" content="NeuroDesk privacy policy under Article 13 of EU Regulation 2016/679 (GDPR).">
 <meta name="robots" content="index,follow">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
-<title>NeuroDesk — Contact</title>
+<title>NeuroDesk — Privacy policy</title>
 <link rel="stylesheet" href="assets/site.css">
 <style>
   :root {
@@ -47,11 +47,6 @@
   :root[data-theme="dark"] .theme-btn .ic-moon { display: none; }
   :root[data-theme="dark"] .theme-btn .ic-sun { display: block; }
 
-  .btn { font-family: var(--sans); font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 999px; padding: 0.85rem 1.6rem; border: 1px solid transparent; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: transform 0.15s ease, background 0.2s ease; }
-  .btn-primary { background: var(--accent); color: #fbfdfb; box-shadow: var(--shadow); }
-  .btn-primary:hover { background: var(--accent-deep); transform: translateY(-1px); }
-  .btn-primary:disabled { opacity: 0.6; cursor: default; transform: none; }
-
   .brand-nav { display: flex; align-items: center; gap: 0.7rem; }
   .back-btn { display: inline-grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--accent-deep); text-decoration: none; font-size: 1.15rem; line-height: 1; }
   .back-btn:hover { background: var(--accent-soft); border-color: var(--accent); }
@@ -65,22 +60,16 @@
   .crumbs [aria-current="page"] { color: var(--text-2); }
 
   section { padding: clamp(2.5rem, 6vw, 4rem) 0; }
-  .page-head { max-width: 42rem; margin-bottom: 2rem; }
-  .page-head h1 { font-size: clamp(2rem, 4.6vw, 3rem); line-height: 1.08; letter-spacing: -0.02em; margin-top: 0.7rem; }
-  .page-head .lede { margin-top: 1rem; font-size: 1.15rem; color: var(--text-2); max-width: 34rem; }
-  .contact-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: clamp(1.6rem, 4vw, 3rem); align-items: start; }
-  .contact-aside h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 700; }
-  .contact-aside p { color: var(--text-2); margin-top: 0.6rem; }
-  .contact-aside .mail-big { display: inline-block; margin-top: 0.4rem; font-weight: 700; color: var(--accent-deep); text-decoration: none; }
-  .contact-aside .mail-big:hover { text-decoration: underline; }
+  .page-head { max-width: 46rem; margin-bottom: 1rem; }
+  .page-head h1 { font-size: clamp(2rem, 4.6vw, 2.8rem); line-height: 1.1; letter-spacing: -0.02em; margin-top: 0.7rem; }
+  .page-head .lede { margin-top: 0.8rem; font-size: 1.1rem; color: var(--text-2); }
+  .draft-note { max-width: 46rem; margin-top: 1.4rem; background: rgba(200,150,40,0.12); border: 1px solid rgba(200,150,40,0.35); border-radius: 0.8rem; padding: 0.9rem 1.1rem; font-size: 0.92rem; color: var(--text-2); }
 
   footer { padding: 2.5rem 0 3rem; border-top: 1px solid var(--border-soft); color: var(--text-3); font-size: 0.88rem; }
   .foot-inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; align-items: center; }
   .mail-btn { display: inline-flex; align-items: center; gap: 0.45rem; font-family: var(--sans); font-weight: 600; font-size: 0.92rem; color: var(--accent-deep); background: var(--accent-soft); border: 1px solid var(--border); border-radius: 999px; padding: 0.45rem 1rem; text-decoration: none; }
   .mail-btn:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: var(--accent); }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-
-  @media (max-width: 760px) { .contact-grid { grid-template-columns: 1fr; } }
 
   .lang-switch { display: flex; align-items: center; gap: 0.15rem; font-family: var(--sans); }
   .lang-switch a { font-size: 0.82rem; font-weight: 600; color: var(--text-3); text-decoration: none; padding: 0.3rem 0.5rem; border-radius: 999px; white-space: nowrap; }
@@ -97,22 +86,22 @@
 <header class="top">
   <div class="wrap top-inner">
     <div class="brand-nav">
-      <a class="back-btn" href="index.fr.html" aria-label="Retour à l’accueil">←</a>
-      <a class="brand brand-home" href="index.fr.html"><span class="bdot" aria-hidden="true"></span> NeuroDesk</a>
+      <a class="back-btn" href="index.en.html" aria-label="Back to home">←</a>
+      <a class="brand brand-home" href="index.en.html"><span class="bdot" aria-hidden="true"></span> NeuroDesk</a>
     </div>
     <div class="top-right">
-      <button class="nav-toggle" id="navToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="siteNav">
+      <button class="nav-toggle" id="navToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
       <nav class="site-nav" id="siteNav" aria-label="Navigation">
-        <a href="index.fr.html" data-nav="index.fr.html">Accueil</a>
-        <a href="tester.fr.html" data-nav="tester.fr.html">Testeurs</a>
-        <a href="finanziatori.fr.html" data-nav="finanziatori.fr.html">Partenaires</a>
-        <a href="chi-siamo.fr.html" data-nav="chi-siamo.fr.html">À propos</a>
-        <a href="contatti.fr.html" data-nav="contatti.fr.html">Contact</a>
+        <a href="index.en.html" data-nav="index.en.html">Home</a>
+        <a href="tester.en.html" data-nav="tester.en.html">Testers</a>
+        <a href="finanziatori.en.html" data-nav="finanziatori.en.html">Partners</a>
+        <a href="chi-siamo.en.html" data-nav="chi-siamo.en.html">About</a>
+        <a href="contatti.en.html" data-nav="contatti.en.html">Contact</a>
       </nav>
-      <div class="lang-switch" aria-label="Lingua / Language"><a href="contatti.fr.html" hreflang="it">Italiano</a><a href="contatti.en.html" hreflang="en">English</a><a href="contatti.fr.html" hreflang="fr" aria-current="true">Français</a></div>
-      <button class="theme-btn" id="themeBtn" type="button" aria-label="Changer de thème clair ou sombre">
+      <div class="lang-switch" aria-label="Lingua / Language"><a href="privacy.en.html" hreflang="it">Italiano</a><a href="privacy.en.html" hreflang="en" aria-current="true">English</a><a href="privacy.fr.html" hreflang="fr">Français</a></div>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch light or dark theme">
         <svg class="ic-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 12.5A7.5 7.5 0 0 1 7.5 2.5a7.5 7.5 0 1 0 10 10z"/></svg>
         <svg class="ic-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.22 4.22l1.06 1.06M14.72 14.72l1.06 1.06M4.22 15.78l1.06-1.06M14.72 5.28l1.06-1.06"/></svg>
       </button>
@@ -120,49 +109,53 @@
   </div>
 </header>
 
-<nav class="crumbs" aria-label="Parcours"><div class="wrap"><a href="index.fr.html">Accueil</a><span class="sep">/</span><span aria-current="page">Contact</span></div></nav>
+<nav class="crumbs" aria-label="Path"><div class="wrap"><a href="index.en.html">Home</a><span class="sep">/</span><span aria-current="page">Privacy</span></div></nav>
 
 <main>
   <section>
     <div class="wrap">
       <div class="page-head">
-        <span class="eyebrow">Parlons-en</span>
-        <h1>Écrivez-nous</h1>
-        <p class="lede">Remplissez le formulaire ci-dessous ou envoyez-nous un e-mail. Une vraie personne vous répond — aucune réponse automatique.</p>
+        <span class="eyebrow">Notice</span>
+        <h1>Privacy policy</h1>
+        <p class="lede">Provided under Article 13 of EU Regulation 2016/679 (GDPR) for people who contact us through this site.</p>
       </div>
 
-      <div class="contact-grid">
-        <div class="form-card">
-          <form class="contact-form" id="contactForm" novalidate>
-            <div class="field">
-              <label for="cf-nome">Nom <span class="req" aria-hidden="true">*</span></label>
-              <input id="cf-nome" name="nome" type="text" required autocomplete="name" maxlength="80">
-            </div>
-            <div class="field">
-              <label for="cf-email">E-mail <span class="req" aria-hidden="true">*</span></label>
-              <input id="cf-email" name="email" type="email" required autocomplete="email" maxlength="120">
-            </div>
-            <div class="field">
-              <label for="cf-messaggio">Message <span class="req" aria-hidden="true">*</span></label>
-              <textarea id="cf-messaggio" name="messaggio" required maxlength="2000" placeholder="Dites-nous en deux lignes comment on peut vous aider."></textarea>
-            </div>
-            <label class="consent">
-              <input id="cf-consenso" name="consenso" type="checkbox" required>
-              <span>J'ai lu la <a href="privacy.fr.html" target="_blank" rel="noopener">politique de confidentialité</a> et je consens au traitement de mes données pour répondre à ma demande. <span class="req" aria-hidden="true">*</span></span>
-            </label>
-            <div class="form-status" id="cfStatus" role="status" aria-live="polite" hidden></div>
-            <button class="btn btn-primary" type="submit">Envoyer la demande</button>
-            <p class="form-note">Ou écrivez-nous à <a href="mailto:hello@neurodesk.it">hello@neurodesk.it</a>. Les champs marqués <span class="req" aria-hidden="true">*</span> sont obligatoires.</p>
-          </form>
-        </div>
+      <div class="prose">
+        <h2>1. Data controller</h2>
+        <p>The data controller is a natural person, <strong>Cinzia Ciprì</strong>, lead of the NeuroDesk project, reachable at <a href="mailto:hello@neurodesk.it">hello@neurodesk.it</a>.</p>
+        <p>For any request about your data you can write to <a href="mailto:hello@neurodesk.it">hello@neurodesk.it</a>.</p>
 
-        <aside class="contact-aside">
-          <h3>Vous préférez l'e-mail ?</h3>
-          <p>C'est parfait. Écrivez quand vous voulez, sans vous presser :</p>
-          <a class="mail-big" href="mailto:hello@neurodesk.it">hello@neurodesk.it</a>
-          <h3 style="margin-top:1.8rem">I tuoi dati restano tuoi</h3>
-          <p>Nous utilisons ce que vous écrivez uniquement pour vous répondre. Pas de newsletters non sollicitées, aucune cession à des tiers. Vous pouvez demander la suppression quand vous voulez.</p>
-        </aside>
+        <h2>2. What data we collect</h2>
+        <ul>
+          <li><strong>Data you provide</strong> by filling in the contact form or writing to us: name, email address and the content of your message.</li>
+          <li><strong>Technical browsing data</strong> needed to serve the site (e.g. IP address, browser type), processed by the hosting provider for security and operation.</li>
+        </ul>
+        <p>Please do not include special-category data in your message (Art. 9 GDPR, e.g. health information) unless strictly necessary.</p>
+
+        <h2>3. Why we process them and on what legal basis</h2>
+        <ul>
+          <li>To <strong>answer your request</strong> and manage the resulting contact — legal basis: your <em>consent</em> (Art. 6.1.a) and/or the performance of pre-contractual measures (Art. 6.1.b).</li>
+          <li>For the <strong>security and operation of the site</strong> — legal basis: legitimate interest (Art. 6.1.f).</li>
+        </ul>
+
+        <h2>4. How long we keep them</h2>
+        <p>We keep contact data for the time strictly necessary to handle your request and, in any case, for the minimum required by law. Once that need has ended, the data is deleted or anonymised.</p>
+
+        <h2>5. Who they may be shared with</h2>
+        <p>Your data is not disclosed to third parties or made public, and is not transferred for any purpose. We currently do not use external providers processing data on our behalf. Should this change in the future, any providers will be appointed as data processors and this policy will be updated.</p>
+        <p>No transfer of data takes place to countries outside the European Union.</p>
+
+        <h2>6. Your rights</h2>
+        <p>At any time you can request access to your data, rectification, erasure, restriction or objection to processing, and portability. You can withdraw consent at any time without affecting the lawfulness of processing already carried out. To exercise these rights, write to <a href="mailto:hello@neurodesk.it">hello@neurodesk.it</a>.</p>
+        <p>You also have the right to lodge a complaint with the Italian Data Protection Authority (<a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">garanteprivacy.it</a>).</p>
+
+        <h2 id="cookie">7. Cookies</h2>
+        <p>This site uses <strong>only technical cookies and local storage</strong>, needed to work: they store your theme choice (light/dark) and your acknowledgement of this notice. We use no profiling cookies and no third-party analytics/tracking tools, so no prior consent is required.</p>
+
+        <h2>8. The NeuroDesk app</h2>
+        <p>This policy covers the showcase site. The users-only application (<a href="https://app.neurodesk.it">app.neurodesk.it</a>), which may process special categories of data, is governed by a dedicated policy and consent inside the app itself.</p>
+
+        <p style="margin-top:2rem;color:var(--text-3);font-size:0.9rem">Last updated: 24 July 2026.</p>
       </div>
     </div>
   </section>
@@ -171,13 +164,13 @@
 <footer>
   <div class="wrap foot-inner">
     <div class="brand" style="font-size:1.05rem"><span class="bdot" aria-hidden="true"></span> NeuroDesk</div>
-    <a class="mail-btn" href="mailto:hello@neurodesk.it"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M3 6l7 5 7-5"/></svg> Écrivez-nous</a>
+    <a class="mail-btn" href="mailto:hello@neurodesk.it"><svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M3 6l7 5 7-5"/></svg> Write to us</a>
   </div>
 </footer>
 
-<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Avis sur les cookies" hidden>
-  <p>Nous utilisons uniquement des <strong>cookies techniques</strong> nécessaires au fonctionnement du site. Aucun traçage publicitaire. <a href="privacy.fr.html#cookie">Plus de détails</a>.</p>
-  <button class="btn btn-primary" id="cookieOk" type="button">J’ai compris</button>
+<div class="cookie-banner" id="cookieBanner" role="region" aria-label="Cookie notice" hidden>
+  <p>We only use <strong>technical cookies</strong> needed for the site to work. No advertising tracking. <a href="privacy.en.html#cookie">More details</a>.</p>
+  <button class="btn btn-primary" id="cookieOk" type="button" style="font-family:var(--sans);font-weight:600;cursor:pointer;border-radius:999px;padding:0.6rem 1.3rem;border:1px solid transparent;background:var(--accent);color:#fbfdfb">Got it</button>
 </div>
 
 <script>
@@ -188,24 +181,6 @@
       var next = cur === 'dark' ? 'light' : 'dark';
       document.documentElement.setAttribute('data-theme', next);
       try { localStorage.setItem('nd-theme', next); } catch (e) {}
-    });
-  })();
-  (function () {
-    var form = document.getElementById('contactForm');
-    if (!form) return;
-    var status = document.getElementById('cfStatus');
-    function show(msg, ok) { status.textContent = msg; status.className = 'form-status ' + (ok ? 'ok' : 'err'); status.hidden = false; }
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      if (!form.checkValidity()) { show('Vérifiez les champs obligatoires et la case de consentement.', false); form.reportValidity(); return; }
-      var data = { nome: form.nome.value.trim(), email: form.email.value.trim(), messaggio: form.messaggio.value.trim(), consenso: form.consenso.checked };
-      var btn = form.querySelector('button[type=submit]');
-      btn.disabled = true;
-      fetch('/api/public/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
-        .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); })
-        .then(function () { form.reset(); show('Merci ! Nous avons bien reçu votre demande, nous répondons bientôt.', true); })
-        .catch(function () { show('Échec de l'envoi. Écrivez-nous directement à hello@neurodesk.it et nous vous répondrons.', false); })
-        .finally(function () { btn.disabled = false; });
     });
   })();
 </script>

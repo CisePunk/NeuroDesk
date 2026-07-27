@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="NeuroDesk : un outil pratique et bienveillant pour adultes neurodivergents — TDAH, autisme, AuDHD, TOP, troubles DYS. Essayez-le et dites-nous ce qui aide et ce qui n'aide pas.">
-<meta name="keywords" content="NeuroDesk, neurodivergenza, neurodivergente, adulti neurodivergenti, ADHD, ADHD adulti, autismo, autismo adulti, spettro autistico, AuDHD, DOP, disturbo oppositivo provocatorio, DSA, dislessia, discalculia, supporto neurodivergenti, strumento ADHD">
-<meta property="og:title" content="NeuroDesk — essayez-le avec nous">
-<meta property="og:description" content="NeuroDesk : un outil pratique et bienveillant pour adultes neurodivergents — TDAH, autisme, AuDHD, TOP, troubles DYS. Essayez-le et dites-nous ce qui aide et ce qui n'aide pas.">
+<meta name="description" content="NeuroDesk aide les adultes neurodivergents — TDAH, autisme, AuDHD, TOP, troubles DYS — à faire le premier pas. Un prototype qui fonctionne, en phase pilote : nous cherchons des partenaires et des financeurs.">
+<meta name="keywords" content="NeuroDesk, neurodivergence, neurodivergent, adultes neurodivergents, TDAH, TDAH adulte, autisme, autisme adulte, spectre autistique, AuDHD, TOP, trouble oppositionnel avec provocation, troubles DYS, dyslexie, dyscalculie, soutien neurodivergents, outil TDAH">
+<meta property="og:title" content="NeuroDesk — partenaires et financeurs">
+<meta property="og:description" content="NeuroDesk aide les adultes neurodivergents — TDAH, autisme, AuDHD, TOP, troubles DYS — à faire le premier pas. Un prototype qui fonctionne, en phase pilote : nous cherchons des partenaires et des financeurs.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://neurodesk.it/tester.fr.html">
+<meta property="og:url" content="https://neurodesk.it/finanziatori.fr.html">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:image" content="https://neurodesk.it/assets/neurodesk-share-fr.png">
 <meta property="og:image:width" content="1200">
@@ -16,7 +16,7 @@
 <meta property="og:image:alt" content="NeuroDesk — dal sovraccarico al prossimo piccolo passo">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧭</text></svg>">
-<title>NeuroDesk — essayez-le avec nous</title>
+<title>NeuroDesk — partenaires et financeurs</title>
 <link rel="stylesheet" href="assets/site.css">
 <style>
   :root {
@@ -27,7 +27,7 @@
     --shadow: 0 1px 2px rgba(60,55,45,0.05), 0 12px 32px -18px rgba(60,55,45,0.28);
     --serif: "Iowan Old Style","Palatino Linotype","Palatino","Georgia",ui-serif,serif;
     --sans: ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    --page: 62rem;
+    --page: 66rem;
   }
   :root[data-theme="dark"] {
     --bg: #191c21; --bg-2: #20242b; --surface: #262b32;
@@ -59,11 +59,10 @@
   .btn { font-family: var(--sans); font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 999px; padding: 0.85rem 1.6rem; border: 1px solid transparent; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: transform 0.15s ease, background 0.2s ease; }
   .btn-primary { background: var(--accent); color: #fbfdfb; box-shadow: var(--shadow); }
   .btn-primary:hover { background: var(--accent-deep); transform: translateY(-1px); }
-  /* Ingresso per chi il codice ce l'ha gia': secondario, ma sempre visibile. */
-  .btn-secondary { background: var(--surface); color: var(--accent-deep); border-color: var(--border); }
-  .btn-secondary:hover { background: var(--accent-soft); border-color: var(--accent); transform: translateY(-1px); }
   .cta-link { font-family: var(--sans); font-size: 0.92rem; font-weight: 600; text-decoration: none; color: var(--accent-deep); padding: 0.5rem 1rem; border: 1px solid var(--border); border-radius: 999px; }
   .cta-link:hover { background: var(--accent-soft); border-color: var(--accent); }
+  .scroll-link { display: inline-block; margin-top: 1rem; font-size: 0.95rem; font-weight: 600; color: var(--accent-deep); text-decoration: none; }
+  .scroll-link:hover { text-decoration: underline; }
 
   .tagline { background: var(--accent-soft); border-bottom: 1px solid var(--border-soft); }
   .tagline p { max-width: var(--page); margin: 0 auto; padding: 0.75rem 1.5rem; text-align: center; font-family: var(--serif); font-style: italic; font-size: 1.03rem; color: var(--accent-deep); }
@@ -71,43 +70,48 @@
   section { padding: clamp(3rem, 7vw, 5rem) 0; }
   .band { background: var(--bg-2); }
 
-  .hero { padding: clamp(3.5rem, 9vw, 6rem) 0 clamp(2.5rem, 6vw, 4rem); }
-  .hero-grid { display: grid; grid-template-columns: 1fr 0.9fr; gap: clamp(2rem, 5vw, 3.5rem); align-items: center; }
-  .hero h1 { font-size: clamp(2.3rem, 5vw, 3.5rem); line-height: 1.06; letter-spacing: -0.02em; }
-  .hero .lede { margin-top: 1.3rem; font-size: 1.18rem; color: var(--text-2); max-width: 28rem; }
+  .hero { padding: clamp(3.5rem, 9vw, 6rem) 0 clamp(2rem, 5vw, 3.5rem); }
   .hero .eyebrow { display: inline-block; margin-bottom: 1rem; }
-  .hero-actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; }
+  .hero h1 { font-size: clamp(2.4rem, 5.2vw, 3.9rem); line-height: 1.05; letter-spacing: -0.022em; max-width: 20ch; }
+  .hero .lede { margin-top: 1.4rem; font-size: 1.2rem; color: var(--text-2); max-width: 40rem; }
+  .hero-actions { margin-top: 2rem; display: flex; flex-wrap: wrap; gap: 0.9rem; align-items: center; }
+  .hero-grid { display: grid; grid-template-columns: 1fr 0.95fr; gap: clamp(2rem, 5vw, 3.5rem); align-items: start; }
+  @media (max-width: 820px) { .hero-grid { grid-template-columns: 1fr; } .hero-grid .shot-frame { max-width: 30rem; } }
 
-  /* mockup chat in CSS */
-  .chat-mock { background: var(--surface); border: 1px solid var(--border); border-radius: 1.25rem; box-shadow: var(--shadow); overflow: hidden; }
-  .chat-head { display: flex; align-items: center; gap: 0.55rem; padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--border-soft); font-size: 0.9rem; font-weight: 600; color: var(--text-2); }
-  .chat-head .bdot { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--accent); }
-  .chat-body { padding: 1.2rem 1.1rem; display: flex; flex-direction: column; gap: 0.35rem; }
-  .cm-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); margin-top: 0.5rem; }
-  .cm-bubble { border-radius: 0.85rem; padding: 0.8rem 0.95rem; line-height: 1.5; font-size: 0.98rem; }
-  .cm-user { background: var(--accent-soft); color: var(--text); }
-  .cm-bot { background: var(--bg-2); color: var(--text); border: 1px solid var(--border-soft); }
+  .section-head { max-width: 42rem; margin-bottom: 2.2rem; }
+  .section-head h2 { font-size: clamp(1.7rem, 3.6vw, 2.5rem); line-height: 1.12; letter-spacing: -0.015em; }
+  .section-head .eyebrow { display: block; margin-bottom: 0.9rem; }
+  .section-head p { margin-top: 1rem; color: var(--text-2); font-size: 1.1rem; }
 
-  .lead-line { font-family: var(--serif); font-size: clamp(1.5rem, 3.2vw, 2.1rem); line-height: 1.34; letter-spacing: -0.01em; max-width: 40rem; }
+  .lead-line { font-family: var(--serif); font-size: clamp(1.5rem, 3.2vw, 2.15rem); line-height: 1.32; letter-spacing: -0.01em; max-width: 46rem; }
+  .lead-line em { font-style: normal; color: var(--accent-deep); }
 
-  .steps { display: grid; gap: 1.3rem; margin-top: 2.2rem; max-width: 44rem; }
-  .step-row { display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: start; }
-  .step-num { font-family: var(--serif); font-size: 1.05rem; font-weight: 600; color: var(--accent-deep); width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid var(--border); display: grid; place-items: center; background: var(--surface); flex: none; }
-  .step-row h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 700; margin-bottom: 0.2rem; }
-  .step-row p { color: var(--text-2); font-size: 1rem; }
+  /* screenshot reale in cornice */
+  .shot-frame { border-radius: 1rem; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); background: var(--surface); max-width: 60rem; margin: 0 auto; }
+  .shot-bar { display: flex; gap: 0.4rem; padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--border-soft); background: var(--bg-2); }
+  .shot-bar span { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--text-3); opacity: 0.4; }
+  .shot-img { display: block; width: 100%; height: auto; }
+  .shot-cap { margin: 1.1rem auto 0; max-width: 42rem; text-align: center; color: var(--text-2); font-size: 1rem; }
 
-  .section-head { max-width: 40rem; margin-bottom: 1.6rem; }
-  .section-head h2 { font-size: clamp(1.7rem, 3.5vw, 2.3rem); line-height: 1.14; letter-spacing: -0.015em; }
-  .section-head .eyebrow { display: block; margin-bottom: 0.8rem; }
+  .pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1.1rem; }
+  .pillar { border-top: 2px solid var(--accent); padding-top: 1.1rem; }
+  .pillar h3 { font-family: var(--sans); font-size: 1.08rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .pillar p { color: var(--text-2); font-size: 0.97rem; }
 
-  .reassure { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.1rem; }
-  .reassure .box { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 1rem; padding: 1.2rem 1.3rem; box-shadow: var(--shadow); }
-  .reassure h3 { font-family: var(--sans); font-size: 1.02rem; font-weight: 700; margin-bottom: 0.4rem; }
-  .reassure p { color: var(--text-2); font-size: 0.96rem; }
+  .status-card { background: var(--surface); border: 1px solid var(--border); border-radius: 1.25rem; box-shadow: var(--shadow); padding: clamp(1.6rem, 4vw, 2.4rem); display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 1.6rem; }
+  .stat .k { font-family: var(--serif); font-size: 1.7rem; font-weight: 600; color: var(--accent-deep); line-height: 1.1; }
+  .stat .v { color: var(--text-2); font-size: 0.95rem; margin-top: 0.3rem; }
 
-  .cta-box { background: var(--surface); border: 1px solid var(--border); border-radius: 1.5rem; box-shadow: var(--shadow); padding: clamp(2rem, 5vw, 3.2rem); text-align: center; max-width: 42rem; margin: 0 auto; }
-  .cta-box h2 { font-size: clamp(1.7rem, 3.6vw, 2.3rem); line-height: 1.16; }
-  .cta-box p { color: var(--text-2); margin: 1rem auto 0; max-width: 30rem; }
+  .thanks .wrap { max-width: 42rem; }
+  .thanks .eyebrow { display: block; margin-bottom: 1rem; }
+  .thanks-lead { font-family: var(--serif); font-size: clamp(1.3rem, 2.6vw, 1.7rem); line-height: 1.4; }
+  .thanks-body { margin-top: 1rem; color: var(--text-2); font-size: 1.05rem; }
+  .thanks-link { color: var(--accent-deep); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--border); }
+  .thanks-link:hover { text-decoration-color: var(--accent); }
+
+  .cta-box { background: var(--surface); border: 1px solid var(--border); border-radius: 1.5rem; box-shadow: var(--shadow); padding: clamp(2rem, 5vw, 3.4rem); text-align: center; max-width: 44rem; margin: 0 auto; }
+  .cta-box h2 { font-size: clamp(1.7rem, 3.6vw, 2.4rem); line-height: 1.15; }
+  .cta-box p { color: var(--text-2); margin: 1rem auto 0; max-width: 32rem; }
   .cta-box .btn { margin-top: 1.8rem; }
   .cta-note { font-size: 0.82rem; color: var(--text-3); margin-top: 1.2rem; }
 
@@ -134,16 +138,7 @@
   .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.6s ease, transform 0.6s ease; }
   .reveal.in { opacity: 1; transform: none; }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-
-  @media (max-width: 760px) { .hero-grid { grid-template-columns: 1fr; } .chat-mock { order: -1; } }
   @media (prefers-reduced-motion: reduce) { * { transition-duration: 0.001ms !important; } .reveal { opacity: 1; transform: none; } }
-
-  /* Cornice per lo screenshot dell'app (stesso stile della pagina partner) */
-  .shot-frame { border-radius: 1rem; overflow: hidden; border: 1px solid var(--border-soft); box-shadow: var(--shadow); background: var(--surface); max-width: 56rem; margin: 1.8rem auto 0; }
-  .shot-bar { display: flex; gap: 0.4rem; padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--border-soft); background: var(--bg-2); }
-  .shot-bar span { width: 0.65rem; height: 0.65rem; border-radius: 50%; background: var(--text-3); opacity: 0.45; }
-  .shot-img { display: block; width: 100%; height: auto; }
-  .shot-cap { margin: 1rem auto 0; max-width: 40rem; text-align: center; color: var(--text-2); font-size: 0.98rem; }
 
   .lang-switch { display: flex; align-items: center; gap: 0.15rem; font-family: var(--sans); }
   .lang-switch a { font-size: 0.82rem; font-weight: 600; color: var(--text-3); text-decoration: none; padding: 0.3rem 0.5rem; border-radius: 999px; white-space: nowrap; }
@@ -174,22 +169,22 @@
         <a href="chi-siamo.fr.html" data-nav="chi-siamo.fr.html">À propos</a>
         <a href="contatti.fr.html" data-nav="contatti.fr.html">Contact</a>
       </nav>
-      <div class="lang-switch" aria-label="Lingua / Language"><a href="tester.fr.html" hreflang="it">Italiano</a><a href="tester.en.html" hreflang="en">English</a><a href="tester.fr.html" hreflang="fr" aria-current="true">Français</a></div>
+      <div class="lang-switch" aria-label="Lingua / Language"><a href="finanziatori.fr.html" hreflang="it">Italiano</a><a href="finanziatori.en.html" hreflang="en">English</a><a href="finanziatori.fr.html" hreflang="fr" aria-current="true">Français</a></div>
       <button class="theme-btn" id="themeBtn" type="button" aria-label="Changer de thème clair ou sombre">
         <svg class="ic-moon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.5 12.5A7.5 7.5 0 0 1 7.5 2.5a7.5 7.5 0 1 0 10 10z"/></svg>
         <svg class="ic-sun" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="3.5"/><path d="M10 2v1.5M10 16.5V18M2 10h1.5M16.5 10H18M4.22 4.22l1.06 1.06M14.72 14.72l1.06 1.06M4.22 15.78l1.06-1.06M14.72 5.28l1.06-1.06"/></svg>
       </button>
-      <a class="cta-link" href="mailto:hello@neurodesk.it?subject=Voglio%20provare%20NeuroDesk">Je veux l'essayer</a>
+      <a class="cta-link" href="mailto:hello@neurodesk.it?subject=NeuroDesk%20—%20partnership">Parlons-en</a>
     </div>
   </div>
 </header>
 
 <div class="tagline"><p>Quand le pas devant vous semble trop grand, NeuroDesk vous aide à en trouver un possible.</p></div>
 
-<nav class="crumbs" aria-label="Parcours"><div class="wrap"><a href="index.fr.html">Accueil</a><span class="sep">/</span><span aria-current="page">Testeurs</span></div></nav>
+<nav class="crumbs" aria-label="Parcours"><div class="wrap"><a href="index.fr.html">Accueil</a><span class="sep">/</span><span aria-current="page">Partenaires</span></div></nav>
 
 <div class="mobile-cta">
-  <a href="mailto:hello@neurodesk.it?subject=Voglio%20provare%20NeuroDesk">
+  <a href="mailto:hello@neurodesk.it?subject=NeuroDesk%20—%20partnership">
     <svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="15" height="11" rx="2"/><path d="M3 6l7 5 7-5"/></svg>
     Écrivez-nous
   </a>
@@ -199,27 +194,21 @@
   <section class="hero">
     <div class="wrap hero-grid">
       <div>
-        <span class="eyebrow">Nous cherchons des testeurs</span>
-        <h1>Envie d'essayer NeuroDesk ?</h1>
-        <p class="lede">
-          NeuroDesk est déjà testé par un petit groupe. Nous cherchons d'autres personnes neurodivergentes —
-          avec TDAH, autisme, AuDHD, TOP, troubles DYS — pour l'utiliser et nous dire, sans détour,
-          ce qui aide et ce qui n'aide pas.
-        </p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="mailto:hello@neurodesk.it?subject=Voglio%20provare%20NeuroDesk">Je veux l'essayer</a>
-          <a class="btn btn-secondary" href="https://app.neurodesk.it">J'ai déjà un code</a>
-        </div>
+      <span class="eyebrow">Une technologie douce et inclusive</span>
+      <h1>Nous aidons les adultes neurodivergents à faire le premier pas</h1>
+      <p class="lede">
+        NeuroDesk transforme la surcharge en un pas possible : un outil pratique pour celles et ceux qui,
+        chaque jour, ont du mal à commencer. Nous sommes en phase pilote, avec un prototype qui fonctionne,
+        et nous cherchons des partenaires pour l'apporter à plus de personnes.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="mailto:hello@neurodesk.it?subject=NeuroDesk%20—%20partnership">Parlons-en</a>
+        <a class="scroll-link" href="#prodotto">Voir le produit ↓</a>
       </div>
-
-      <div class="chat-mock" aria-label="Exemple de conversation avec le Companion">
-        <div class="chat-head"><span class="bdot" aria-hidden="true"></span> NeuroDesk Companion</div>
-        <div class="chat-body">
-          <div class="cm-label">Vous</div>
-          <div class="cm-bubble cm-user">J'ai un examen dans trois jours et je n'arrive pas à me mettre à étudier.</div>
-          <div class="cm-label">Companion</div>
-          <div class="cm-bubble cm-bot">Je vous crois, et ce n'est pas votre faute.<br><br>Prochain pas (2 minutes) : ouvrez le livre à la première page du chapitre. Ne lisez pas encore. Ouvrez-le, c'est tout.</div>
-        </div>
+    </div>
+      <div class="shot-frame">
+        <div class="shot-bar" aria-hidden="true"><span></span><span></span><span></span></div>
+        <img class="shot-img" src="assets/partner-embed-1.jpg" alt="Tableau de bord NeuroDesk côté école ou organisme : la liste des personnes qui utilisent l'outil, chacune avec son profil." />
       </div>
     </div>
   </section>
@@ -240,62 +229,28 @@
 
   <section class="band">
     <div class="wrap reveal">
-      <p class="lead-line">Écrivez la tâche que vous n'arrivez pas à commencer. NeuroDesk répond par <strong>un seul petit pas</strong> à faire, pas par une longue liste.</p>
+      <span class="eyebrow">Le problème</span>
+      <p class="lead-line" style="margin-top:1.1rem">
+        Beaucoup de personnes neurodivergentes affrontent chaque jour des tâches qui deviennent pour elles un
+        <em>obstacle</em> : démarches, études, travail, gestion de la maison. Souvent, ce n'est pas la
+        volonté qui manque, mais une aide conçue pour la façon dont leur esprit fonctionne vraiment.
+      </p>
     </div>
   </section>
 
-  <section>
+  <section id="prodotto">
     <div class="wrap">
       <div class="section-head reveal">
-        <span class="eyebrow">Comment ça se passe</span>
-        <h2>Simple, et sans se presser</h2>
+        <span class="eyebrow">Le produit</span>
+        <h2>Un compagnon qui donne un seul pas à la fois</h2>
+        <p>La personne écrit la tâche qu'elle n'arrive pas à commencer. NeuroDesk répond par une micro-action concrète, sur un ton qui ne juge pas.</p>
       </div>
-      <div class="steps reveal">
-        <div class="step-row"><div class="step-num">1</div><div><h3>On vous donne un code</h3><p>Vous entrez avec un code, sans donner votre nom. Aucune inscription.</p></div></div>
-        <div class="step-row"><div class="step-num">2</div><div><h3>Vous l'utilisez quand vous voulez</h3><p>Écrivez comme ça vient, même quelques mots. Vous recevez un pas à la fois.</p></div></div>
-        <div class="step-row"><div class="step-num">3</div><div><h3>Vous nous dites comment ça s'est passé</h3><p>Quelques questions avec des boutons, et un espace pour écrire. Aucun rapport à rédiger.</p></div></div>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="wrap">
-      <div class="section-head reveal">
-        <span class="eyebrow">Pensé pour vous</span>
-        <h2>Facile à utiliser, même les mauvais jours</h2>
-      </div>
-      <div class="reassure reveal">
-        <div class="box">
-          <h3>Vous pouvez l'écouter</h3>
-          <p>Si lire fatigue, touchez <strong>Écouter</strong> : NeuroDesk vous lit la réponse à voix haute, avec la voix de votre appareil. Rien à installer.</p>
+      <div class="reveal">
+        <div class="shot-frame">
+          <div class="shot-bar" aria-hidden="true"><span></span><span></span><span></span></div>
+          <img class="shot-img" src="assets/partner-embed-2.jpg" alt="Écran de NeuroDesk : la personne écrit qu'elle n'arrive pas à se mettre à étudier et le Companion répond par un seul pas concret à faire en deux minutes." />
         </div>
-        <div class="box">
-          <h3>Grand texte, couleurs douces</h3>
-          <p>Des caractères grands et lisibles, peu de mouvement. Il y a aussi le thème sombre, pour quand la lumière dérange.</p>
-        </div>
-        <div class="box">
-          <h3>Compatible avec les lecteurs d'écran</h3>
-          <p>Compatible avec les lecteurs d'écran et la navigation au clavier. Personne n'est laissé de côté.</p>
-        </div>
-      </div>
-      <div class="shot-frame reveal">
-        <div class="shot-bar" aria-hidden="true"><span></span><span></span><span></span></div>
-        <img class="shot-img" src="assets/companion-ascolta.png" width="2480" height="1720" loading="lazy"
-             alt="L'écran du Companion : les domaines à choisir, l'espace pour écrire et, sous la réponse, le bouton Écouter pour se la faire lire à voix haute.">
-      </div>
-      <p class="shot-cap reveal">Le bouton <strong>Écouter</strong> apparaît sous chaque réponse : une touche et il vous la lit.</p>
-    </div>
-  </section>
-
-  <section>
-    <div class="wrap">
-      <div class="cta-box reveal">
-        <span class="eyebrow">Faites-nous savoir</span>
-        <h2 style="margin-top:0.7rem">Envie d'essayer ?</h2>
-        <p>Écrivez-nous et on vous envoie un code pour commencer. Quelques minutes suffisent, quand vous voulez.</p>
-        <a class="btn btn-primary" href="mailto:hello@neurodesk.it?subject=Voglio%20provare%20NeuroDesk">Je veux l'essayer</a>
-        <p class="cta-note">C'est une vraie personne qui vous répond.</p>
-        <p class="cta-note">Vous avez déjà un code ? <a href="https://app.neurodesk.it" style="color:var(--accent-deep);font-weight:600">Entrez ici</a>.</p>
+        <p class="shot-cap">Un écran réel du Companion, en phase pilote : de la surcharge à un pas de deux minutes.</p>
       </div>
     </div>
   </section>
@@ -303,19 +258,70 @@
   <section class="band">
     <div class="wrap">
       <div class="section-head reveal">
-        <span class="eyebrow">Ce qu'il faut savoir</span>
-        <h2>Peu d'infos, claires</h2>
+        <span class="eyebrow">À qui il s'adresse</span>
+        <h2>À la personne, et à ceux qui l'accompagnent au quotidien</h2>
+        <p>Le même outil, trois contextes d'usage : la personne qui l'utilise reste au centre ; celui qui le met à disposition ne gère que les accès.</p>
       </div>
-      <div class="reassure reveal">
-        <div class="box"><h3>Pas besoin d'être expert</h3><p>Il n'y a pas de bonne ou de mauvaise façon de l'utiliser. Ce qui nous intéresse, c'est comment c'est pour vous.</p></div>
-        <div class="box"><h3>Vos données restent les vôtres</h3><p>Vous entrez sans nom. Les conversations sont chiffrées sur notre serveur et vous pouvez les supprimer quand vous voulez.</p></div>
-        <div class="box"><h3>Ce n'est pas une thérapie</h3><p>NeuroDesk est un outil pratique. Il ne remplace ni médecins, ni psychologues, ni services.</p></div>
+      <div class="pillars reveal">
+        <div class="pillar"><h3>Personnes neurodivergentes</h3><p>Adultes avec TDAH, autisme, AuDHD, TOP ou troubles DYS qui veulent une aide concrète pour les tâches du quotidien.</p></div>
+        <div class="pillar"><h3>Écoles et organismes</h3><p>Établissements, services et organismes du secteur associatif qui accompagnent plusieurs personnes et veulent un outil pratique à ajouter à leur suivi.</p></div>
+        <div class="pillar"><h3>Entreprises et organisations</h3><p>NeuroDesk comme avantage pour le personnel : un soutien quotidien pour ceux qui peinent à commencer, organiser ou terminer une tâche. L'entreprise gère les accès, les conversations restent privées.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Ce qui le rend différent</span>
+        <h2>Le respect fait partie de NeuroDesk dès le début</h2>
+      </div>
+      <div class="pillars reveal">
+        <div class="pillar"><h3>Faible charge cognitive</h3><p>Peu de mots à la fois, pas de longs textes, des boutons clairs. La simplicité fait partie de l'aide.</p></div>
+        <div class="pillar"><h3>Aucune promesse vide</h3><p>NeuroDesk est un outil, pas une thérapie, et ne pose pas de diagnostic. Il ne remplace ni médecins ni services.</p></div>
+        <div class="pillar"><h3>Construit avec ceux qui l'utilisent</h3><p>Les fonctions naissent de l'écoute de personnes neurodivergentes — TDAH, autisme, AuDHD, TOP, troubles DYS — et s'affinent avec leurs retours.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Où nous en sommes</span>
+        <h2>Un prototype qui fonctionne, déjà utilisé par les premiers testeurs</h2>
+        <p>La plateforme, le Companion et la collecte des retours fonctionnent déjà. Nous cherchons des partenaires pour l'apporter à plus de personnes.</p>
+      </div>
+      <div class="status-card reveal">
+        <div class="stat"><div class="k">En test</div><div class="v">Déjà utilisé par les premiers testeurs, pour savoir quoi améliorer avant de l'ouvrir à tous.</div></div>
+        <div class="stat"><div class="k">5 domaines</div><div class="v">Blocage, études, démarches, travail, autonomie : là où commencer est le plus difficile.</div></div>
+        <div class="stat"><div class="k">Confidentialité incluse</div><div class="v">Données chiffrées et sans nom, conservées sur des serveurs européens. Le traitement de la réponse a lieu chez le fournisseur d'IA, avec les garanties prévues par le RGPD.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band thanks">
+    <div class="wrap reveal">
+      <span class="eyebrow">Un remerciement</span>
+      <p class="thanks-lead">NeuroDesk est aussi né de l'écoute de celles et ceux qui parlent de la neurodivergence sans la simplifier ni la réduire à une définition de manuel.</p>
+      <p class="thanks-body">Un remerciement particulier à <a class="thanks-link" href="https://www.instagram.com/trinakrio/" target="_blank" rel="noopener noreferrer">Luca Donato</a>, dont la façon directe, concrète et profondément humaine de parler du TDAH, de l'autisme et de l'AuDHD est pour nous une source constante d'inspiration.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="cta-box reveal">
+        <span class="eyebrow">Construisons-le ensemble</span>
+        <h2 style="margin-top:0.7rem">Aidez-nous à apporter NeuroDesk à ceux qui en ont besoin</h2>
+        <p>Nous cherchons des financeurs, des partenaires et des soutiens qui croient en une technologie douce et inclusive. Nous pouvons vous montrer le prototype en personne.</p>
+        <a class="btn btn-primary" href="mailto:hello@neurodesk.it?subject=NeuroDesk%20—%20partnership">Parlons-en</a>
+        <p class="cta-note">Aucune donnée des testeurs n'est publique.</p>
+        <p class="cta-note">Vous voulez savoir qui est derrière ? <a href="chi-siamo.fr.html" style="color:var(--accent-deep);font-weight:600">Découvrez qui nous sommes →</a></p>
       </div>
     </div>
   </section>
 </main>
 
-<section class="switch-band"><div class="wrap"><p>Vous êtes une entreprise, un organisme ou un financeur ?</p><a class="cta-link" href="finanziatori.fr.html">Aller à la page partenaires →</a></div></section>
+<section class="switch-band"><div class="wrap"><p>Vous êtes une personne neurodivergente et vous voulez l'essayer ?</p><a class="cta-link" href="tester.fr.html">Aller à la page testeurs →</a></div></section>
 
 <footer>
   <div class="wrap foot-inner">
@@ -338,7 +344,7 @@
   (function () {
     var els = document.querySelectorAll('.reveal');
     if (!('IntersectionObserver' in window)) { els.forEach(function (e) { e.classList.add('in'); }); return; }
-    var io = new IntersectionObserver(function (en) { en.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } }); }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
+    var io = new IntersectionObserver(function (en) { en.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add('in'); io.unobserve(x.target); } }); }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
     els.forEach(function (e) { io.observe(e); });
   })();
 </script>
