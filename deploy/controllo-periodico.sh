@@ -81,8 +81,13 @@ fi
 titolo "A2. Aggiornamenti di sistema"
 
 apt-get update -qq >/dev/null 2>&1
-DA_AGGIORNARE=$(apt-get -s upgrade 2>/dev/null | grep -c '^Inst' || echo 0)
-SICUREZZA=$(apt-get -s upgrade 2>/dev/null | grep '^Inst' | grep -ci security || echo 0)
+# Il "|| echo 0" produceva DUE righe quando grep non trovava niente (il proprio "0"
+# piu' quello dell'echo), e il confronto numerico piu' sotto falliva con
+# "integer expected". tr -d ripulisce qualunque cosa non sia una cifra.
+DA_AGGIORNARE=$(apt-get -s upgrade 2>/dev/null | grep -c '^Inst' | tr -dc '0-9')
+SICUREZZA=$(apt-get -s upgrade 2>/dev/null | grep '^Inst' | grep -ci security | tr -dc '0-9')
+DA_AGGIORNARE=${DA_AGGIORNARE:-0}
+SICUREZZA=${SICUREZZA:-0}
 if [ "$SICUREZZA" -gt 0 ]; then
     grave "${SICUREZZA} aggiornamenti di SICUREZZA in attesa (su ${DA_AGGIORNARE} totali)"
     echo "              Per applicarli:  apt update && apt upgrade -y"
@@ -111,7 +116,17 @@ done
 titolo "A4. Porte aperte verso internet"
 
 # Solo 22, 80 e 443 devono essere in ascolto su indirizzi pubblici.
-ESPOSTE=$(ss -tlnH 2>/dev/null | awk '{print $4}' | grep -v '^127\.' | grep -v '^\[::1\]' \
+#
+# Il loopback si scrive in almeno tre modi e vanno esclusi tutti:
+#   127.0.0.1:8080            IPv4
+#   [::1]:8080                IPv6
+#   [::ffff:127.0.0.1]:8080   IPv4 mappato in IPv6 — e' cosi' che si presenta la
+#                             JVM, ed e' quello che mancava: il controllo gridava
+#                             "porta 8080 esposta" a ogni giro su un servizio che
+#                             non era raggiungibile da fuori. Un allarme grave che
+#                             suona sempre insegna solo a non ascoltarlo piu'.
+ESPOSTE=$(ss -tlnH 2>/dev/null | awk '{print $4}' \
+          | grep -vE '^(127\.|\[::1\]|\[::ffff:127\.)' \
           | sed 's/.*://' | sort -u | tr '\n' ' ')
 INATTESE=$(echo "$ESPOSTE" | tr ' ' '\n' | grep -vE '^(22|80|443|)$' | tr '\n' ' ')
 if [ -n "${INATTESE// /}" ]; then
@@ -119,9 +134,19 @@ if [ -n "${INATTESE// /}" ]; then
 else
     ok "in ascolto pubblico solo: ${ESPOSTE}"
 fi
-ss -tlnH 2>/dev/null | grep -qE '127\.0\.0\.1:(3306|8080|8090)' \
+ss -tlnH 2>/dev/null | grep -qE '(127\.0\.0\.1|\[::ffff:127\.0\.0\.1\]):(3306|8080|8090)' \
     && ok "database e servizi interni raggiungibili solo da localhost" \
     || avviso "verifica che MySQL e i servizi siano legati a 127.0.0.1"
+
+# Il firewall e' la seconda serratura: se un servizio si slegasse da localhost
+# per errore, deve comunque restare irraggiungibile.
+if command -v ufw >/dev/null 2>&1; then
+    if ufw status 2>/dev/null | grep -q '^Status: active'; then
+        ok "firewall attivo: $(ufw status 2>/dev/null | grep -c ALLOW) regole di apertura"
+    else
+        grave "firewall SPENTO: le porte interne dipendono solo dal binding dei servizi"
+    fi
+fi
 
 titolo "A5. Prova vera: la porta della chat è ancora chiusa?"
 
