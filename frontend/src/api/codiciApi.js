@@ -22,6 +22,11 @@ export function emettiCodice(etichetta) {
     });
 }
 
+/** Consumo aggregato per modello: in tutto e negli ultimi sette giorni. Solo numeri, nessun contenuto. */
+export function getConsumo() {
+    return apiFetch('/api/tester/consumo');
+}
+
 /** Revoca (attivo=false) o riattiva un codice. La revoca ha effetto subito sul backend. */
 export function impostaStatoCodice(id, attivo) {
     return apiFetch(`/api/tester/${id}/stato`, { method: 'PUT', body: { attivo } });

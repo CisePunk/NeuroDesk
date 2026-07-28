@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { IconDashboard, IconModuli, IconTask, IconCompanion, IconFeedback, IconSun, IconMoon, IconCodici } from '../components/Icons';
+import { IconDashboard, IconModuli, IconTask, IconCompanion, IconFeedback, IconSun, IconMoon, IconCodici, IconEsci } from '../components/Icons';
 import { useAuth } from '../auth/AuthContext';
 import { getTestMode } from '../api/studentiApi';
 
@@ -102,8 +102,14 @@ function MainLayout({ children }) {
                         </span>
                     </button>
 
+                    {/* Su telefono questo bottone diventa l'ultima voce della barra
+                        in basso (vedi App.css, @media max-width 767px): chi usa un
+                        dispositivo condiviso deve poter uscire in un gesto, non
+                        cercando in fondo a un menu. L'icona serve li': senza, "Esci"
+                        non si distingue dalle altre voci. */}
                     <button className="btn-ghost logout-btn" onClick={logout}>
-                        Esci
+                        <IconEsci className="nav-icon logout-icon" aria-hidden="true" />
+                        <span>Esci</span>
                     </button>
 
                     {/* AGPLv3 art. 13: chi usa NeuroDesk attraverso la rete deve poter

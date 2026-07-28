@@ -159,7 +159,7 @@ verificate **dal vivo** in produzione durante l'audit (Playwright, `curl`).
 | 41 | Header di sicurezza | HSTS, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer` su app e landing (`curl -I`) | ✅ |
 | 42 | Endpoint interno non esposto | Caddy: `/api/internal/*` → **404** dall'esterno; raggiungibile solo in loopback dal companion | ✅ |
 | 43 | Token interno dedicato | `X-Internal-Token` ≠ segreto JWT; assente/errato → **401**; confronto a tempo costante (`MessageDigest.isEqual`) | ✅ |
-| 44 | Revoca live sul Companion | il companion interroga lo stato dal backend (cache 60s, tetto sulla cache scaduta 5 min → poi **fail-closed**): revoca effettiva entro ~60s invece che dopo la scadenza del token (24h) | ✅ |
+| 44 | Revoca live sul Companion | il companion interroga lo stato dal backend (cache 60s, tetto sulla cache scaduta 5 min → poi **fail-closed**): revoca effettiva entro ~60s invece che dopo la scadenza del token (8h) | ✅ |
 | 45 | Consenso revocabile (Art. 7(3)) | `DELETE /api/auth/consenso` azzera `consensoIl` e rilascia token `consenso=false`; il companion blocca (403) sia via claim sia via controllo live | ✅ |
 | 46 | Chiave di cifratura obbligatoria | `SecurityGuard` rifiuta l'avvio se `neurodesk.crypto.secret` è vuota, < 32 caratteri o uguale al JWT | ✅ |
 | 47 | Conversazione fuori da `localStorage` | cache attiva in `sessionStorage` (muore con la scheda) + bonifica una-tantum delle copie legacy; `logout` pulisce entrambe | ✅ |

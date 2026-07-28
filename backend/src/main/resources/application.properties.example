@@ -26,7 +26,13 @@ neurodesk.jwt.secret=METTI_UN_SEGRETO_LUNGO_ALMENO_32_CARATTERI
 # (es. dopo un sospetto di fuga) le conversazioni gia' salvate restano leggibili.
 # Senza questa riga la chiave deriva dal JWT e ruotarlo distrugge i dati.
 neurodesk.crypto.secret=METTI_UNA_CHIAVE_DEDICATA_DIVERSA_DAL_JWT_ALMENO_32
-neurodesk.jwt.expiration-ms=86400000
+# Durata del token: 8 ore. Il token vive in localStorage, quindi sopravvive alla
+# chiusura del browser: con 24 ore chi prende in mano quel telefono il giorno dopo
+# entra senza sapere il codice, e qui dentro ci sono dati di salute (Art. 9). Otto
+# ore coprono una giornata intera ma non ci si dorme sopra. NON e' un timeout di
+# inattivita': quello butterebbe fuori chi si allontana a meta' di un passo, cioe'
+# proprio la persona per cui NeuroDesk esiste.
+neurodesk.jwt.expiration-ms=28800000
 neurodesk.login.pepper=METTI_UN_PEPPER_LUNGO_E_SEGRETO
 neurodesk.admin.codice=scuola
 neurodesk.admin.password=CAMBIA_QUESTA_PASSWORD

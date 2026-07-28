@@ -1,5 +1,6 @@
 package com.neurodesk.app.neurodesk.controller;
 
+import com.neurodesk.app.neurodesk.dto.ConsumoRiepilogoResponse;
 import com.neurodesk.app.neurodesk.dto.CreaTesterRequest;
 import com.neurodesk.app.neurodesk.dto.TesterCreatoResponse;
 import com.neurodesk.app.neurodesk.dto.TesterResponse;
@@ -33,6 +34,16 @@ public class TesterController {
     @GetMapping
     public List<TesterResponse> lista() {
         return testerService.lista();
+    }
+
+    /**
+     * Consumo aggregato per modello, in tutto e negli ultimi sette giorni.
+     * Serve alla pagina Codici per dire quanto si e' speso e fra quanti giorni
+     * finisce il credito al ritmo attuale.
+     */
+    @GetMapping("/consumo")
+    public ConsumoRiepilogoResponse consumo() {
+        return testerService.riepilogoConsumo();
     }
 
     /**

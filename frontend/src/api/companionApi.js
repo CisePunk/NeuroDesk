@@ -29,11 +29,21 @@ export async function sendCompanionMessage({ message, mode, profile, history }) 
             window.dispatchEvent(new Event('nd-unauthorized'));
         }
         let serverMsg = null;
+        let codice = null;
         try {
             const data = await response.json();
-            serverMsg = data?.error || data?.message || null;
+            codice = data?.error || null;
+            serverMsg = data?.message || data?.error || null;
         } catch {
             /* corpo non JSON */
+        }
+        // Un solo caso in cui il testo del server vince su quello generico: il
+        // credito esaurito. Il messaggio standard per gli errori 5xx dice
+        // "riprova fra qualche minuto", che qui sarebbe falso — riprovare non
+        // serve finché non si ricarica, e mandare a vuoto chi sta seguendo un
+        // passo alla volta è il modo peggiore di fallire.
+        if (codice === 'companion_credito_esaurito' && serverMsg) {
+            throw new Error(serverMsg);
         }
         throw new Error(messaggioAmichevole(response.status, serverMsg));
     }

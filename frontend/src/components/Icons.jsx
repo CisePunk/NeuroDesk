@@ -89,3 +89,14 @@ export function IconCodici(props) {
         </svg>
     );
 }
+
+// Uscita: porta con la freccia che esce. Serve sulla barra in basso da telefono,
+// dove "Esci" senza icona non si distingue dalle altre voci.
+export function IconEsci(props) {
+    return (
+        <svg {...base} {...props}>
+            <path d="M8 3.5H4.5A1.5 1.5 0 0 0 3 5v10a1.5 1.5 0 0 0 1.5 1.5H8" />
+            <path d="M12.5 13.5 16 10l-3.5-3.5M16 10H7" />
+        </svg>
+    );
+}

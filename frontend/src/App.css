@@ -1364,6 +1364,46 @@ main h1, main h2 { margin-top: 0; }
     border-left-color: transparent;
   }
 
+  /* "Esci" diventa l'ultima voce della barra in basso, con la stessa forma e lo
+     stesso bersaglio delle altre. Prima stava nel piede della barra laterale e da
+     telefono finiva schiacciato in fondo: su un dispositivo condiviso — casa,
+     famiglia, biblioteca — uscire deve costare un gesto solo, perché qui dentro
+     ci sono dati di salute e il token dura ore. */
+  .sidebar-footer {
+    margin-top: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    padding: 4px 2px 2px;
+  }
+
+  .logout-btn {
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 60px;
+    min-height: 44px;      /* bersaglio tattile minimo raccomandato */
+    padding: 6px 8px;
+    font-size: 10px;
+    border-radius: 0;
+    border-top: 2px solid transparent;
+  }
+
+  .logout-icon { display: block; width: 20px; height: 20px; opacity: 0.65; }
+
+  /* Il link al sorgente resta visibile anche qui: l'AGPLv3 art. 13 chiede di
+     offrirlo a chi usa il programma via rete, e la maggior parte lo usa da
+     telefono. Nasconderlo sul telefono vorrebbe dire non offrirlo quasi a nessuno. */
+  .sidebar-sorgente {
+    font-size: 8px;
+    text-align: center;
+    line-height: 1.1;
+    padding-bottom: 2px;
+  }
+
   main {
     padding: 20px 16px 82px;
     background: var(--main-overlay);
@@ -1511,6 +1551,9 @@ main h1, main h2 { margin-top: 0; }
 /* Sidebar footer + logout */
 .sidebar-footer { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
 .logout-btn { align-self: flex-start; font-size: 13px; }
+/* Da schermo largo il bottone resta solo testo, com'era: l'icona serve solo
+   sulla barra in basso del telefono, dove le voci si riconoscono dal simbolo. */
+.logout-icon { display: none; }
 /* Link al sorgente richiesto dall'AGPLv3 art. 13: presente e raggiungibile,
    ma discreto — non deve competere con le azioni dell'utente. */
 .sidebar-sorgente { font-size: 11px; opacity: 0.55; text-decoration: none; color: inherit; }

@@ -146,6 +146,9 @@ async function fetchProvider(url, options, etichetta) {
     const details = await response.text();
     ultimoErrore = new Error(`${etichetta} error: ${response.status} ${details}`);
     ultimoErrore.provider = etichetta;
+    // Lo stato serve a chi sta sopra per decidere se ripiegare sull'altro
+    // provider: senza, l'unica scelta possibile sarebbe fallire sempre.
+    ultimoErrore.status = response.status;
     // 4xx "veri" (401 chiave sbagliata, 400 modello inesistente) non migliorano
     // riprovando: falliamo subito, così l'errore in log è quello giusto.
     if (!transitorio(response.status)) throw ultimoErrore;
@@ -164,10 +167,91 @@ export function resolveProvider(requested) {
   return provider;
 }
 
+// Quando conviene passare all'altro provider invece di far fallire la richiesta.
+// La regola distingue "il problema e' loro" da "il problema e' nostro":
+//  - nessuna risposta (timeout, rete): loro, o la strada per arrivarci
+//  - 429 rate limit, 529 sovraccarico, 5xx: loro
+//  - 401/402/403: chiave scaduta, credito finito, account sospeso
+//  - messaggi che parlano di credito o quota: capita che arrivino come 400
+// NON si ripiega su un 400 generico: una richiesta malformata e' un bug nostro e
+// fallirebbe identica sull'altro provider, con in piu' il costo di una chiamata.
+const PAROLE_CREDITO = /credit|quota|billing|insufficient|payment|balance/i;
+
+function valeIlRipiego(err) {
+  if (PAROLE_CREDITO.test(err?.message || '')) return true;
+  const stato = err?.status;
+  if (stato === undefined) return true;
+  return transitorio(stato) || stato === 401 || stato === 402 || stato === 403;
+}
+
+/**
+ * Il credito e' finito, e non e' un guasto passeggero.
+ *
+ * La distinzione conta perche' cambia cosa diciamo a chi sta scrivendo: davanti a
+ * un guasto momentaneo "riprova fra poco" e' vero, davanti al credito esaurito e'
+ * una bugia — riprovare non serve finche' qualcuno non ricarica. Su chi sta
+ * seguendo un passo alla volta, mandarlo a ritentare a vuoto e' il modo peggiore
+ * di fallire.
+ */
+function eCredito(err) {
+  if (err?.status === 402) return true;
+  return PAROLE_CREDITO.test(err?.message || '');
+}
+
+function provideDiRipiego(primario) {
+  if (primario === 'anthropic' && process.env.OPENAI_API_KEY) return 'openai';
+  if (primario === 'openai' && process.env.ANTHROPIC_API_KEY) return 'anthropic';
+  return null;
+}
+
+/**
+ * Genera la risposta, con ripiego automatico sull'altro provider.
+ *
+ * Senza ripiego, un rate limit o un credito esaurito non fermano una persona:
+ * fermano il Companion per tutti insieme, e chi sta scrivendo in un momento
+ * difficile riceve un errore invece di un passo. Con due provider configurati
+ * quel guasto diventa un rallentamento invisibile.
+ *
+ * Il ripiego NON e' silenzioso verso di noi: la risposta porta `ripiegoDa`, cosi'
+ * il server lo registra e ce ne accorgiamo. E' silenzioso solo verso chi scrive,
+ * che non deve sapere niente di tutto questo.
+ */
+export async function generateCompanionReply(opzioni) {
+  const primario = resolveProvider(opzioni.provider);
+
+  try {
+    return await chiamaProvider({ ...opzioni, provider: primario });
+  } catch (err) {
+    const ripiego = provideDiRipiego(primario);
+    if (!ripiego || !valeIlRipiego(err)) {
+      // Nessun secondo provider a cui appoggiarsi: se il primario e' a secco,
+      // siamo a secco e basta, e va detto com'e'.
+      if (!ripiego && eCredito(err)) err.creditoEsaurito = true;
+      throw err;
+    }
+
+    // Log del solo motivo tecnico: mai il testo di chi scrive (Art. 9).
+    console.error(`[companion] ${primario} non disponibile (${err.status ?? 'nessuna risposta'}), passo a ${ripiego}`);
+    try {
+      const risposta = await chiamaProvider({ ...opzioni, provider: ripiego });
+      return { ...risposta, ripiegoDa: primario, motivoRipiego: String(err.message).slice(0, 200) };
+    } catch (errRipiego) {
+      // Sono caduti entrambi: torna l'errore del primario, che e' quello che
+      // spiega la causa. Perdere questa informazione renderebbe cieca la diagnosi.
+      console.error(`[companion] anche ${ripiego} non disponibile: ${errRipiego.message}`);
+      // Entrambi a secco per credito: e' l'unico caso in cui "riprova fra poco"
+      // sarebbe falso. Lo marchiamo qui perche' e' l'unico punto che ha visto
+      // tutti e due gli errori.
+      if (eCredito(err) && eCredito(errRipiego)) err.creditoEsaurito = true;
+      throw err;
+    }
+  }
+}
+
 // Il provider effettivo si sceglie con AI_PROVIDER (env) oppure, per richiesta,
 // col campo "provider" nel body: comodo per confrontare openai e haiku nelle prove
 // senza riavviare il servizio.
-export async function generateCompanionReply({ message, mode, profile, history, provider: requested }) {
+async function chiamaProvider({ message, mode, profile, history, provider: requested }) {
   const provider = resolveProvider(requested);
 
   if (provider === 'mock') {

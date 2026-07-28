@@ -13,4 +13,12 @@ public class TesterResponse {
     private boolean attivo;
     private boolean consensoDato;
     private LocalDateTime creatoIl;
+
+    // Consumo AI. Non limita niente: serve a vedere se un accesso consuma molto
+    // piu' degli altri, cioe' se qualcuno lo sta usando per fatti suoi invece
+    // che per provarlo. La decisione su cosa farne resta a una persona.
+    private long chiamate;
+    private long tokenInput;
+    private long tokenOutput;
+    private LocalDateTime ultimoUso;
 }

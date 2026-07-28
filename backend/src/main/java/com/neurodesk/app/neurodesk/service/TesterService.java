@@ -1,9 +1,11 @@
 package com.neurodesk.app.neurodesk.service;
 
+import com.neurodesk.app.neurodesk.dto.ConsumoRiepilogoResponse;
 import com.neurodesk.app.neurodesk.dto.TesterCreatoResponse;
 import com.neurodesk.app.neurodesk.dto.TesterResponse;
 import com.neurodesk.app.neurodesk.entity.Ruolo;
 import com.neurodesk.app.neurodesk.entity.Utente;
+import com.neurodesk.app.neurodesk.repository.ConsumoAiRepository;
 import com.neurodesk.app.neurodesk.repository.UtenteRepository;
 import com.neurodesk.app.neurodesk.security.CodeGenerator;
 import com.neurodesk.app.neurodesk.security.HashService;
@@ -13,7 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Creazione/gestione dei tester (utenti STUDENTE anonimi). Il codice in chiaro
@@ -24,6 +29,7 @@ import java.util.List;
 public class TesterService {
 
     private final UtenteRepository utenteRepository;
+    private final ConsumoAiRepository consumoRepository;
     private final HashService hashService;
     private final CodeGenerator codeGenerator;
 
@@ -49,13 +55,61 @@ public class TesterService {
     }
 
     public List<TesterResponse> lista() {
+        // Una sola interrogazione per tutto il consumo, poi si accosta in memoria:
+        // con una query per codice, l'elenco farebbe N+1 accessi al database.
+        Map<Long, Object[]> consumo = new HashMap<>();
+        for (Object[] riga : consumoRepository.riepilogoPerUtente()) {
+            consumo.put((Long) riga[0], riga);
+        }
         return utenteRepository.findByRuoloOrderByCreatoIlDesc(Ruolo.STUDENTE).stream()
-                .map(u -> new TesterResponse(
-                        u.getId(),
-                        u.getEtichetta(),
-                        Boolean.TRUE.equals(u.getAttivo()),
-                        u.getConsensoIl() != null,
-                        u.getCreatoIl()))
+                .map(u -> {
+                    Object[] c = consumo.get(u.getId());
+                    return new TesterResponse(
+                            u.getId(),
+                            u.getEtichetta(),
+                            Boolean.TRUE.equals(u.getAttivo()),
+                            u.getConsensoIl() != null,
+                            u.getCreatoIl(),
+                            c == null ? 0L : ((Number) c[1]).longValue(),
+                            c == null ? 0L : ((Number) c[2]).longValue(),
+                            c == null ? 0L : ((Number) c[3]).longValue(),
+                            c == null ? null : (LocalDateTime) c[4]);
+                })
+                .toList();
+    }
+
+    /**
+     * Quanto si sta consumando, diviso per modello, in tutto e negli ultimi sette
+     * giorni. Il calcolo in euro non si fa qui: qui escono i token misurati, il
+     * listino sta in un punto solo del frontend perche' cambia da solo (Sonnet 5
+     * ha un prezzo di lancio fino al 31 agosto 2026) e un cambio di listino non
+     * deve costringere a ripubblicare il backend.
+     */
+    public ConsumoRiepilogoResponse riepilogoConsumo() {
+        LocalDateTime setteGiorniFa = LocalDateTime.now().minusDays(7);
+        LocalDateTime inizio = consumoRepository.primaRegistrazione();
+
+        // Quanti giorni di storico abbiamo davvero. Se il registro e' partito ieri,
+        // proiettare "al ritmo degli ultimi sette giorni" mentirebbe di sette volte.
+        double giorni = inizio == null
+                ? 0
+                : Math.max(0.5, java.time.Duration.between(inizio, LocalDateTime.now()).toMinutes() / 1440.0);
+
+        return new ConsumoRiepilogoResponse(
+                righe(consumoRepository.riepilogoPerModello()),
+                righe(consumoRepository.riepilogoPerModelloDa(setteGiorniFa)),
+                Math.min(giorni, 7.0),
+                consumoRepository.countByRipiegoDaIsNotNullAndCreatoIlGreaterThanEqual(setteGiorniFa));
+    }
+
+    private static List<ConsumoRiepilogoResponse.Riga> righe(List<Object[]> grezze) {
+        return grezze.stream()
+                .map(r -> new ConsumoRiepilogoResponse.Riga(
+                        (String) r[0],
+                        (String) r[1],
+                        ((Number) r[2]).longValue(),
+                        ((Number) r[3]).longValue(),
+                        ((Number) r[4]).longValue()))
                 .toList();
     }
 

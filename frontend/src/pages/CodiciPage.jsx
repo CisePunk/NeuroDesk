@@ -1,8 +1,18 @@
 import { useMemo, useState } from 'react';
-import { getCodici, emettiCodice, impostaStatoCodice } from '../api/codiciApi';
+import { getCodici, emettiCodice, impostaStatoCodice, getConsumo } from '../api/codiciApi';
 import { useAsyncData } from '../ui/useAsyncData';
 import { StatoLista } from '../ui/StatoLista';
 import { useToast } from '../ui/ToastProvider';
+import { PannelloBudget } from '../ui/PannelloBudget';
+
+// I token grezzi non dicono niente a colpo d'occhio: "184.2k" si confronta,
+// "184231" no. Serve a vedere in un attimo chi consuma fuori scala.
+function formattaToken(n) {
+    if (!n) return '0';
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'k';
+    return String(n);
+}
 
 function formattaData(iso) {
     if (!iso) return '';
@@ -26,6 +36,9 @@ function CodiciPage() {
     const toast = useToast();
     const { dati, caricamento, errore, ricarica } = useAsyncData(getCodici);
     const codici = useMemo(() => dati ?? [], [dati]);
+    // Il consumo si carica a parte: se quell'endpoint fallisce, l'elenco dei
+    // codici deve restare utilizzabile lo stesso.
+    const { dati: consumo } = useAsyncData(getConsumo);
 
     const [mostraForm, setMostraForm] = useState(false);
     const [etichetta, setEtichetta] = useState('');
@@ -38,6 +51,14 @@ function CodiciPage() {
         totale: codici.length,
         attivi: codici.filter(c => c.attivo).length,
         conConsenso: codici.filter(c => c.consensoDato).length,
+        tokenTotali: codici.reduce((s, c) => s + (c.tokenInput || 0) + (c.tokenOutput || 0), 0),
+        // La media si calcola solo su chi ha davvero scritto: includere i codici
+        // mai usati la schiaccerebbe verso zero e farebbe sembrare anomalo chiunque.
+        mediaAttivi: (() => {
+            const usati = codici.filter(c => c.chiamate > 0);
+            if (!usati.length) return 0;
+            return usati.reduce((s, c) => s + (c.tokenInput || 0) + (c.tokenOutput || 0), 0) / usati.length;
+        })(),
     }), [codici]);
 
     const visibili = useMemo(() => {
@@ -114,8 +135,13 @@ function CodiciPage() {
                 <div className="card-detail" style={{ marginTop: '0.2rem' }}>
                     <strong>{riepilogo.totale}</strong> emessi · <strong>{riepilogo.attivi}</strong> attivi
                     {' '}· <strong>{riepilogo.conConsenso}</strong> hanno dato il consenso
+                    {riepilogo.tokenTotali > 0 && (
+                        <> · <strong>{formattaToken(riepilogo.tokenTotali)}</strong> token consumati in tutto</>
+                    )}
                 </div>
             )}
+
+            {consumo && <PannelloBudget riepilogo={consumo} />}
 
             {mostraForm && (
                 <form onSubmit={handleEmetti} className="form-card" style={{ maxWidth: '34rem', margin: '1rem 0' }}>
@@ -203,7 +229,26 @@ function CodiciPage() {
                             </div>
                             <div className="card-detail" style={{ marginTop: '0.3rem', opacity: 0.75 }}>
                                 Emesso il {formattaData(c.creatoIl)}
+                                {c.ultimoUso && <> · ultimo uso {formattaData(c.ultimoUso)}</>}
                             </div>
+                            {c.chiamate > 0 && (() => {
+                                const token = (c.tokenInput || 0) + (c.tokenOutput || 0);
+                                // Tre volte la media di chi usa il Companion: non e' una
+                                // soglia con un significato, e' solo la riga che merita
+                                // un'occhiata. Non blocca e non avvisa nessuno.
+                                const fuoriScala = riepilogo.mediaAttivi > 0 && token > riepilogo.mediaAttivi * 3;
+                                return (
+                                    <div className="card-detail" style={{ marginTop: '0.2rem' }}>
+                                        <strong>{c.chiamate}</strong> richieste ·{' '}
+                                        <strong>{formattaToken(token)}</strong> token
+                                        {fuoriScala && (
+                                            <span style={{ color: '#b04545', fontWeight: 600 }}>
+                                                {' '}— oltre il triplo della media, vale un'occhiata
+                                            </span>
+                                        )}
+                                    </div>
+                                );
+                            })()}
                             <div style={{ marginTop: '0.6rem' }}>
                                 <button
                                     className={c.attivo ? 'btn-ghost' : 'btn-secondary'}

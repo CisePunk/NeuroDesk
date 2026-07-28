@@ -56,6 +56,36 @@ async function statoUtente(id) {
   }
 }
 
+/**
+ * Riferisce al backend quanto e' costata una chiamata AI.
+ *
+ * Lo fa il servizio, non il browser: il consumo serve anche ad accorgersi di chi
+ * usa il Companion per fatti propri, e un numero che passa dal client puo'
+ * essere falsificato proprio da chi avrebbe interesse a farlo.
+ *
+ * Non si aspetta la risposta e non fallisce mai verso l'utente: se il backend e'
+ * irraggiungibile si perde una riga di statistica, non la risposta di chi sta
+ * scrivendo. Nessun contenuto viene inviato, solo conteggi.
+ */
+function registraConsumo(utenteId, ai) {
+  const corpo = {
+    utenteId,
+    provider: ai.provider,
+    modello: ai.model,
+    tokenInput: ai.usage?.estimatedInputTokens ?? 0,
+    tokenOutput: ai.usage?.outputTokens ?? 0,
+    ripiegoDa: ai.ripiegoDa ?? null,
+  };
+  fetch(`${BACKEND_URL}/api/internal/consumo`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Internal-Token': INTERNAL_TOKEN },
+    body: JSON.stringify(corpo),
+    signal: AbortSignal.timeout(5000),
+  }).catch((err) => {
+    console.error(`[companion] consumo non registrato: ${err.message}`);
+  });
+}
+
 /** Ritorna lo stato in cache solo se non piu' vecchio di STATO_STALE_MAX_MS. */
 function statoRecente(cached, now) {
   if (cached && now - cached.ts < STATO_STALE_MAX_MS) {
@@ -218,6 +248,8 @@ const server = http.createServer(async (req, res) => {
         provider: overrideProvider,
       });
 
+      registraConsumo(utente.sub, ai);
+
       return sendJson(res, 200, {
         mode,
         reply: ai.text,
@@ -231,6 +263,20 @@ const server = http.createServer(async (req, res) => {
       // provider — chiave sbagliata, modello inesistente, credito finito — arriva
       // al client come un 500 muto e si debugga alla cieca.
       console.error(`[companion] richiesta fallita: ${err.message}`);
+      // Credito esaurito su tutti i provider: non e' un guasto, e riprovare non
+      // serve. Alla persona diciamo la verita' e le togliamo di dosso l'idea che
+      // dipenda da lei o da come ha scritto. A noi lo urla nel log, perche' e'
+      // il momento in cui bisogna ricaricare.
+      if (err.creditoEsaurito) {
+        console.error('[companion] CREDITO ESAURITO su tutti i provider configurati: ricaricare.');
+        return sendJson(res, 503, {
+          error: 'companion_credito_esaurito',
+          message:
+            'Il Companion è fermo per un limite raggiunto dalla nostra parte. ' +
+            'Non dipende da te e non dipende da quello che hai scritto. ' +
+            'Riprovare adesso non serve: torna più tardi, quello che hai scritto resta salvato.',
+        });
+      }
       if (err.provider) {
         return sendJson(res, 502, {
           error: 'companion_provider_failed',
