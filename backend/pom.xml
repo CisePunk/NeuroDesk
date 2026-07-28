@@ -84,6 +84,25 @@
 			<artifactId>mysql-connector-j</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<!-- Migrazioni di schema esplicite. Lo schema smette di essere un effetto
+		     collaterale delle entita' Java e diventa una serie di file versionati
+		     in db/migration, uguali su ogni ambiente.
+		     Servono tutti e tre: flyway-core fa il lavoro, flyway-mysql aggiunge il
+		     dialetto MySQL, e spring-boot-flyway porta l'autoconfigurazione — in
+		     Spring Boot 4 le autoconfigurazioni stanno in moduli separati, quindi
+		     senza quest'ultimo i jar sono nel classpath ma non parte niente. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-flyway</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-mysql</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
