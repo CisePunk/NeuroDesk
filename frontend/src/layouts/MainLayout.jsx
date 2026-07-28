@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { IconDashboard, IconModuli, IconTask, IconCompanion, IconFeedback, IconSun, IconMoon, IconCodici, IconEsci } from '../components/Icons';
 import { useAuth } from '../auth/AuthContext';
 import { getTestMode } from '../api/studentiApi';
+import AiutoInLinea from '../ui/AiutoInLinea';
 
 function MainLayout({ children }) {
     const { ruolo, logout } = useAuth();
@@ -128,6 +129,10 @@ function MainLayout({ children }) {
             <main id="contenuto-principale" tabIndex={-1}>
                 {children}
             </main>
+
+            {/* Fuori da <main> apposta: l'aiuto deve restare raggiungibile da
+                qualunque pagina, anche mentre si sta scrivendo al Companion. */}
+            <AiutoInLinea />
         </div>
     );
 }

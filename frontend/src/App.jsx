@@ -13,6 +13,7 @@ import FeedbackPage from './pages/FeedbackPage';
 import FeedbackReportPage from './pages/FeedbackReportPage';
 import LoginPage from './pages/LoginPage';
 import ConsentPage from './pages/ConsentPage';
+import AiutoInLinea from './ui/AiutoInLinea';
 
 function App() {
   const { isAuth, ruolo, consensoDato, caricato } = useAuth();
@@ -24,21 +25,30 @@ function App() {
 
   // Non autenticato: solo login.
   if (!isAuth) {
+    // L'aiuto sta anche qui, non solo dentro l'app: "non riesco a entrare col mio
+    // codice" e' un problema della schermata di login, ed e' il punto in cui una
+    // persona resta bloccata fuori senza nessuno a cui chiedere.
     return (
-      <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
+      <>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+        <AiutoInLinea />
+      </>
     );
   }
 
   // Studente che non ha ancora dato il consenso: solo la schermata di consenso.
   if (ruolo === 'STUDENTE' && !consensoDato) {
     return (
-      <Routes>
-        <Route path="/consenso" element={<ConsentPage />} />
-        <Route path="*" element={<Navigate to="/consenso" replace />} />
-      </Routes>
+      <>
+        <Routes>
+          <Route path="/consenso" element={<ConsentPage />} />
+          <Route path="*" element={<Navigate to="/consenso" replace />} />
+        </Routes>
+        <AiutoInLinea />
+      </>
     );
   }
 
