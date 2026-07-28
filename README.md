@@ -271,12 +271,48 @@ neurodesk
 ├── landing             sito pubblico statico, IT/EN/FR (compresa la guida ai tester)
 ├── deploy              preparazione del server, pubblicazione, controllo periodico
 ├── docs
-├── screenshots
 └── README.md
 ```
 
 Pubblicazione: `bash deploy/02-pubblica.sh root@IP` compila in locale, carica gli
 artefatti e riavvia i servizi. I segreti restano sul server e non passano mai da qui.
+
+## Due cose da sapere prima di metterci mano
+
+### Cambiare lo schema del database
+
+Lo schema **non** lo decide piu' Hibernate. Vive in `backend/src/main/resources/db/migration`
+come file numerati, e Hibernate all'avvio si limita a verificare che le entita' Java
+corrispondano: se non corrispondono, l'applicazione **rifiuta di partire** invece di
+modificare il database di nascosto.
+
+Per aggiungere un campo o una tabella:
+
+1. Scrivi il file `V2__descrizione_breve.sql` in `db/migration` (il numero cresce, il
+   nome dopo il doppio underscore e' libero).
+2. Cambia l'entita' Java di conseguenza.
+3. Prova in locale: se il file SQL e l'entita' non concordano, il backend non parte.
+   E' il controllo che serve.
+4. Pubblica. Flyway applica la migrazione all'avvio, una volta sola.
+
+`V1` e' la fotografia dello schema di produzione al 28 luglio 2026 e sui database che
+esistono gia' non viene eseguita, solo registrata. Non modificarla mai: una migrazione
+gia' applicata e' immutabile, le correzioni si fanno con un file nuovo.
+
+### Rigenerare gli screenshot del sito
+
+Le immagini del prodotto sulle pagine pubbliche le produce uno script, non una cattura
+a mano — cosi' non invecchiano in silenzio quando l'interfaccia cambia.
+
+```bash
+# servono backend, companion e vite accesi, e un database DEDICATO con etichette finte
+cd frontend
+USCITA=/tmp/shot node screenshot.mjs <codice1> <codice2> <codice3> <codice4-mai-usato>
+```
+
+Due vincoli: mai puntarlo alla produzione (in un'immagine pubblica non deve poter finire
+il nome di una persona vera), e il Companion va acceso con il provider AI **vero** — una
+risposta generata dal mock mostrerebbe una cosa che l'app non fa.
 
 ## Prossimi passi tecnici
 
@@ -291,8 +327,9 @@ Restano:
 2. Aggiungere una tabella `MicroAction` per tracciare i passi proposti e completati.
 3. Tradurre l'applicazione: oggi e' solo in italiano, mentre il sito e la guida
    sono anche in inglese e francese.
-4. Aggiornare gli screenshot in `screenshots/`: risalgono alla prima versione
-   gestionale e mostrano pagine che non esistono piu'.
+4. Tradurre gli screenshot delle pagine pubbliche nelle altre lingue man mano
+   che l'interfaccia viene tradotta (oggi le catture mostrano l'interfaccia
+   italiana con conversazioni nelle tre lingue).
 
 ## Autrice
 

@@ -98,7 +98,11 @@ spring.datasource.username=IL_TUO_UTENTE_MYSQL
 spring.datasource.password=LA_TUA_PASSWORD_MYSQL
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
-spring.jpa.hibernate.ddl-auto=update
+# Lo schema lo governano le migrazioni in db/migration, non Hibernate:
+# 'validate' controlla che le entita' corrispondano e rifiuta di partire se non e' cosi'.
+spring.jpa.hibernate.ddl-auto=validate
+spring.flyway.baseline-on-migrate=true
+spring.flyway.baseline-version=1
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect

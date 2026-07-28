@@ -121,18 +121,18 @@ nome + generazione di un codice di accesso anonimo collegato).
 
 | # | Test | Verifica | Esito |
 |---|------|----------|-------|
-| 30 | Autorizzazione | `POST /api/studenti` e `PUT /api/studenti/{id}/stato` → `hasRole("SCUOLA")` (401 senza token) | ✅ |
-| 31 | Codice non esposto in lista | il codice in chiaro è **solo** nella risposta di creazione; `GET /api/studenti` non lo restituisce; nel DB solo l'hash | ✅ |
+| 30 | Autorizzazione | `POST /api/tester` e `PUT /api/tester/{id}/stato` → `hasRole("SCUOLA")` (401 senza token). Vale anche per `/api/studenti`, che resta nel backend ma non ha piu' pagina | ✅ |
+| 31 | Codice non esposto in lista | il codice in chiaro è **solo** nella risposta di creazione; `GET /api/tester` non lo restituisce; nel DB solo l'hash con pepper | ✅ |
 | 32 | Rimozione dato art. 9 | `profiloNeurodivergente` rimosso da entity, DTO e mapper; nessun residuo nel codice | ✅ |
 | 33 | Revoca accesso | `PUT .../stato {attivo:false}` disattiva l'account-codice collegato; il filtro JWT ricontrolla `attivo` → accesso revocato subito | ✅ |
-| 34 | Pseudonimizzazione | nome/email solo nell'anagrafica `Studente`; account-codice anonimo (etichetta null), collegati via `utenteId` | ✅ |
+| 34 | Nessun dato identificante | dal 27 luglio 2026 la pagina che raccoglieva nome, cognome ed email è stata **rimossa**: l'unico dato accanto a un codice è un'etichetta scelta da chi amministra, e resta nel gestionale | ✅ |
 | 35 | Pulizia account orfani | la rimozione utenti di test elimina anche gli account-codice collegati | ✅ |
 
 ### Finding aperti (da chiudere prima del go-live)
 
 - **[MEDIA] Rate-limiter dietro reverse proxy** — con Caddy davanti, `getRemoteAddr()` vede l'IP del proxy: tutti gli invii finirebbero in un unico bucket (blocco funzionale). **Mitigazione:** in produzione impostare `server.forward-headers-strategy` (nel `backend.env` della checklist: `SERVER_FORWARD_HEADERS_STRATEGY=NATIVE`) e **verificare** che l'IP client reale venga risolto. Vale anche per il preesistente `LoginRateLimiter`.
 - **[BASSA / latente] Stored XSS** — `messaggio`/`nome` sono salvati grezzi, ma **nessun endpoint li rilegge oggi** e il frontend React escapa. Attenzione se si aggiungerà una vista "contatti/CRM" lato SCUOLA: rendering solo testuale, mai `dangerouslySetInnerHTML`.
-- **[GDPR] DROP COLUMN** — rimuovere il campo JPA `profiloNeurodivergente` non cancella l'eventuale colonna/dati storici: se il DB di produzione avesse dati, prevedere una migrazione che elimini la colonna.
+- **[GDPR] DROP COLUMN** — rimuovere il campo JPA `profiloNeurodivergente` non cancella l'eventuale colonna/dati storici. Ora è fattibile in modo pulito: dal 28 luglio 2026 lo schema è governato da Flyway, quindi basta una migrazione `V2__drop_profilo.sql` (la colonna non risulta presente nello schema di produzione fotografato in `V1`, quindi probabilmente non c'e' niente da eliminare: verificare prima).
 
 ---
 
@@ -193,6 +193,10 @@ Nessuna vulnerabilità **critica** né aperta bloccante.
 viene risolto (rate limiting per-IP funzionante dietro Caddy). Aggiunti inoltre header di
 sicurezza (CSP/HSTS/…), token interno dedicato e revoca live sul Companion (§7.2).
 
+**Chiuso il 28 luglio 2026:** migrazioni schema esplicite — `ddl-auto` è passato da
+`update` a `validate` e lo schema è governato da Flyway (`V1` è la fotografia della
+produzione, registrata come baseline sul database esistente).
+
 **Ancora aperti (non bloccanti):** vigilanza XSS su una futura vista contatti (rendering
-solo testuale), migrazione `DROP COLUMN` per `profiloNeurodivergente`, migrazioni schema
-`ddl-auto` → Flyway/Liquibase prima di dati reali, e DPA con i fornitori AI.
+solo testuale), eventuale `DROP COLUMN` per `profiloNeurodivergente`, e DPA con i
+fornitori AI.
