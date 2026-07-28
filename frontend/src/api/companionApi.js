@@ -19,7 +19,7 @@ export async function sendCompanionMessage({ message, mode, profile, history }) 
             body: JSON.stringify({ message, mode, profile, history }),
         });
     } catch {
-        throw new Error('Companion non raggiungibile. Controlla che il servizio sia acceso.');
+        throw new Error('Non riesco a raggiungere il Companion. Controlla la connessione e riprova fra un minuto.');
     }
 
     if (!response.ok) {

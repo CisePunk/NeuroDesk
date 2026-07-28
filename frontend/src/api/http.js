@@ -42,25 +42,31 @@ export function clearToken() {
   } catch { /* ignora */ }
 }
 
+// Messaggi per chi usa l'app, non per chi la sviluppa. Tre regole, perche' chi
+// legge puo' essere in difficolta' proprio nel momento in cui compare l'errore:
+// dire cosa e' successo, dire di chi e' il problema (quasi mai suo), dire cosa
+// puo' fare adesso. Niente parole che presuppongono di sapere com'e' fatta
+// l'app: "backend", "server", "elemento", "sessione" non vogliono dire niente a
+// chi sta solo cercando di fare un passo.
 export function messaggioAmichevole(status, serverMessage) {
   switch (status) {
     case 0:
-      return 'Server non raggiungibile. Controlla che il backend sia acceso.';
+      return 'Non riesco a collegarmi. Controlla la connessione e riprova fra un minuto.';
     case 401:
       return 'Codice o password non validi.';
     case 403:
-      return 'Non hai i permessi per questa azione.';
+      return 'Questa parte non è disponibile con il tuo accesso.';
     case 404:
-      return 'Elemento non trovato.';
+      return 'Non trovo quello che cercavi. Forse è stato cancellato.';
     case 409:
-      return 'Esiste già un elemento con questi dati.';
+      return 'Esiste già qualcosa con questi dati.';
     case 429:
-      return 'Troppi tentativi. Riprova tra qualche minuto.';
+      return 'Troppi tentativi ravvicinati. Aspetta un paio di minuti e riprova.';
     case 400:
-      return serverMessage || 'Alcuni dati non sono validi. Controlla i campi.';
+      return serverMessage || 'Qualche dato non va bene. Controlla i campi e riprova.';
     default:
-      if (status >= 500) return 'Errore del server. Riprova più tardi.';
-      return serverMessage || 'Si è verificato un errore imprevisto.';
+      if (status >= 500) return 'Il problema è dalla nostra parte, non tuo. Riprova fra qualche minuto.';
+      return serverMessage || 'Qualcosa non ha funzionato. Riprova, e se continua scrivici.';
   }
 }
 
