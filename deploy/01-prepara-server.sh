@@ -222,7 +222,7 @@ cat > /etc/caddy/Caddyfile <<CADDY
     email ${EMAIL_TLS}
 }
 
-# 1) Landing pubblica: solo file statici, nessuna API, nessun dato.
+# 1) Landing pubblica: file statici, piu' UN SOLO endpoint dinamico (il form contatti).
 ${DOMINIO} {
     encode gzip
     root * /var/www/neurodesk-landing
@@ -237,7 +237,18 @@ ${DOMINIO} {
     # Gli asset della landing (site.css/site.js) hanno nome fisso: no-cache
     # forza il browser a rivalidare, così gli aggiornamenti si vedono subito.
     header /assets/* Cache-Control "no-cache"
-    file_server
+
+    # L'unica eccezione al "solo file statici": il form contatti, che e' anche il
+    # modo in cui ci si candida come tester. Senza questa riga il form risponde
+    # 404 e rimanda a scrivere una mail — cioe' esattamente il mailto che il form
+    # doveva togliere di mezzo. Solo questo percorso: tutto il resto di /api
+    # sulla landing continua a non esistere.
+    handle /api/public/contact {
+        reverse_proxy 127.0.0.1:8080
+    }
+    handle {
+        file_server
+    }
 }
 
 # 2) www -> dominio nudo, per non avere due indirizzi che rispondono uguale.

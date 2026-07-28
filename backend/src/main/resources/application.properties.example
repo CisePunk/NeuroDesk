@@ -46,4 +46,19 @@ neurodesk.security.strict=true
 # client cosi' il rate limiting usa il vero IP e non quello del proxy.
 # Lasciare COMMENTATO se l'app e' esposta direttamente (senza proxy fidato),
 # altrimenti un client potrebbe falsificare l'header e aggirare il rate limiting.
-# server.forward-headers-strategy=NATIVE
+
+# IP reale del client dietro il reverse proxy.
+#
+# Senza questa riga getRemoteAddr() restituisce 127.0.0.1 per OGNI richiesta,
+# perche' l'unico che parla col backend e' Caddy sulla stessa macchina. Il
+# risultato e' che i due limitatori (login e contatti) non contano piu' per
+# persona ma per tutti insieme: otto codici sbagliati da chiunque e NESSUNO
+# entra piu' per un quarto d'ora. Una difesa anti-forza-bruta che si trasforma
+# in un blocco del servizio a costo zero per chi attacca.
+#
+# NATIVE fa riscrivere getRemoteAddr() a Tomcat leggendo X-Forwarded-For, ma
+# SOLO se chi ha aperto la connessione e' un proxy fidato. Qui lo restringiamo
+# al loopback: Caddy. Un client esterno puo' mandare l'header che vuole, la
+# valvola prende comunque l'indirizzo vero (l'ultimo non fidato della catena).
+server.forward-headers-strategy=NATIVE
+server.tomcat.remoteip.internal-proxies=127\\.0\\.0\\.1|0:0:0:0:0:0:0:1|::1
