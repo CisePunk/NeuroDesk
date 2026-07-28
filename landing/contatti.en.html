@@ -191,6 +191,23 @@
       try { localStorage.setItem('nd-theme', next); } catch (e) {}
     });
   })();
+  // Chi arriva da "Voglio provarlo" o "Parliamone" trova il messaggio gia'
+  // impostato: un foglio bianco, per chi fa fatica a iniziare, e' esattamente
+  // l'ostacolo che questo prodotto cerca di togliere. Il testo resta modificabile.
+  (function () {
+    var motivo = new URLSearchParams(location.search).get('motivo');
+    var testi = { tester: "I'd like to try NeuroDesk as a tester.", partner: "I'm writing about a possible partnership or supporting the project." };
+    var note  = { tester: "You're writing to <strong>try NeuroDesk</strong>. Change the text as you like — it's just a starting point.", partner: "You're writing to <strong>a partnership</strong>. Change the text as you like — it's just a starting point." };
+    var campo = document.getElementById('cf-messaggio');
+    if (!campo || !testi[motivo]) return;
+    if (!campo.value) campo.value = testi[motivo];
+    var nota = document.createElement('p');
+    nota.className = 'form-note';
+    nota.style.cssText = 'margin-bottom:0.2rem;color:var(--accent-deep);font-weight:600';
+    nota.innerHTML = note[motivo];
+    campo.parentElement.insertBefore(nota, campo);
+  })();
+
   (function () {
     var form = document.getElementById('contactForm');
     if (!form) return;
