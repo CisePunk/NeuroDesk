@@ -113,7 +113,26 @@ for (const c of CONVERSAZIONI) {
     await ctx.close();
 }
 
-// --- 3. Il Companion da telefono --------------------------------------------
+// --- 3. La pagina Codici, lato di chi amministra -----------------------------
+// Le etichette che si vedono qui arrivano dal database dedicato e sono
+// dichiaratamente di esempio: e' l'unica schermata dove comparirebbero nomi.
+{
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 2 });
+    const page = await ctx.newPage();
+    await page.goto(BASE + '/', { waitUntil: 'networkidle' });
+    const toggle = page.locator('.auth-toggle').first();
+    if (await toggle.count()) await toggle.click();
+    await page.fill('input[type="text"]', 'scuola');
+    await page.fill('input[type="password"]', 'CambiaMi123!');
+    await page.click('button:has-text("Entra")');
+    await page.waitForTimeout(1500);
+    await page.click('.nav-link:has-text("Codici")');
+    await page.waitForTimeout(1500);
+    await scatta(page, 'codici', { clip: { x: 0, y: 0, width: 1280, height: 760 } });
+    await ctx.close();
+}
+
+// --- 4. Il Companion da telefono --------------------------------------------
 {
     const ctx = await browser.newContext({ ...devices['iPhone 13'], deviceScaleFactor: 2 });
     const page = await ctx.newPage();

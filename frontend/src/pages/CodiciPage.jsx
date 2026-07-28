@@ -127,7 +127,7 @@ function CodiciPage() {
                             value={etichetta}
                             onChange={(e) => setEtichetta(e.target.value)}
                             maxLength={60}
-                            placeholder="es. Clelia, oppure «tester 5»"
+                            placeholder="es. «tester 5», oppure un soprannome"
                             autoFocus
                         />
                         <small style={{ color: 'var(--text-3, #888)' }}>
@@ -173,7 +173,7 @@ function CodiciPage() {
                         type="search"
                         value={filtro}
                         onChange={(e) => setFiltro(e.target.value)}
-                        placeholder="es. Clelia"
+                        placeholder="cerca…"
                     />
                 </div>
             )}
