@@ -28,15 +28,10 @@ export function getConsumo() {
 }
 
 /**
- * Imposta la chiave API personale di un tester ("bring your own token").
- *
- * La chiave viaggia in chiaro SOLO in questa richiesta, su HTTPS, e non torna
- * mai indietro: l'elenco dice soltanto SE c'e' e per quale fornitore. Nel
- * database e' cifrata con la stessa chiave delle conversazioni.
+ * La chiave API personale NON si imposta da qui: la mette la persona stessa
+ * dalle opzioni del Companion (PUT /api/auth/chiave-ai). Cosi' non passa mai dal
+ * browser di chi gestisce NeuroDesk, che ne vede soltanto l'esistenza.
  */
-export function impostaChiaveCodice(id, provider, chiave) {
-    return apiFetch(`/api/tester/${id}/chiave`, { method: 'PUT', body: { provider, chiave } });
-}
 
 /** Toglie la chiave personale: quel tester torna a usare il credito comune. */
 export function rimuoviChiaveCodice(id) {

@@ -10,4 +10,14 @@ import lombok.Data;
 public class MeResponse {
     private Ruolo ruolo;
     private boolean consensoDato;
+
+    /**
+     * Ha impostato una chiave API propria? Solo SE, mai quale: serve alla pagina
+     * del Companion per mostrare "stai usando la tua chiave" invece del modulo
+     * per inserirla.
+     */
+    private boolean chiavePropria;
+
+    /** Per quale fornitore, se c'e'. */
+    private String chiaveProvider;
 }

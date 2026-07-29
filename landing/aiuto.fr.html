@@ -177,6 +177,8 @@
   .trad { color: var(--text-3); font-style: italic; }
 
   .aggiornato { max-width: var(--testo); margin-top: 3rem; color: var(--text-3); font-size: 0.88rem; }
+
+  .sotto-titolo { font-family: var(--sans); font-size: 1rem; font-weight: 700; margin: 1.8rem 0 0.7rem; }
 </style>
 
 <script>
@@ -397,6 +399,87 @@
     </div>
   </section>
 
+  <section class="blocco" id="chiave-api">
+    <h2>Utiliser ta propre clé API</h2>
+    <p class="intro">
+      C'est réservé aux développeurs qui ont déjà un compte Anthropic ou OpenAI. Si tu ne sais pas ce
+      qu'est une clé API, <strong>passe cette section</strong> : tu n'en as pas besoin, et tu ne pèses
+      sur personne — une réponse coûte moins d'un demi-centime.
+    </p>
+
+    <ol class="passi">
+      <li>
+        <h3>Crée la clé sur ton compte</h3>
+        <p>
+          Sur <strong>console.anthropic.com</strong> (ou <strong>platform.openai.com</strong>),
+          dans la section <em>API keys</em>, crées-en une nouvelle.
+        </p>
+        <p class="poi">Copie-la tout de suite : eux aussi ne te la montrent qu'une fois.</p>
+      </li>
+      <li>
+        <h3>Colle-la dans NeuroDesk</h3>
+        <p>
+          Sur la page Companion, sous la zone où tu écris, ouvre <strong>Options avancées</strong>.
+          Choisis le bon fournisseur dans le menu et colle la clé.
+        </p>
+        <p class="poi">À partir de là, tu paies tes propres conversations, sur ton compte.</p>
+      </li>
+      <li>
+        <h3>Tu peux revenir en arrière quand tu veux</h3>
+        <p>Dans le même panneau : <strong>Revenir au crédit commun</strong>.</p>
+        <p class="poi">Si tu ne l'utilises pas ailleurs, pense à révoquer la clé depuis ton compte aussi.</p>
+      </li>
+    </ol>
+
+    <h3 class="sotto-titolo">Si quelque chose ne marche pas</h3>
+    <div class="accordion">
+      <details>
+        <summary>« La clé API que tu as fournie n'a pas été acceptée »</summary>
+        <div class="corpo">
+          <p>Le fournisseur l'a refusée. Dans l'ordre, les causes les plus fréquentes :</p>
+          <p><strong>1. Tu ne l'as pas copiée en entier.</strong> Elles sont longues et se coupent facilement. Recopie-la entièrement.</p>
+          <p><strong>2. Mauvais fournisseur dans le menu.</strong> Une clé Anthropic avec « OpenAI » sélectionné est refusée, et inversement.</p>
+          <p><strong>3. Plus de crédit sur ton compte.</strong> Vérifie le solde là où tu l'as créée.</p>
+          <p><strong>4. Clé révoquée ou expirée.</strong> Crées-en une nouvelle et recolle-la.</p>
+          <p>Dans tous ces cas <strong>nous n'utilisons pas le crédit de NeuroDesk à ta place</strong> : on s'arrête et on te le dit, pour que tu puisses la corriger.</p>
+        </div>
+      </details>
+      <details>
+        <summary>« La clé semble trop courte »</summary>
+        <div class="corpo">
+          <p>Tu n'en as collé qu'une partie. Retourne là où tu l'as créée et recopie-la en entier — c'est souvent une sélection à la souris qui s'est arrêtée trop tôt.</p>
+          <p>Si tu ne la vois plus, crées-en une nouvelle : le fournisseur non plus ne te la remontrera pas.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Je l'ai enregistrée mais rien ne change</summary>
+        <div class="corpo">
+          <p>Attends une minute et réessaie : le service revérifie au plus une fois par minute, donc le premier message après l'enregistrement peut encore partir du crédit commun.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Qui peut voir ma clé ?</summary>
+        <div class="corpo">
+          <p><strong>Personne.</strong> Elle est chiffrée avec le même système que les conversations, et n'est ensuite visible par personne — pas même par celle qui gère NeuroDesk, qui voit seulement <em>qu'</em>il y en a une, et pour quel fournisseur.</p>
+          <p>Elle n'apparaît dans aucun journal et ne revient jamais vers le navigateur.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Puis-je fixer un plafond de dépense ?</summary>
+        <div class="corpo">
+          <p>Pas d'ici, mais depuis ton compte oui — et c'est la bonne chose à faire. Anthropic comme OpenAI permettent de fixer une limite mensuelle : avec ça, le risque est fermé à la source.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Je veux la retirer mais je n'arrive pas à me connecter</summary>
+        <div class="corpo">
+          <p>Écris-nous : nous pouvons aussi retirer la clé de ton accès. Nous ne pouvons pas la lire, mais nous pouvons l'effacer.</p>
+          <p>Si tu es pressé, le plus rapide reste de la révoquer depuis ton compte : à partir de là elle ne fonctionne plus, où qu'elle soit.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
   <section class="blocco" id="segnalare">
     <h2>Nous signaler un problème</h2>
     <p class="intro">Quelques lignes suffisent. Avec ces quatre éléments, c'est bien plus simple pour nous.</p>
@@ -410,7 +493,7 @@
     <p class="intro">Inutile de nous envoyer le contenu de votre conversation : il ne sert pas à corriger un défaut. Si vous voulez nous dire ce que vous en avez pensé, la section <strong>Feedback</strong> est dans l'application.</p>
   </section>
 
-    <p class="aggiornato">Dernière mise à jour : 27 juillet 2026.</p>
+    <p class="aggiornato">Dernière mise à jour : 29 juillet 2026.</p>
   </div>
 </main>
 

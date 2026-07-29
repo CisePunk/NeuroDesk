@@ -177,6 +177,8 @@
   .trad { color: var(--text-3); font-style: italic; }
 
   .aggiornato { max-width: var(--testo); margin-top: 3rem; color: var(--text-3); font-size: 0.88rem; }
+
+  .sotto-titolo { font-family: var(--sans); font-size: 1rem; font-weight: 700; margin: 1.8rem 0 0.7rem; }
 </style>
 
 <script>
@@ -396,6 +398,87 @@
     </div>
   </section>
 
+  <section class="blocco" id="chiave-api">
+    <h2>Usare la tua chiave API</h2>
+    <p class="intro">
+      Serve solo se sei uno sviluppatore e hai già un account Anthropic o OpenAI. Se non sai cos'è
+      una chiave API, <strong>salta pure questa sezione</strong>: non ti serve, e non stai pesando
+      su nessuno — una risposta costa meno di mezzo centesimo.
+    </p>
+
+    <ol class="passi">
+      <li>
+        <h3>Crea la chiave sul tuo account</h3>
+        <p>
+          Su <strong>console.anthropic.com</strong> (oppure <strong>platform.openai.com</strong>),
+          nella sezione <em>API keys</em>, creane una nuova.
+        </p>
+        <p class="poi">Copiala subito: anche loro te la mostrano una volta sola.</p>
+      </li>
+      <li>
+        <h3>Incollala dentro NeuroDesk</h3>
+        <p>
+          Nella pagina Companion, sotto il riquadro dove scrivi, apri <strong>Opzioni avanzate</strong>.
+          Scegli il fornitore giusto nel menu e incolla la chiave.
+        </p>
+        <p class="poi">Da quel momento le tue conversazioni le paghi tu, sul tuo conto.</p>
+      </li>
+      <li>
+        <h3>Quando vuoi, torni indietro</h3>
+        <p>Nello stesso pannello: <strong>Torna al credito comune</strong>.</p>
+        <p class="poi">Se non la usi altrove, ricordati di revocare la chiave anche dal tuo account.</p>
+      </li>
+    </ol>
+
+    <h3 class="sotto-titolo">Se qualcosa non funziona</h3>
+    <div class="accordion">
+      <details>
+        <summary>«La chiave API che hai fornito non è stata accettata»</summary>
+        <div class="corpo">
+          <p>Il fornitore l'ha rifiutata. Nell'ordine, le cause più frequenti:</p>
+          <p><strong>1. Non l'hai copiata tutta.</strong> Sono lunghe e si tagliano facilmente. Ricopiala per intero.</p>
+          <p><strong>2. Fornitore sbagliato nel menu.</strong> Una chiave Anthropic con «OpenAI» selezionato viene rifiutata, e viceversa.</p>
+          <p><strong>3. Credito finito sul tuo account.</strong> Controlla il saldo dove l'hai creata.</p>
+          <p><strong>4. Chiave revocata o scaduta.</strong> Creane una nuova e reincollala.</p>
+          <p>In tutti questi casi <strong>non usiamo il credito di NeuroDesk al tuo posto</strong>: ti fermiamo e te lo diciamo, così puoi sistemarla tu.</p>
+        </div>
+      </details>
+      <details>
+        <summary>«La chiave sembra troppo corta»</summary>
+        <div class="corpo">
+          <p>Hai incollato solo un pezzo. Torna dove l'hai creata e ricopiala per intero — di solito il problema è una selezione col mouse che si è fermata prima.</p>
+          <p>Se non riesci più a vederla, creane una nuova: nemmeno il fornitore te la rimostra.</p>
+        </div>
+      </details>
+      <details>
+        <summary>L'ho messa ma non cambia niente</summary>
+        <div class="corpo">
+          <p>Aspetta un minuto e riprova: il servizio ricontrolla al massimo una volta al minuto, quindi il primo messaggio dopo il salvataggio può ancora partire dal credito comune.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Chi può vedere la mia chiave?</summary>
+        <div class="corpo">
+          <p><strong>Nessuno.</strong> Viene cifrata con lo stesso sistema con cui cifriamo le conversazioni, e non è più visibile a nessuno — nemmeno a chi gestisce NeuroDesk, che vede soltanto <em>che</em> ce n'è una e per quale fornitore.</p>
+          <p>Non compare in nessun registro e non torna mai indietro verso il browser.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Posso mettere un tetto di spesa?</summary>
+        <div class="corpo">
+          <p>Non da qui, ma dal tuo account sì — ed è la cosa giusta da fare. Sia Anthropic sia OpenAI permettono di impostare un limite mensile: se ce lo metti, il rischio è chiuso alla fonte.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Voglio toglierla, ma non riesco a entrare</summary>
+        <div class="corpo">
+          <p>Scrivici: possiamo togliere la chiave dal tuo accesso anche noi. Non possiamo leggerla, ma possiamo cancellarla.</p>
+          <p>Se hai fretta, la strada più veloce resta revocarla dal tuo account: da quel momento non funziona più, ovunque sia.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
   <section class="blocco" id="segnalare">
     <h2>Segnalarci un problema</h2>
     <p class="intro">Bastano poche righe. Se ci metti queste quattro cose, per noi è molto più facile.</p>
@@ -409,7 +492,7 @@
     <p class="intro">Non serve mandarci il contenuto della conversazione: per sistemare un difetto non ci serve. Se invece vuoi dirci com'è andata nel merito, c'è <strong>Feedback</strong> dentro l'app.</p>
   </section>
 
-    <p class="aggiornato">Ultimo aggiornamento: 27 luglio 2026.</p>
+    <p class="aggiornato">Ultimo aggiornamento: 29 luglio 2026.</p>
   </div>
 </main>
 

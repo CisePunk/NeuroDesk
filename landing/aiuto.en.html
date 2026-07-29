@@ -177,6 +177,8 @@
   .trad { color: var(--text-3); font-style: italic; }
 
   .aggiornato { max-width: var(--testo); margin-top: 3rem; color: var(--text-3); font-size: 0.88rem; }
+
+  .sotto-titolo { font-family: var(--sans); font-size: 1rem; font-weight: 700; margin: 1.8rem 0 0.7rem; }
 </style>
 
 <script>
@@ -397,6 +399,87 @@
     </div>
   </section>
 
+  <section class="blocco" id="chiave-api">
+    <h2>Using your own API key</h2>
+    <p class="intro">
+      This is only for developers who already have an Anthropic or OpenAI account. If you do not know
+      what an API key is, <strong>skip this section</strong>: you do not need it, and you are not
+      weighing on anyone — one answer costs less than half a cent.
+    </p>
+
+    <ol class="passi">
+      <li>
+        <h3>Create the key on your own account</h3>
+        <p>
+          On <strong>console.anthropic.com</strong> (or <strong>platform.openai.com</strong>),
+          in the <em>API keys</em> section, create a new one.
+        </p>
+        <p class="poi">Copy it straight away: they also show it only once.</p>
+      </li>
+      <li>
+        <h3>Paste it into NeuroDesk</h3>
+        <p>
+          On the Companion page, under the box where you write, open <strong>Advanced options</strong>.
+          Pick the right provider in the menu and paste the key.
+        </p>
+        <p class="poi">From then on you pay for your own conversations, on your own account.</p>
+      </li>
+      <li>
+        <h3>You can go back whenever you want</h3>
+        <p>In the same panel: <strong>Go back to the shared credit</strong>.</p>
+        <p class="poi">If you do not use it elsewhere, remember to revoke the key on your own account too.</p>
+      </li>
+    </ol>
+
+    <h3 class="sotto-titolo">If something does not work</h3>
+    <div class="accordion">
+      <details>
+        <summary>"The API key you gave us was not accepted"</summary>
+        <div class="corpo">
+          <p>The provider refused it. In order, the most common causes:</p>
+          <p><strong>1. You did not copy all of it.</strong> They are long and easy to cut short. Copy the whole thing again.</p>
+          <p><strong>2. Wrong provider in the menu.</strong> An Anthropic key with "OpenAI" selected gets refused, and the other way round.</p>
+          <p><strong>3. No credit left on your account.</strong> Check the balance where you created it.</p>
+          <p><strong>4. Key revoked or expired.</strong> Create a new one and paste it again.</p>
+          <p>In all these cases <strong>we do not use NeuroDesk's credit in your place</strong>: we stop and tell you, so you can fix it yourself.</p>
+        </div>
+      </details>
+      <details>
+        <summary>"The key looks too short"</summary>
+        <div class="corpo">
+          <p>You only pasted part of it. Go back where you created it and copy the whole thing — usually a mouse selection that stopped early.</p>
+          <p>If you cannot see it any more, create a new one: the provider will not show it to you again either.</p>
+        </div>
+      </details>
+      <details>
+        <summary>I saved it but nothing changed</summary>
+        <div class="corpo">
+          <p>Wait a minute and try again: the service re-checks at most once a minute, so the first message after saving may still come out of the shared credit.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Who can see my key?</summary>
+        <div class="corpo">
+          <p><strong>Nobody.</strong> It is encrypted with the same system we use for the conversations, and is not visible to anyone afterwards — not even to whoever runs NeuroDesk, who only sees <em>that</em> there is one, and for which provider.</p>
+          <p>It appears in no log and never travels back to the browser.</p>
+        </div>
+      </details>
+      <details>
+        <summary>Can I set a spending cap?</summary>
+        <div class="corpo">
+          <p>Not from here, but from your own account yes — and it is the right thing to do. Both Anthropic and OpenAI let you set a monthly limit: with that in place, the risk is closed at the source.</p>
+        </div>
+      </details>
+      <details>
+        <summary>I want to remove it but I cannot sign in</summary>
+        <div class="corpo">
+          <p>Write to us: we can remove the key from your access too. We cannot read it, but we can delete it.</p>
+          <p>If you are in a hurry, the fastest route is revoking it on your own account: from that moment it stops working, wherever it is.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
   <section class="blocco" id="segnalare">
     <h2>Reporting a problem</h2>
     <p class="intro">A few lines will do. Include these four things and it gets much easier for us.</p>
@@ -410,7 +493,7 @@
     <p class="intro">No need to send the contents of your conversation: we don't need it to fix a defect. If you'd rather tell us what you thought of it, there's <strong>Feedback</strong> inside the app.</p>
   </section>
 
-    <p class="aggiornato">Last updated: 27 July 2026.</p>
+    <p class="aggiornato">Last updated: 29 July 2026.</p>
   </div>
 </main>
 

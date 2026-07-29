@@ -1916,3 +1916,19 @@ main h1, main h2 { margin-top: 0; }
   color: var(--text-3);
   opacity: 0.8;
 }
+
+/* "Bring your own token" — pannello dentro le opzioni avanzate del Companion.
+   La chiave la mette la persona stessa: non passa mai dal browser di chi
+   gestisce NeuroDesk, che ne vede soltanto l'esistenza. */
+.chiave-mia {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.chiave-mia h4 { margin: 0 0 8px; font-size: 14px; font-weight: 700; }
+.chiave-mia p  { margin: 0 0 10px; font-size: 13px; line-height: 1.55; color: var(--text-2); }
+.chiave-attiva { color: var(--success) !important; font-weight: 600; }
+.chiave-attiva span { font-weight: 400; opacity: 0.8; }
+.chiave-nota   { font-size: 12px !important; color: var(--text-3) !important; margin-bottom: 0 !important; }

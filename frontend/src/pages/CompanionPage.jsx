@@ -10,6 +10,7 @@ import { revocaConsenso } from '../api/authApi';
 import { useAuth } from '../auth/AuthContext';
 import { useToast } from '../ui/ToastProvider';
 import { testi } from '../i18n/lingua';
+import { impostaChiaveAi, rimuoviChiaveAi, getMe } from '../api/authApi';
 
 // Le modalita' prendono i testi dal dizionario: il valore ('crisis_mode', ...)
 // non cambia mai con la lingua, perche' e' quello che viaggia verso il server e
@@ -79,6 +80,49 @@ function CompanionPage() {
     // della pagina. Il valore della modalita' che viaggia al server non cambia.
     const t = testi();
     const MODES = costruisciModes(t);
+
+    // "Bring your own token": lo stato della PROPRIA chiave. Il testo della
+    // chiave vive solo qui e sparisce appena salvato — non torna mai indietro
+    // dal server, nemmeno a chi l'ha messa.
+    const [chiaveMia, setChiaveMia] = useState(null);   // { chiavePropria, chiaveProvider }
+    const [chiaveTesto, setChiaveTesto] = useState('');
+    const [chiaveProv, setChiaveProv] = useState('anthropic');
+    const [chiaveInCorso, setChiaveInCorso] = useState(false);
+
+    useEffect(() => {
+        let vivo = true;
+        getMe()
+            .then(d => { if (vivo) setChiaveMia({ chiavePropria: d?.chiavePropria, chiaveProvider: d?.chiaveProvider }); })
+            .catch(() => { /* non e' un motivo per rompere la pagina */ });
+        return () => { vivo = false; };
+    }, []);
+
+    async function salvaChiaveMia() {
+        setChiaveInCorso(true);
+        try {
+            await impostaChiaveAi(chiaveProv, chiaveTesto);
+            setChiaveTesto('');
+            setChiaveMia({ chiavePropria: true, chiaveProvider: chiaveProv });
+            toast.successo(t.chiaveSalvata);
+        } catch (err) {
+            toast.errore(err.message);
+        } finally {
+            setChiaveInCorso(false);
+        }
+    }
+
+    async function togliChiaveMia() {
+        setChiaveInCorso(true);
+        try {
+            await rimuoviChiaveAi();
+            setChiaveMia({ chiavePropria: false, chiaveProvider: null });
+            toast.successo(t.chiaveTolta);
+        } catch (err) {
+            toast.errore(err.message);
+        } finally {
+            setChiaveInCorso(false);
+        }
+    }
     const activeMode = MODES.find(item => item.value === mode);
 
     // Stato reale del servizio: così il badge non afferma "mock" quando l'AI è vera.
@@ -376,6 +420,62 @@ function CompanionPage() {
                                     <button type="button" className="companion-clear-history" onClick={revocaMioConsenso}>
                                         {t.compRevoca}
                                     </button>
+                                )}
+
+                                {/* La chiave la mette la persona stessa: non passa
+                                    dalle mani di chi gestisce NeuroDesk, che ne vede
+                                    solo l'esistenza. */}
+                                {ruolo === 'STUDENTE' && chiaveMia && (
+                                    <div className="chiave-mia">
+                                        <h4>{t.chiaveTitolo}</h4>
+                                        {chiaveMia.chiavePropria ? (
+                                            <>
+                                                <p className="chiave-attiva">
+                                                    ✓ {t.chiaveAttiva} <span>({chiaveMia.chiaveProvider})</span>
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    className="btn-ghost"
+                                                    onClick={togliChiaveMia}
+                                                    disabled={chiaveInCorso}
+                                                >
+                                                    {t.chiaveTogli}
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <p>{t.chiaveSpiega}</p>
+                                                <div className="form-group">
+                                                    <label htmlFor="chiave-prov">{t.chiaveFornitore}</label>
+                                                    <select id="chiave-prov" value={chiaveProv} onChange={(e) => setChiaveProv(e.target.value)}>
+                                                        <option value="anthropic">Anthropic</option>
+                                                        <option value="openai">OpenAI</option>
+                                                    </select>
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor="chiave-mia">{t.chiaveCampo}</label>
+                                                    <input
+                                                        id="chiave-mia"
+                                                        type="password"
+                                                        value={chiaveTesto}
+                                                        onChange={(e) => setChiaveTesto(e.target.value)}
+                                                        placeholder={t.chiaveSegnaposto}
+                                                        autoComplete="off"
+                                                        spellCheck={false}
+                                                    />
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="btn-secondary"
+                                                    onClick={salvaChiaveMia}
+                                                    disabled={chiaveInCorso || chiaveTesto.trim().length < 20}
+                                                >
+                                                    {chiaveInCorso ? t.chiaveSalvataggio : t.chiaveSalva}
+                                                </button>
+                                            </>
+                                        )}
+                                        <p className="chiave-nota">{t.chiaveNota}</p>
+                                    </div>
                                 )}
                             </div>
                         )}

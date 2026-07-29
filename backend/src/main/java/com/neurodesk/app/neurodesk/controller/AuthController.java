@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
@@ -21,6 +23,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final LoginRateLimiter rateLimiter;
+    private final com.neurodesk.app.neurodesk.service.TesterService testerService;
 
     @PostMapping("/login")
     public LoginResponse login(@Valid @RequestBody LoginRequest req, HttpServletRequest request) {
@@ -39,9 +42,35 @@ public class AuthController {
         }
     }
 
+    /**
+     * La persona imposta LA PROPRIA chiave API ("bring your own token").
+     *
+     * Sta qui e non fra le funzioni di amministrazione apposta: la chiave e' sua,
+     * e deve poterla mettere lei senza passarla a nessuno. Cosi' non transita mai
+     * dal browser di chi gestisce NeuroDesk, che ne vede solo l'esistenza.
+     *
+     * Arriva in chiaro solo in questa richiesta, su HTTPS, viene cifrata prima di
+     * toccare il database e non torna mai indietro: nemmeno a lei.
+     */
+    @PutMapping("/chiave-ai")
+    public void impostaChiaveAi(@AuthenticationPrincipal Utente utente,
+                                @RequestBody Map<String, String> body) {
+        if (body == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Corpo della richiesta mancante.");
+        }
+        testerService.impostaChiaveAi(utente.getId(), body.get("provider"), body.get("chiave"));
+    }
+
+    /** Toglie la propria chiave: si torna a usare il credito comune. */
+    @DeleteMapping("/chiave-ai")
+    public void rimuoviChiaveAi(@AuthenticationPrincipal Utente utente) {
+        testerService.rimuoviChiaveAi(utente.getId());
+    }
+
     @GetMapping("/me")
     public MeResponse me(@AuthenticationPrincipal Utente utente) {
-        return new MeResponse(utente.getRuolo(), utente.getConsensoIl() != null);
+        return new MeResponse(utente.getRuolo(), utente.getConsensoIl() != null,
+                utente.getChiaveAiCifrata() != null, utente.getChiaveAiProvider());
     }
 
     @PostMapping("/consenso")

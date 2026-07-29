@@ -47,21 +47,14 @@ public class TesterController {
     }
 
     /**
-     * Imposta la chiave API personale di un tester ("bring your own token"):
-     * da qui in poi le sue risposte le paga lui, sul suo conto.
+     * NON esiste piu' un modo per l'amministrazione di IMPOSTARE la chiave di
+     * qualcun altro: la mette la persona stessa, dalle opzioni del Companion
+     * (PUT /api/auth/chiave-ai). Cosi' non passa mai dal browser di chi gestisce
+     * NeuroDesk, che ne vede soltanto l'esistenza.
      *
-     * La chiave arriva in chiaro SOLO in questa richiesta, viaggia su HTTPS,
-     * viene cifrata prima di toccare il database e non torna mai indietro:
-     * l'elenco dei codici dice soltanto se c'e' e per quale fornitore.
+     * Resta la RIMOZIONE, perche' e' l'unica cosa che puo' servire per aiutare
+     * qualcuno rimasto bloccato con una chiave che non funziona piu'.
      */
-    @PutMapping("/{id}/chiave")
-    public void impostaChiave(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        if (body == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Corpo della richiesta mancante.");
-        }
-        testerService.impostaChiaveAi(id, body.get("provider"), body.get("chiave"));
-    }
-
     /** Toglie la chiave personale: il tester torna a usare il credito comune. */
     @DeleteMapping("/{id}/chiave")
     public void rimuoviChiave(@PathVariable Long id) {
