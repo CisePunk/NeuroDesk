@@ -1,4 +1,5 @@
 import { messaggioAmichevole, getToken, clearToken } from './http';
+import { testi } from '../i18n/lingua';
 
 // Il Companion e' un servizio separato (Node), raggiunto via proxy Vite su
 // /api/companion. Ora e' PROTETTO: manda lo stesso token JWT del backend, cosi'
@@ -19,7 +20,7 @@ export async function sendCompanionMessage({ message, mode, profile, history }) 
             body: JSON.stringify({ message, mode, profile, history }),
         });
     } catch {
-        throw new Error('Non riesco a raggiungere il Companion. Controlla la connessione e riprova fra un minuto.');
+        throw new Error(testi().errCompanion);
     }
 
     if (!response.ok) {

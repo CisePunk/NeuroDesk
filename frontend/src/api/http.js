@@ -5,6 +5,7 @@
 // URL del backend Spring. In sviluppo: localhost:8080. In produzione si imposta
 // VITE_API_BASE_URL (build-time), es. "https://tuo-dominio/api-backend", oppure ""
 // per chiamate same-origin dietro reverse proxy. Vedi .env.production.example.
+import { testi } from '../i18n/lingua';
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080';
 const TOKEN_KEY = 'nd-token';
 
@@ -51,22 +52,22 @@ export function clearToken() {
 export function messaggioAmichevole(status, serverMessage) {
   switch (status) {
     case 0:
-      return 'Non riesco a collegarmi. Controlla la connessione e riprova fra un minuto.';
+      return t.errRete;
     case 401:
-      return 'Codice o password non validi.';
+      return t.errCredenziali;
     case 403:
-      return 'Questa parte non è disponibile con il tuo accesso.';
+      return t.errPermesso;
     case 404:
-      return 'Non trovo quello che cercavi. Forse è stato cancellato.';
+      return t.errNonTrovato;
     case 409:
-      return 'Esiste già qualcosa con questi dati.';
+      return t.errConflitto;
     case 429:
-      return 'Troppi tentativi ravvicinati. Aspetta un paio di minuti e riprova.';
+      return t.errTroppi;
     case 400:
-      return serverMessage || 'Qualche dato non va bene. Controlla i campi e riprova.';
+      return serverMessage || t.errDati;
     default:
-      if (status >= 500) return 'Il problema è dalla nostra parte, non tuo. Riprova fra qualche minuto.';
-      return serverMessage || 'Qualcosa non ha funzionato. Riprova, e se continua scrivici.';
+      if (status >= 500) return t.errNostro;
+      return serverMessage || t.errGenerico;
   }
 }
 

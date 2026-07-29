@@ -1905,3 +1905,14 @@ main h1, main h2 { margin-top: 0; }
     max-height: calc(100vh - 220px);
   }
 }
+
+/* Nota in fondo al consenso: la traduzione serve a capire, l'italiano fa fede.
+   Piccola e discreta, ma presente — nasconderla sarebbe scorretto verso chi
+   legge l'inglese o il francese. */
+.consent-riferimento {
+  margin: 14px 0 0;
+  font-size: 11px;
+  text-align: center;
+  color: var(--text-3);
+  opacity: 0.8;
+}

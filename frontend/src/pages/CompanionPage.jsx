@@ -9,39 +9,20 @@ import {
 import { revocaConsenso } from '../api/authApi';
 import { useAuth } from '../auth/AuthContext';
 import { useToast } from '../ui/ToastProvider';
+import { testi } from '../i18n/lingua';
 
-const MODES = [
-    {
-        value: 'crisis_mode',
-        label: 'Blocco',
-        hint: 'Quando tutto sembra troppo',
-        description: 'Riceverai una sola micro-azione da 2 a 5 minuti. Niente liste, niente piani. Solo il passo più piccolo possibile da fare adesso.',
-    },
-    {
-        value: 'study_mode',
-        label: 'Studio',
-        hint: 'Testi, esami, memoria',
-        description: 'Il materiale viene diviso in blocchi piccoli. Se serve, verranno create domande brevi per aiutarti a ricordare.',
-    },
-    {
-        value: 'bureaucracy_mode',
-        label: 'Burocrazia',
-        hint: 'Documenti e uffici',
-        description: "Viene creata una checklist o una bozza di messaggio. I dati vanno sempre verificati con l'ente competente.",
-    },
-    {
-        value: 'work_mode',
-        label: 'Lavoro',
-        hint: 'Annunci e candidature',
-        description: 'Si parte dai tuoi vincoli reali: salute, energia, orari, stress. Nessuna scelta definitiva, solo il passo successivo.',
-    },
-    {
-        value: 'autonomy_mode',
-        label: 'Autonomie',
-        hint: 'Soldi, casa, routine',
-        description: 'Affrontiamo una sola area alla volta: soldi, casa, routine o scadenze. Nessuna panoramica complessa.',
-    },
-];
+// Le modalita' prendono i testi dal dizionario: il valore ('crisis_mode', ...)
+// non cambia mai con la lingua, perche' e' quello che viaggia verso il server e
+// decide come risponde il Companion. Cambia solo cosa si legge a schermo.
+function costruisciModes(t) {
+    return [
+        { value: 'crisis_mode',      label: t.modoBloccoL,     hint: t.modoBloccoH,     description: t.modoBloccoD },
+        { value: 'study_mode',       label: t.modoStudioL,     hint: t.modoStudioH,     description: t.modoStudioD },
+        { value: 'bureaucracy_mode', label: t.modoBurocraziaL, hint: t.modoBurocraziaH, description: t.modoBurocraziaD },
+        { value: 'work_mode',        label: t.modoLavoroL,     hint: t.modoLavoroH,     description: t.modoLavoroD },
+        { value: 'autonomy_mode',    label: t.modoAutonomieL,  hint: t.modoAutonomieH,  description: t.modoAutonomieD },
+    ];
+}
 
 const PROFILE_TEMPLATE = {
     energy: 'bassa',
@@ -94,6 +75,10 @@ function CompanionPage() {
     // Voce del dispositivo (SpeechSynthesis): gira in locale, non tocca il server.
     const ttsDisponibile = typeof window !== 'undefined' && 'speechSynthesis' in window;
 
+    // Lingua di chi legge: decide le etichette delle modalita' e i testi fissi
+    // della pagina. Il valore della modalita' che viaggia al server non cambia.
+    const t = testi();
+    const MODES = costruisciModes(t);
     const activeMode = MODES.find(item => item.value === mode);
 
     // Stato reale del servizio: così il badge non afferma "mock" quando l'AI è vera.
@@ -147,7 +132,7 @@ function CompanionPage() {
 
         const cleanMessage = message.trim();
         if (!cleanMessage) {
-            setErrore('Serve almeno una parola per continuare.');
+            setErrore(t.compVuoto);
             return;
         }
 
@@ -230,7 +215,7 @@ function CompanionPage() {
         const righe = conversation.map(m =>
             (m.role === 'user' ? 'Tu:\n' : 'Companion:\n') + m.content
         );
-        const testo = ['NeuroDesk Companion — la tua conversazione', '', ...righe].join('\n\n');
+        const testo = [t.compConversazione, '', ...righe].join('\n\n');
         const blob = new Blob([testo], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -243,27 +228,27 @@ function CompanionPage() {
     }
 
     async function revocaMioConsenso() {
-        if (!window.confirm('Vuoi revocare il consenso all\'uso del Companion? Potrai ridarlo quando vuoi. Le conversazioni già salvate restano finché non le cancelli tu.')) {
+        if (!window.confirm(t.compRevocaChiedi)) {
             return;
         }
         try {
             const res = await revocaConsenso();
             // Nuovo token con consenso=false: da qui l'app riporta alla pagina del consenso.
             segnaRevocaConsenso(res?.token);
-            toast.successo('Consenso revocato. Puoi ridarlo quando vuoi.');
+            toast.successo(t.compRevocato);
         } catch (err) {
             toast.errore(err.message);
         }
     }
 
     async function cancellaTutto() {
-        if (!window.confirm('Vuoi cancellare tutta la tua cronologia salvata? L\'operazione non è reversibile.')) {
+        if (!window.confirm(t.compCancellaChiedi)) {
             return;
         }
         try {
             await cancellaCronologia();
             nuovaConversazione();
-            toast.successo('Cronologia cancellata.');
+            toast.successo(t.compCancellata);
         } catch (err) {
             toast.errore(err.message);
         }
@@ -275,11 +260,13 @@ function CompanionPage() {
         <div className="page companion-page">
             <div className="page-header companion-header">
                 <div>
-                    <h1>Companion</h1>
+                    <h1>{t.compTitolo}</h1>
                     <p className="subtitle">
-                        Il tuo aiuto pratico, un passo piccolo quando tutto sembra troppo.
+                        {t.compSottotitolo}
                         <br />
-                        <strong>Come si usa:</strong> scegli l'area qui sotto, scrivi cosa ti blocca e premi il pulsante — ricevi <strong>un solo piccolo passo</strong> da fare. <span aria-hidden="true">👇</span>
+                        <strong>{t.compComeSiUsaA}</strong> {t.compComeSiUsaB}{' '}
+                        <strong>{t.compComeSiUsaC}</strong> {t.compComeSiUsaD}{' '}
+                        <span aria-hidden="true">👇</span>
                     </p>
                 </div>
                 {(() => {
@@ -287,7 +274,7 @@ function CompanionPage() {
                     // prima, lo stato letto da /health; se ancora ignoto, non affermo nulla.
                     const p = lastMeta?.provider ?? providerConfigurato;
                     if (!p) return null;
-                    const testo = p === 'mock' ? 'AI di prova (mock)' : `Provider: ${p}`;
+                    const testo = p === 'mock' ? t.compMock : `Provider: ${p}`;
                     return <span className="badge badge-secondary">{testo}</span>;
                 })()}
             </div>
@@ -340,14 +327,14 @@ function CompanionPage() {
                                     <span /><span /><span />
                                 </span>
                             </>
-                        ) : vuota ? 'Aiutami a fare il prossimo passo' : 'Continua'}
+                        ) : vuota ? t.compInvia : 'Continua'}
                     </button>
 
                     {!vuota && (
                         <div className="companion-thread-actions">
                             {ttsDisponibile && (
                                 <button type="button" className="btn-secondary" onClick={ascolta}>
-                                    <span aria-hidden="true">{parlando ? '⏹' : '🔊'}</span> {parlando ? 'Ferma' : 'Ascolta la risposta'}
+                                    <span aria-hidden="true">{parlando ? '⏹' : '🔊'}</span> {parlando ? 'Ferma' : t.compAscolta}
                                 </button>
                             )}
                             <button type="button" className="btn-secondary" onClick={scaricaIstruzioni}>
@@ -406,7 +393,7 @@ function CompanionPage() {
                     {vuota && !caricamento ? (
                         <div className="companion-empty">
                             <p className="companion-empty-mode">{activeMode?.description}</p>
-                            <p className="companion-empty-cta">Descrivi il blocco nel form e invia.</p>
+                            <p className="companion-empty-cta">{t.compDescrivi}</p>
                         </div>
                     ) : (
                         <div className="companion-thread" aria-live="polite" aria-atomic="false" aria-busy={caricamento}>
@@ -427,7 +414,7 @@ function CompanionPage() {
                                     <span className="companion-dots companion-dots--lg">
                                         <span /><span /><span />
                                     </span>
-                                    <p>Sto preparando un passo concreto...</p>
+                                    <p>{t.compInvioInCorso}</p>
                                 </div>
                             )}
 
