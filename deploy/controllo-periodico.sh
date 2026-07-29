@@ -184,6 +184,52 @@ USATO=$(df / | awk 'NR==2{print $5}' | tr -d '%')
 [ "$USATO" -gt 85 ] && grave "disco pieno all'${USATO}% (liberi ${LIBERO})" \
                     || ok "disco usato al ${USATO}%, liberi ${LIBERO}"
 
+titolo "A7. Chi ha bussato (honeypot)"
+
+# Legge l'archivio scritto dall'honeypot, che a sua volta legge il log di Caddy.
+# Qui non si guarda il singolo tentativo — un sito pubblico viene scansionato
+# tutti i giorni — ma la forma: quante origini distinte, e se qualcuna insiste.
+EVENTI=/var/log/neurodesk/honeypot-eventi.jsonl
+if [ ! -s "$EVENTI" ]; then
+    ok "nessun tentativo registrato (o honeypot non ancora attivo)"
+else
+    python3 - "$EVENTI" <<'PYTHON'
+import json, sys
+from collections import defaultdict
+from datetime import datetime, timedelta, timezone
+
+soglia = datetime.now(timezone.utc) - timedelta(days=3)
+per_impronta = defaultdict(lambda: {"n": 0, "rischio": 0})
+motivi = defaultdict(int)
+totale = 0
+for riga in open(sys.argv[1], encoding="utf-8", errors="replace"):
+    try:
+        e = json.loads(riga)
+        if datetime.fromisoformat(e["quando"]) < soglia:
+            continue
+    except Exception:
+        continue
+    totale += 1
+    motivi[e["motivo"]] += 1
+    r = per_impronta[e["impronta_ip"]]
+    r["n"] += 1
+    r["rischio"] = max(r["rischio"], e["rischio"])
+
+if totale == 0:
+    print("  [ok]      nessun tentativo negli ultimi 3 giorni")
+else:
+    print(f"  [ok]      {totale} tentativi da {len(per_impronta)} origini distinte (ultimi 3 giorni)")
+    for m, n in sorted(motivi.items(), key=lambda x: -x[1]):
+        print(f"            {m}: {n}")
+    insistenti = [(i, r) for i, r in per_impronta.items() if r["n"] >= 20]
+    if insistenti:
+        for i, r in sorted(insistenti, key=lambda x: -x[1]["n"])[:5]:
+            print(f"  [nota]    [{i}] ha fatto {r['n']} richieste: e' una scansione, non rumore")
+    else:
+        print("            nessuna origine insistente: e' il rumore di fondo di internet")
+PYTHON
+fi
+
 # =============================================================================
 # B) COME VA IL PILOTA
 # =============================================================================
