@@ -112,7 +112,21 @@ public final class FeedbackCatalogo {
                     List.of(
                             op("mai", "Mai", "Never", "Jamais"),
                             op("qualche_volta", "Qualche volta", "Sometimes", "Parfois"),
-                            op("spesso", "Spesso", "Often", "Souvent"))));
+                            op("spesso", "Spesso", "Often", "Souvent"))),
+            // Domanda aggiunta il 29 luglio 2026 per decidere con un numero, e non
+            // con un'impressione, se costruire uno spazio dove i tester possano
+            // parlarsi. Le risposte sono scritte per NON spingere verso il si':
+            // "no, preferisco da solo" e' messa come scelta legittima e non come
+            // rifiuto, altrimenti si misura la cortesia invece del bisogno.
+            new DomandaTradotta("comunita",
+                    "Ti piacerebbe un posto dove confrontarti con altri che hanno le tue stesse difficoltà?",
+                    "Would you like a place to talk things over with others facing the same difficulties?",
+                    "Aimerais-tu un endroit pour échanger avec d'autres qui vivent les mêmes difficultés ?",
+                    List.of(
+                            op("si_molto", "Sì, mi piacerebbe molto", "Yes, I would like that a lot", "Oui, beaucoup"),
+                            op("si_forse", "Forse, dipende da com'è fatto", "Maybe, depending how it works", "Peut-être, selon la forme"),
+                            op("no_solo", "No, preferisco usarlo da solo", "No, I prefer using it on my own", "Non, je préfère l'utiliser seul"),
+                            op("non_so", "Non saprei", "Not sure", "Je ne sais pas"))));
 
     /** Le domande in italiano. Usate dal report e dall'export CSV, che leggi tu. */
     public static final List<Domanda> DOMANDE = in("it");
