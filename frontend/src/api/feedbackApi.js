@@ -1,8 +1,12 @@
 import { apiFetch } from './http';
 
 // Domande fisse del feedback (pulsanti). Fonte unica: il catalogo lato backend.
-export function getFeedbackSchema() {
-    return apiFetch('/api/feedback/schema');
+// Le domande arrivano gia' tradotte dal backend: cambia solo l'etichetta mostrata,
+// il valore salvato resta lo stesso in tutte le lingue. Cosi' il report somma
+// insieme chi ha cliccato "Molto facile" e chi ha cliccato "Very easy".
+export function getFeedbackSchema(lingua) {
+    const q = lingua ? `?lang=${encodeURIComponent(lingua)}` : '';
+    return apiFetch(`/api/feedback/schema${q}`);
 }
 
 // Invia il feedback del tester. risposte = { idDomanda: idOpzione }.

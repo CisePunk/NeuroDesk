@@ -30,10 +30,17 @@ public class FeedbackController {
 
     private final FeedbackService feedbackService;
 
-    /** Domande fisse da mostrare nel form (pulsanti). Fonte unica: FeedbackCatalogo. */
+    /**
+     * Domande fisse da mostrare nel form (pulsanti). Fonte unica: FeedbackCatalogo.
+     *
+     * <p>{@code lang} cambia SOLO le etichette mostrate: i valori salvati restano gli
+     * stessi in tutte le lingue, quindi il report aggregato continua a sommare
+     * insieme la risposta di chi ha cliccato "Molto facile" e quella di chi ha
+     * cliccato "Very easy". Lingua sconosciuta o assente: italiano.
+     */
     @GetMapping("/schema")
-    public List<Domanda> schema() {
-        return FeedbackCatalogo.DOMANDE;
+    public List<Domanda> schema(@RequestParam(required = false) String lang) {
+        return FeedbackCatalogo.in(lang);
     }
 
     @PostMapping

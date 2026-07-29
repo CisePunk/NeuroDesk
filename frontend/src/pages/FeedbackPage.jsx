@@ -1,9 +1,16 @@
 import { useEffect, useState } from 'react';
 import { getFeedbackSchema, inviaFeedback } from '../api/feedbackApi';
 import { useToast } from '../ui/ToastProvider';
+import { linguaCorrente, testiFeedback } from '../i18n/lingua';
 
 function FeedbackPage() {
     const toast = useToast();
+    // La lingua del browser decide sia i testi della pagina sia quelli delle
+    // domande, che arrivano gia' tradotti dal backend. Chiedere un parere in una
+    // lingua che non si parla significa ricevere i clic sui pulsanti e mai il
+    // commento libero, che e' la parte che vale.
+    const lingua = linguaCorrente();
+    const t = testiFeedback(lingua);
 
     const [domande, setDomande] = useState([]);
     const [risposte, setRisposte] = useState({});
@@ -17,7 +24,7 @@ function FeedbackPage() {
 
     useEffect(() => {
         let attivo = true;
-        getFeedbackSchema()
+        getFeedbackSchema(lingua)
             .then((d) => {
                 if (attivo) setDomande(d ?? []);
             })
@@ -30,7 +37,7 @@ function FeedbackPage() {
         return () => {
             attivo = false;
         };
-    }, []);
+    }, [lingua]);
 
     function scegli(idDomanda, valore) {
         setRisposte((prev) => ({ ...prev, [idDomanda]: valore }));
@@ -48,7 +55,7 @@ function FeedbackPage() {
         try {
             await inviaFeedback({ risposte, descrizioneErrori, commento });
             setInviato(true);
-            toast.successo('Grazie! Il tuo feedback è stato inviato.');
+            toast.successo(t.grazieBreve);
         } catch (err) {
             toast.errore(err.message);
         } finally {
@@ -66,8 +73,8 @@ function FeedbackPage() {
     if (caricamento) {
         return (
             <div className="page">
-                <div className="page-header"><h2>Feedback</h2></div>
-                <p className="muted">Caricamento…</p>
+                <div className="page-header"><h2>{t.titolo}</h2></div>
+                <p className="muted">{t.caricamento}</p>
             </div>
         );
     }
@@ -75,11 +82,11 @@ function FeedbackPage() {
     if (inviato) {
         return (
             <div className="page">
-                <div className="page-header"><h2>Feedback</h2></div>
+                <div className="page-header"><h2>{t.titolo}</h2></div>
                 <div className="feedback-thanks">
-                    <p><strong>Grazie di cuore.</strong> Il tuo parere ci aiuta a migliorare NeuroDesk.</p>
+                    <p><strong>{t.grazieTitolo}</strong> {t.grazieTesto}</p>
                     <button type="button" className="btn-secondary" onClick={nuovo}>
-                        Lascia un altro feedback
+                        {t.altroFeedback}
                     </button>
                 </div>
             </div>
@@ -89,12 +96,10 @@ function FeedbackPage() {
     return (
         <div className="page">
             <div className="page-header">
-                <h2>Feedback</h2>
+                <h2>{t.titolo}</h2>
             </div>
 
-            <p className="feedback-intro">
-                Siamo in fase di test: dicci com'è andata. Bastano pochi tocchi, i commenti sono facoltativi.
-            </p>
+            <p className="feedback-intro">{t.intro}</p>
 
             {errore && <p className="errore">{errore}</p>}
 
@@ -119,31 +124,31 @@ function FeedbackPage() {
                 ))}
 
                 <div className="form-group">
-                    <label htmlFor="descrizioneErrori">Se hai avuto errori o blocchi, descrivili</label>
+                    <label htmlFor="descrizioneErrori">{t.etichettaErrori}</label>
                     <textarea
                         id="descrizioneErrori"
                         rows={3}
                         value={descrizioneErrori}
                         onChange={(e) => setDescrizioneErrori(e.target.value)}
-                        placeholder="Es. cliccando su Salva non succedeva niente…"
+                        placeholder={t.segnapostoErrori}
                         maxLength={4000}
                     />
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="commento">Altri commenti (facoltativo)</label>
+                    <label htmlFor="commento">{t.etichettaCommento}</label>
                     <textarea
                         id="commento"
                         rows={3}
                         value={commento}
                         onChange={(e) => setCommento(e.target.value)}
-                        placeholder="Cosa ti è piaciuto, cosa cambieresti…"
+                        placeholder={t.segnapostoCommento}
                         maxLength={4000}
                     />
                 </div>
 
                 <button type="submit" className="btn-primary" disabled={invio || vuoto}>
-                    {invio ? 'Invio…' : 'Invia feedback'}
+                    {invio ? t.invioInCorso : t.invia}
                 </button>
             </form>
         </div>
