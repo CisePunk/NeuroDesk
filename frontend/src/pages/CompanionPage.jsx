@@ -202,7 +202,9 @@ function CompanionPage() {
         if (!testo) return;
         synth.cancel();
         const u = new SpeechSynthesisUtterance(testo);
-        u.lang = 'it-IT';
+        // La voce segue la lingua di chi legge: leggere una risposta inglese
+        // con la pronuncia italiana la rende incomprensibile.
+        u.lang = t.codiceVoce;
         u.rate = 0.95; // un filo più lento: aiuta la comprensione
         u.onend = () => setParlando(false);
         u.onerror = () => setParlando(false);
@@ -213,7 +215,7 @@ function CompanionPage() {
     function scaricaIstruzioni() {
         if (conversation.length === 0) return;
         const righe = conversation.map(m =>
-            (m.role === 'user' ? 'Tu:\n' : 'Companion:\n') + m.content
+            (m.role === 'user' ? t.compTu + ':\n' : 'Companion:\n') + m.content
         );
         const testo = [t.compConversazione, '', ...righe].join('\n\n');
         const blob = new Blob([testo], { type: 'text/plain;charset=utf-8' });
@@ -283,7 +285,7 @@ function CompanionPage() {
                 <form className="form-card companion-form" onSubmit={handleSubmit}>
 
                     <div className="companion-step">
-                        <span className="companion-step-label">1 — In che area sei bloccata?</span>
+                        <span className="companion-step-label">{t.compPasso1b}</span>
                         <div className="mode-grid">
                             {MODES.map(item => (
                                 <button
@@ -301,7 +303,7 @@ function CompanionPage() {
                     </div>
 
                     <div className="companion-step">
-                        <label className="companion-step-label" htmlFor="companion-input">2 — Cosa non riesci a fare adesso?</label>
+                        <label className="companion-step-label" htmlFor="companion-input">{t.compPasso2}</label>
                         <textarea
                             id="companion-input"
                             ref={textareaRef}
@@ -309,7 +311,7 @@ function CompanionPage() {
                             value={message}
                             onChange={(event) => setMessage(event.target.value)}
                             rows={5}
-                            placeholder="Scrivi pure come vuoi. Non serve essere precisa."
+                            placeholder={t.compSegnaposto}
                         />
                     </div>
 
@@ -327,21 +329,21 @@ function CompanionPage() {
                                     <span /><span /><span />
                                 </span>
                             </>
-                        ) : vuota ? t.compInvia : 'Continua'}
+                        ) : vuota ? t.compInvia : t.compContinua}
                     </button>
 
                     {!vuota && (
                         <div className="companion-thread-actions">
                             {ttsDisponibile && (
                                 <button type="button" className="btn-secondary" onClick={ascolta}>
-                                    <span aria-hidden="true">{parlando ? '⏹' : '🔊'}</span> {parlando ? 'Ferma' : t.compAscolta}
+                                    <span aria-hidden="true">{parlando ? '⏹' : '🔊'}</span> {parlando ? t.compFerma : t.compAscolta}
                                 </button>
                             )}
                             <button type="button" className="btn-secondary" onClick={scaricaIstruzioni}>
-                                ↓ Scarica la conversazione
+                                ↓ {t.compScarica}
                             </button>
                             <button type="button" className="btn-ghost" onClick={nuovaConversazione}>
-                                Nuova conversazione
+                                {t.compNuova}
                             </button>
                         </div>
                     )}
@@ -354,7 +356,7 @@ function CompanionPage() {
                             aria-expanded={showAdvanced}
                             aria-controls="companion-advanced-panel"
                         >
-                            {showAdvanced ? '▾' : '▸'} Opzioni avanzate
+                            {showAdvanced ? '▾' : '▸'} {t.compAvanzate}
                         </button>
                         {showAdvanced && (
                             <div id="companion-advanced-panel">
@@ -364,15 +366,15 @@ function CompanionPage() {
                                         checked={includeProfile}
                                         onChange={(event) => setIncludeProfile(event.target.checked)}
                                     />
-                                    Includi profilo funzionale minimale
-                                    <span className="companion-profile-note"> — può consumare token in modalità AI reale</span>
+                                    {t.compProfilo}
+                                    <span className="companion-profile-note">{t.compProfiloNota}</span>
                                 </label>
                                 <button type="button" className="companion-clear-history" onClick={cancellaTutto}>
-                                    Cancella la mia cronologia
+                                    {t.compCancellaCronologia}
                                 </button>
                                 {ruolo === 'STUDENTE' && (
                                     <button type="button" className="companion-clear-history" onClick={revocaMioConsenso}>
-                                        Revoca il consenso
+                                        {t.compRevoca}
                                     </button>
                                 )}
                             </div>
@@ -380,13 +382,13 @@ function CompanionPage() {
                     </div>
 
                     <p className="companion-notice">
-                        Companion non sostituisce medico, terapeuta, tutor o consulente. Se stai male, parlane con una persona di cui ti fidi o con il tuo medico.
+                        {t.compAvviso}
                     </p>
                 </form>
 
                 <section className="companion-panel">
                     <div className="companion-panel-header">
-                        <span className="companion-panel-title">Conversazione</span>
+                        <span className="companion-panel-title">{t.compPannello}</span>
                         <span className="badge">{activeMode?.label}</span>
                     </div>
 
@@ -403,7 +405,7 @@ function CompanionPage() {
                                     className={`companion-msg companion-msg--${m.role === 'user' ? 'user' : 'assistant'}`}
                                 >
                                     <span className="companion-msg-label">
-                                        {m.role === 'user' ? 'Tu' : 'Companion'}
+                                        {m.role === 'user' ? t.compTu : 'Companion'}
                                     </span>
                                     <div className="companion-msg-body">{m.content}</div>
                                 </div>
@@ -420,7 +422,7 @@ function CompanionPage() {
 
                             {lastMeta && !caricamento && (
                                 <div className="companion-meta">
-                                    <span>Provider: {lastMeta.provider ?? 'nessuna chiamata AI'}</span>
+                                    <span>Provider: {lastMeta.provider ?? t.compNessunaChiamata}</span>
                                     {lastMeta.usage?.estimatedInputTokens && (
                                         <span>Token stimati: {lastMeta.usage.estimatedInputTokens}</span>
                                     )}

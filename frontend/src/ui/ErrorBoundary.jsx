@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import { testi } from '../i18n/lingua';
 
 /**
  * Rete di sicurezza per TUTTA l'app. Senza questa, un solo errore in un render o
@@ -36,13 +37,12 @@ class ErrorBoundary extends Component {
             <div className="auth-screen">
                 <div className="auth-card auth-card--wide">
                     <div className="auth-brand">
-                        <h1 className="auth-logo">Qualcosa si è inceppato</h1>
-                        <span className="auth-tagline">Non è colpa tua, ed è un problema nostro.</span>
+                        <h1 className="auth-logo">{testi().erroreTitolo}</h1>
+                        <span className="auth-tagline">{testi().erroreSottotitolo}</span>
                     </div>
 
                     <p className="consent-text">
-                        Ricarica la pagina: ritrovi la conversazione dov'era. Quello che avevi scritto
-                        è già salvato, non si perde niente.
+                        {testi().erroreTesto}
                     </p>
 
                     <button
@@ -50,12 +50,12 @@ class ErrorBoundary extends Component {
                         className="btn-primary auth-submit"
                         onClick={() => window.location.reload()}
                     >
-                        Ricarica la pagina
+                        {testi().erroreRicarica}
                     </button>
 
                     <p className="companion-notice">
-                        Se ti succede spesso, scrivici a <a href="mailto:hello@neurodesk.it">hello@neurodesk.it</a>:
-                        dicci quale pulsante avevi toccato e con che telefono o computer.
+                        {testi().erroreScriviciA}{' '}
+                        <a href="mailto:hello@neurodesk.it">hello@neurodesk.it</a>{testi().erroreScriviciB}
                     </p>
                 </div>
             </div>

@@ -4,9 +4,11 @@ import { IconDashboard, IconModuli, IconTask, IconCompanion, IconFeedback, IconS
 import { useAuth } from '../auth/AuthContext';
 import { getTestMode } from '../api/studentiApi';
 import AiutoInLinea from '../ui/AiutoInLinea';
+import { testi } from '../i18n/lingua';
 
 function MainLayout({ children }) {
     const { ruolo, logout } = useAuth();
+    const t = testi();
     const isScuola = ruolo === 'SCUOLA';
 
     // Moduli e Task servono solo in test: in produzione (test-mode=false) restano nascosti.
@@ -40,14 +42,14 @@ function MainLayout({ children }) {
     return (
         <div className="app">
             {/* Salta la barra laterale: visibile solo quando riceve il focus da tastiera. */}
-            <a className="skip-link" href="#contenuto-principale">Salta al contenuto</a>
+            <a className="skip-link" href="#contenuto-principale">{t.saltaAlContenuto}</a>
             <aside>
                 <div className="sidebar-shimmer" />
 
                 <div className="sidebar-brand">
                     <span className="sidebar-logo">NeuroDesk</span>
                     <span className="sidebar-tagline">
-                        {isScuola ? 'gestione scuola' : 'il tuo companion'}
+                        {isScuola ? t.taglineScuola : t.taglineTester}
                     </span>
                 </div>
 
@@ -78,11 +80,11 @@ function MainLayout({ children }) {
                     )}
                     <NavLink to="/companion" className={navClass}>
                         <IconCompanion className="nav-icon" />
-                        <span>Companion</span>
+                        <span>{t.navCompanion}</span>
                     </NavLink>
                     <NavLink to="/feedback" className={navClass}>
                         <IconFeedback className="nav-icon" />
-                        <span>{isScuola ? 'Report feedback' : 'Feedback'}</span>
+                        <span>{isScuola ? t.navReportFeedback : t.navFeedback}</span>
                     </NavLink>
                 </nav>
 
@@ -90,7 +92,7 @@ function MainLayout({ children }) {
                     <button
                         className="theme-toggle"
                         onClick={() => setIsLight(v => !v)}
-                        aria-label={isLight ? 'Passa al tema scuro' : 'Passa al tema chiaro'}
+                        aria-label={isLight ? t.temaScuro : t.temaChiaro}
                     >
                         <span className={`theme-icon theme-icon--moon${!isLight ? ' theme-icon--active' : ''}`}>
                             <IconMoon />
@@ -110,7 +112,7 @@ function MainLayout({ children }) {
                         non si distingue dalle altre voci. */}
                     <button className="btn-ghost logout-btn" onClick={logout}>
                         <IconEsci className="nav-icon logout-icon" aria-hidden="true" />
-                        <span>Esci</span>
+                        <span>{t.esci}</span>
                     </button>
 
                     {/* AGPLv3 art. 13: chi usa NeuroDesk attraverso la rete deve poter
@@ -121,7 +123,7 @@ function MainLayout({ children }) {
                         target="_blank"
                         rel="noopener noreferrer"
                     >
-                        Codice sorgente · AGPLv3
+                        {t.sorgente}
                     </a>
                 </div>
             </aside>

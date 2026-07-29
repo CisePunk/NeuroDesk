@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login as apiLogin } from '../api/authApi';
 import { useAuth } from '../auth/AuthContext';
+import { testi } from '../i18n/lingua';
 
 function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const t = testi();
 
   const [codice, setCodice] = useState('');
   const [password, setPassword] = useState('');
@@ -16,7 +18,7 @@ function LoginPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     if (!codice.trim()) {
-      setErrore('Inserisci il tuo codice di accesso.');
+      setErrore(t.loginCodiceMancante);
       return;
     }
     setErrore('');
@@ -37,17 +39,17 @@ function LoginPage() {
       <div className="auth-card">
         <div className="auth-brand">
           <h1 className="auth-logo">NeuroDesk</h1>
-          <span className="auth-tagline">Entra con il tuo codice</span>
+          <span className="auth-tagline">{t.loginTagline}</span>
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
           <label className="auth-field">
-            <span>Codice di accesso</span>
+            <span>{t.loginCampoCodice}</span>
             <input
               type="text"
               value={codice}
               onChange={(e) => setCodice(e.target.value)}
-              placeholder="es. neuro-xxxx-xxxx-xxxx-xxxx"
+              placeholder={t.loginSegnaposto}
               autoComplete="off"
               autoFocus
               disabled={caricamento}
@@ -56,7 +58,7 @@ function LoginPage() {
 
           {mostraPassword && (
             <label className="auth-field">
-              <span>Password (solo per la scuola)</span>
+              <span>{t.loginCampoPassword}</span>
               <input
                 type="password"
                 value={password}
@@ -74,7 +76,7 @@ function LoginPage() {
           )}
 
           <button type="submit" className="btn-primary auth-submit" disabled={caricamento}>
-            {caricamento ? 'Accesso…' : 'Entra'}
+            {caricamento ? t.loginInCorso : t.loginEntra}
           </button>
 
           <button
@@ -83,7 +85,7 @@ function LoginPage() {
             onClick={() => setMostraPassword((v) => !v)}
             disabled={caricamento}
           >
-            {mostraPassword ? '← Entra come tester (solo codice)' : 'Sei la scuola? Accedi con password'}
+            {mostraPassword ? t.loginTornaTester : t.loginVaiScuola}
           </button>
         </form>
       </div>

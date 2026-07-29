@@ -30,6 +30,74 @@ export function linguaCorrente() {
 
 const DIZIONARIO = {
     it: {
+        // ─── Menu, accesso, stati ────────────────────────────────────────────
+        saltaAlContenuto: 'Salta al contenuto',
+        taglineTester: 'il tuo companion',
+        taglineScuola: 'gestione scuola',
+        navCompanion: 'Companion',
+        navFeedback: 'Feedback',
+        navReportFeedback: 'Report feedback',
+        temaScuro: 'Passa al tema scuro',
+        temaChiaro: 'Passa al tema chiaro',
+        esci: 'Esci',
+        sorgente: 'Codice sorgente · AGPLv3',
+
+        loginTagline: 'Entra con il tuo codice',
+        loginCampoCodice: 'Codice di accesso',
+        loginSegnaposto: 'es. neuro-xxxx-xxxx-xxxx-xxxx',
+        loginCampoPassword: 'Password (solo per la scuola)',
+        loginCodiceMancante: 'Inserisci il tuo codice di accesso.',
+        loginEntra: 'Entra',
+        loginInCorso: 'Accesso…',
+        loginVaiScuola: 'Sei la scuola? Accedi con password',
+        loginTornaTester: '← Entra come tester (solo codice)',
+
+        statoCaricamento: 'Caricamento…',
+        statoRiprova: 'Riprova',
+        erroreTitolo: 'Qualcosa si è inceppato',
+        erroreTesto: "Ricarica la pagina: ritrovi la conversazione dov'era. Quello che avevi scritto è salvato sul server, non l'hai perso.",
+        erroreRicarica: 'Ricarica la pagina',
+        erroreSottotitolo: 'Non è colpa tua, ed è un problema nostro.',
+        erroreScriviciA: 'Se ti succede spesso, scrivici a',
+        erroreScriviciB: ': dicci quale pulsante avevi toccato e con che telefono o computer.',
+
+        // ─── Aiuto in linea ──────────────────────────────────────────────────
+        aiutoApri: 'Apri l\'aiuto',
+        aiutoTitolo: 'Aiuto',
+        aiutoChiudi: 'Chiudi',
+        aiutoIntro: 'Scegli la cosa che ti sta succedendo. Ogni risposta è un passo alla volta: fai il primo, poi passa al secondo.',
+        aiutoGuida: 'Guida completa:',
+        aiutoVoci: [
+            { titolo: 'La pagina è diventata bianca', passi: [
+                'Ricarica la pagina. Da computer premi F5. Da telefono trascina il dito verso il basso.',
+                'Se torna bianca una seconda volta, svuota la cache: trovi come si fa qui sotto.',
+                'Quello che avevi scritto non è perso: le conversazioni sono salvate sul server, non nel browser.' ] },
+            { titolo: 'Non riesco a entrare col mio codice', passi: [
+                'Controlla che ci siano tutti i trattini: il codice è fatto come neuro-xxxx-xxxx-xxxx-xxxx.',
+                'Copialo e incollalo invece di riscriverlo: è lungo e un carattere sbagliato basta.',
+                'Se hai sbagliato molte volte di fila, l\'accesso si blocca per un quarto d\'ora. Non è un guasto: aspetta e riprova.',
+                'Se il codice non lo trovi più, chiedine uno nuovo: quello vecchio non è recuperabile da nessuno, nemmeno da noi.' ] },
+            { titolo: 'Il Companion non risponde', passi: [
+                'Aspetta una decina di secondi e riprova: a volte è solo lento.',
+                'Se compare un messaggio che dice che il problema è dalla nostra parte, è vero ed è dalla nostra: non dipende da te né da quello che hai scritto.',
+                'Se dice di non riprovare adesso, non riprovare: torna più tardi. Quello che hai scritto resta salvato.' ] },
+            { titolo: 'Come svuoto la cache', passi: [
+                'Chrome o Edge: premi Ctrl+Shift+R (su Mac Cmd+Shift+R). Ricarica saltando la cache.',
+                'Safari su Mac: tieni premuto Shift e clicca il pulsante di ricarica.',
+                'Su telefono: chiudi del tutto la scheda, poi riapri app.neurodesk.it.',
+                'Se non basta: impostazioni del browser, cancella i dati di navigazione, solo «immagini e file memorizzati». Non serve cancellare le password.' ] },
+            { titolo: 'Ho perso la conversazione', passi: [
+                'Ricarica la pagina: la conversazione viene ripresa dal server.',
+                'Se non torna, era una conversazione più vecchia di 30 giorni: le cancelliamo apposta, è la promessa che ti abbiamo fatto.' ] },
+            { titolo: 'Voglio uscire, o non sono da solo al computer', passi: [
+                'Premi «Esci». Da computer è in fondo alla barra a sinistra, da telefono è l\'ultima voce della barra in basso.',
+                'L\'accesso resta valido 8 ore, poi ti richiede il codice da solo.',
+                'Se il dispositivo è condiviso, esci ogni volta che ti alzi: qui dentro c\'è roba tua.' ] },
+            { titolo: 'Che fine fanno le cose che scrivo', passi: [
+                'Sono cifrate e vengono cancellate da sole dopo 30 giorni.',
+                'Il tuo accesso è anonimo: non abbiamo il tuo nome né la tua email.',
+                'Se vuoi che cancelliamo tutto subito, scrivicelo: lo facciamo.' ] },
+        ],
         // ─── Consenso ────────────────────────────────────────────────────────
         // NOTA: questa e' un'informativa, non un'interfaccia. La versione
         // ITALIANA e' quella di riferimento: le traduzioni servono a far capire,
@@ -85,6 +153,28 @@ const DIZIONARIO = {
         compComeSiUsaC: 'un solo piccolo passo',
         compComeSiUsaD: 'da fare.',
         compPasso1: '1 — In che area sei bloccato?',
+        compPasso2: '2 — Cosa non riesci a fare adesso?',
+        // "essere precisa" dava per scontato che chi scrive fosse una donna.
+        // NeuroDesk lo usano anche uomini: la forma neutra non esclude nessuno.
+        compSegnaposto: 'Scrivi pure come vuoi. Non serve essere precisi.',
+        // "bloccata" dava per scontato che chi legge fosse una donna: forma neutra.
+        compPasso1b: '1 — In che area sei in difficoltà?',
+        compContinua: 'Continua',
+        compFerma: 'Ferma',
+        compScarica: 'Scarica la conversazione',
+        compNuova: 'Nuova conversazione',
+        compAvanzate: 'Opzioni avanzate',
+        compProfilo: 'Includi profilo funzionale minimale',
+        compProfiloNota: ' — può consumare token in modalità AI reale',
+        compCancellaCronologia: 'Cancella la mia cronologia',
+        compRevoca: 'Revoca il consenso',
+        compAvviso: 'Companion non sostituisce medico, terapeuta, tutor o consulente. Se stai male, parlane con una persona di cui ti fidi o con il tuo medico.',
+        compPannello: 'Conversazione',
+        compTu: 'Tu',
+        compNessunaChiamata: 'nessuna chiamata AI',
+        // Lingua della sintesi vocale: senza questa, una risposta in inglese
+        // verrebbe letta con la pronuncia italiana.
+        codiceVoce: 'it-IT',
         compInvia: 'Aiutami a fare il prossimo passo',
         compInvioInCorso: 'Sto preparando un passo concreto…',
         compVuoto: 'Serve almeno una parola per continuare.',
@@ -129,6 +219,74 @@ const DIZIONARIO = {
         invioInCorso: 'Invio…',
     },
     en: {
+        // ─── Menu, sign-in, states ───────────────────────────────────────────
+        saltaAlContenuto: 'Skip to content',
+        taglineTester: 'your companion',
+        taglineScuola: 'school admin',
+        navCompanion: 'Companion',
+        navFeedback: 'Feedback',
+        navReportFeedback: 'Feedback report',
+        temaScuro: 'Switch to dark theme',
+        temaChiaro: 'Switch to light theme',
+        esci: 'Sign out',
+        sorgente: 'Source code · AGPLv3',
+
+        loginTagline: 'Sign in with your code',
+        loginCampoCodice: 'Access code',
+        loginSegnaposto: 'e.g. neuro-xxxx-xxxx-xxxx-xxxx',
+        loginCampoPassword: 'Password (school only)',
+        loginCodiceMancante: 'Enter your access code.',
+        loginEntra: 'Sign in',
+        loginInCorso: 'Signing in…',
+        loginVaiScuola: 'Are you the school? Sign in with a password',
+        loginTornaTester: '← Sign in as a tester (code only)',
+
+        statoCaricamento: 'Loading…',
+        statoRiprova: 'Try again',
+        erroreTitolo: 'Something jammed',
+        erroreTesto: 'Reload the page: you will find the conversation where you left it. What you wrote is saved on the server, you have not lost it.',
+        erroreRicarica: 'Reload the page',
+        erroreSottotitolo: 'This is not your fault, and it is our problem.',
+        erroreScriviciA: 'If this keeps happening, write to us at',
+        erroreScriviciB: ': tell us which button you had pressed, and on what phone or computer.',
+
+        // ─── In-app help ─────────────────────────────────────────────────────
+        aiutoApri: 'Open help',
+        aiutoTitolo: 'Help',
+        aiutoChiudi: 'Close',
+        aiutoIntro: 'Pick the thing that is happening to you. Each answer is one step at a time: do the first, then move to the second.',
+        aiutoGuida: 'Full guide:',
+        aiutoVoci: [
+            { titolo: 'The page went blank', passi: [
+                'Reload the page. On a computer press F5. On a phone pull down with your finger.',
+                'If it goes blank a second time, clear the cache: you will find how just below.',
+                'What you wrote is not lost: conversations are saved on the server, not in the browser.' ] },
+            { titolo: 'My code will not let me in', passi: [
+                'Check that all the dashes are there: the code looks like neuro-xxxx-xxxx-xxxx-xxxx.',
+                'Copy and paste it instead of typing it: it is long, and one wrong character is enough.',
+                'If you have got it wrong many times in a row, sign-in locks for fifteen minutes. Nothing is broken: wait and try again.',
+                'If you cannot find your code any more, ask for a new one: the old one cannot be recovered by anyone, not even by us.' ] },
+            { titolo: 'The Companion is not answering', passi: [
+                'Wait ten seconds or so and try again: sometimes it is just slow.',
+                'If a message says the problem is on our side, it is true and it is on our side: it does not depend on you or on what you wrote.',
+                'If it says not to try again now, do not: come back later. What you wrote stays saved.' ] },
+            { titolo: 'How do I clear the cache', passi: [
+                'Chrome or Edge: press Ctrl+Shift+R (Cmd+Shift+R on a Mac). It reloads skipping the cache.',
+                'Safari on a Mac: hold Shift and click the reload button.',
+                'On a phone: close the tab completely, then open app.neurodesk.it again.',
+                'If that is not enough: browser settings, clear browsing data, only "cached images and files". You do not need to clear your passwords.' ] },
+            { titolo: 'I lost my conversation', passi: [
+                'Reload the page: the conversation is fetched back from the server.',
+                'If it does not come back, it was older than 30 days: we delete those on purpose — it is the promise we made you.' ] },
+            { titolo: 'I want to sign out, or I am not alone at this computer', passi: [
+                'Press "Sign out". On a computer it is at the bottom of the left bar; on a phone it is the last item in the bottom bar.',
+                'Your session stays valid for 8 hours, then it asks for the code again by itself.',
+                'If the device is shared, sign out every time you get up: what is in here is yours.' ] },
+            { titolo: 'What happens to the things I write', passi: [
+                'They are encrypted and they delete themselves after 30 days.',
+                'Your access is anonymous: we do not have your name or your email.',
+                'If you want us to delete everything right away, tell us: we will.' ] },
+        ],
         // ─── Consent ─────────────────────────────────────────────────────────
         // This is a privacy notice, not interface copy. The ITALIAN version is
         // the reference one: the translation is here so you can understand what
@@ -184,6 +342,23 @@ const DIZIONARIO = {
         compComeSiUsaC: 'one small step',
         compComeSiUsaD: 'to take.',
         compPasso1: '1 — Which area are you stuck in?',
+        compPasso2: '2 — What can you not do right now?',
+        compSegnaposto: 'Write however you like. It does not have to be precise.',
+        compPasso1b: '1 — Which area are you struggling with?',
+        compContinua: 'Continue',
+        compFerma: 'Stop',
+        compScarica: 'Download the conversation',
+        compNuova: 'New conversation',
+        compAvanzate: 'Advanced options',
+        compProfilo: 'Include a minimal functional profile',
+        compProfiloNota: ' — this can use more tokens with the real AI',
+        compCancellaCronologia: 'Delete my history',
+        compRevoca: 'Withdraw consent',
+        compAvviso: 'The Companion does not replace a doctor, therapist, tutor or counsellor. If you are unwell, talk to someone you trust or to your doctor.',
+        compPannello: 'Conversation',
+        compTu: 'You',
+        compNessunaChiamata: 'no AI call yet',
+        codiceVoce: 'en-GB',
         compInvia: 'Help me take the next step',
         compInvioInCorso: 'Working out one concrete step…',
         compVuoto: 'Write at least one word to continue.',
@@ -227,6 +402,74 @@ const DIZIONARIO = {
         invioInCorso: 'Sending…',
     },
     fr: {
+        // ─── Menu, connexion, états ──────────────────────────────────────────
+        saltaAlContenuto: 'Aller au contenu',
+        taglineTester: 'ton companion',
+        taglineScuola: "gestion de l'école",
+        navCompanion: 'Companion',
+        navFeedback: 'Retour',
+        navReportFeedback: 'Rapport des retours',
+        temaScuro: 'Passer au thème sombre',
+        temaChiaro: 'Passer au thème clair',
+        esci: 'Se déconnecter',
+        sorgente: 'Code source · AGPLv3',
+
+        loginTagline: 'Entre avec ton code',
+        loginCampoCodice: "Code d'accès",
+        loginSegnaposto: 'ex. neuro-xxxx-xxxx-xxxx-xxxx',
+        loginCampoPassword: "Mot de passe (école uniquement)",
+        loginCodiceMancante: "Saisis ton code d'accès.",
+        loginEntra: 'Entrer',
+        loginInCorso: 'Connexion…',
+        loginVaiScuola: "Tu es l'école ? Connecte-toi avec un mot de passe",
+        loginTornaTester: '← Entrer comme testeur (code seulement)',
+
+        statoCaricamento: 'Chargement…',
+        statoRiprova: 'Réessayer',
+        erroreTitolo: "Quelque chose s'est enrayé",
+        erroreTesto: "Recharge la page : tu retrouveras la conversation là où elle était. Ce que tu avais écrit est enregistré sur le serveur, tu ne l'as pas perdu.",
+        erroreRicarica: 'Recharger la page',
+        erroreSottotitolo: "Ce n'est pas de ta faute, et c'est notre problème.",
+        erroreScriviciA: 'Si cela arrive souvent, écris-nous à',
+        erroreScriviciB: " : dis-nous sur quel bouton tu avais appuyé, et avec quel téléphone ou ordinateur.",
+
+        // ─── Aide intégrée ───────────────────────────────────────────────────
+        aiutoApri: "Ouvrir l'aide",
+        aiutoTitolo: 'Aide',
+        aiutoChiudi: 'Fermer',
+        aiutoIntro: 'Choisis ce qui est en train de t\'arriver. Chaque réponse va un pas à la fois : fais le premier, puis passe au second.',
+        aiutoGuida: 'Guide complet :',
+        aiutoVoci: [
+            { titolo: 'La page est devenue blanche', passi: [
+                'Recharge la page. Sur ordinateur appuie sur F5. Sur téléphone, tire vers le bas avec le doigt.',
+                'Si elle redevient blanche une deuxième fois, vide le cache : tu trouves comment faire juste en dessous.',
+                'Ce que tu avais écrit n\'est pas perdu : les conversations sont enregistrées sur le serveur, pas dans le navigateur.' ] },
+            { titolo: "Mon code ne me laisse pas entrer", passi: [
+                'Vérifie que tous les tirets sont là : le code ressemble à neuro-xxxx-xxxx-xxxx-xxxx.',
+                'Copie-colle-le au lieu de le retaper : il est long, et un seul caractère faux suffit.',
+                "Si tu t'es trompé plusieurs fois de suite, la connexion se bloque un quart d'heure. Rien n'est cassé : attends et réessaie.",
+                'Si tu ne retrouves plus ton code, demandes-en un nouveau : l\'ancien n\'est récupérable par personne, pas même par nous.' ] },
+            { titolo: 'Le Companion ne répond pas', passi: [
+                "Attends une dizaine de secondes et réessaie : parfois il est juste lent.",
+                "Si un message dit que le problème vient de chez nous, c'est vrai et c'est de chez nous : cela ne dépend ni de toi ni de ce que tu as écrit.",
+                "S'il dit de ne pas réessayer maintenant, ne réessaie pas : reviens plus tard. Ce que tu as écrit reste enregistré." ] },
+            { titolo: 'Comment vider le cache', passi: [
+                'Chrome ou Edge : appuie sur Ctrl+Maj+R (Cmd+Maj+R sur Mac). La page se recharge en ignorant le cache.',
+                'Safari sur Mac : maintiens Maj et clique sur le bouton de rechargement.',
+                'Sur téléphone : ferme complètement l\'onglet, puis rouvre app.neurodesk.it.',
+                'Si cela ne suffit pas : réglages du navigateur, effacer les données de navigation, uniquement « images et fichiers en cache ». Pas besoin d\'effacer les mots de passe.' ] },
+            { titolo: 'J\'ai perdu ma conversation', passi: [
+                'Recharge la page : la conversation est récupérée depuis le serveur.',
+                "Si elle ne revient pas, c'est qu'elle avait plus de 30 jours : nous les effaçons exprès — c'est la promesse qu'on t'a faite." ] },
+            { titolo: 'Je veux me déconnecter, ou je ne suis pas seul devant cet ordinateur', passi: [
+                'Appuie sur « Se déconnecter ». Sur ordinateur c\'est en bas de la barre de gauche ; sur téléphone c\'est la dernière entrée de la barre du bas.',
+                "Ta session reste valable 8 heures, puis elle redemande le code toute seule.",
+                "Si l'appareil est partagé, déconnecte-toi chaque fois que tu te lèves : ce qu'il y a ici est à toi." ] },
+            { titolo: "Que deviennent les choses que j'écris", passi: [
+                "Elles sont chiffrées et s'effacent d'elles-mêmes après 30 jours.",
+                "Ton accès est anonyme : nous n'avons ni ton nom ni ton adresse e-mail.",
+                'Si tu veux qu\'on efface tout tout de suite, dis-le-nous : on le fait.' ] },
+        ],
         // ─── Consentement ────────────────────────────────────────────────────
         // Ceci est une notice d'information, pas du texte d'interface. La version
         // ITALIENNE fait foi : la traduction est là pour que tu comprennes ce que
@@ -285,6 +528,23 @@ const DIZIONARIO = {
         compComeSiUsaC: 'un seul petit pas',
         compComeSiUsaD: 'à faire.',
         compPasso1: '1 — Dans quel domaine es-tu bloqué ?',
+        compPasso2: '2 — Que n\'arrives-tu pas à faire maintenant ?',
+        compSegnaposto: "Écris comme tu veux. Pas besoin d'être précis.",
+        compPasso1b: '1 — Dans quel domaine es-tu en difficulté ?',
+        compContinua: 'Continuer',
+        compFerma: 'Arrêter',
+        compScarica: 'Télécharger la conversation',
+        compNuova: 'Nouvelle conversation',
+        compAvanzate: 'Options avancées',
+        compProfilo: 'Inclure un profil fonctionnel minimal',
+        compProfiloNota: " — cela peut consommer plus de jetons avec l'IA réelle",
+        compCancellaCronologia: 'Effacer mon historique',
+        compRevoca: 'Retirer le consentement',
+        compAvviso: "Le Companion ne remplace ni médecin, ni thérapeute, ni tuteur, ni conseiller. Si tu ne vas pas bien, parles-en à une personne de confiance ou à ton médecin.",
+        compPannello: 'Conversation',
+        compTu: 'Toi',
+        compNessunaChiamata: "aucun appel à l'IA",
+        codiceVoce: 'fr-FR',
         compInvia: 'Aide-moi à faire le pas suivant',
         compInvioInCorso: 'Je prépare un pas concret…',
         compVuoto: 'Il faut au moins un mot pour continuer.',
