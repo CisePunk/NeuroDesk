@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { getCodici, emettiCodice, impostaStatoCodice, getConsumo } from '../api/codiciApi';
+import { getCodici, emettiCodice, impostaStatoCodice, getConsumo, impostaChiaveCodice, rimuoviChiaveCodice } from '../api/codiciApi';
 import { useAsyncData } from '../ui/useAsyncData';
 import { StatoLista } from '../ui/StatoLista';
 import { useToast } from '../ui/ToastProvider';
@@ -45,6 +45,11 @@ function CodiciPage() {
     const [emettendo, setEmettendo] = useState(false);
     const [appenaEmesso, setAppenaEmesso] = useState(null); // { id, codice, etichetta }
     const [azioneId, setAzioneId] = useState(null);
+    // Chiave personale in corso di inserimento: id del codice, testo e fornitore.
+    // Vive solo qui, nello stato del componente, e sparisce appena salvata.
+    const [chiaveApertaId, setChiaveApertaId] = useState(null);
+    const [chiaveTesto, setChiaveTesto] = useState('');
+    const [chiaveProvider, setChiaveProvider] = useState('anthropic');
     const [filtro, setFiltro] = useState('');
 
     const riepilogo = useMemo(() => ({
@@ -91,6 +96,38 @@ function CodiciPage() {
             // Su http non sicuro o senza permesso la clipboard non c'e': non e' un errore
             // dell'utente, quindi gli si dice cosa fare invece di lasciarlo fermo.
             toast.errore('Copia non riuscita: selezionalo a mano.');
+        }
+    }
+
+    async function salvaChiave(c) {
+        setAzioneId(c.id);
+        try {
+            await impostaChiaveCodice(c.id, chiaveProvider, chiaveTesto);
+            // Si cancella subito dallo stato: non deve restare in memoria del
+            // browser piu' del necessario, e comunque non torna mai indietro.
+            setChiaveTesto('');
+            setChiaveApertaId(null);
+            toast.successo('Chiave salvata. Da ora paga lui le sue risposte.');
+            ricarica();
+        } catch (err) {
+            toast.errore(err.message);
+        } finally {
+            setAzioneId(null);
+        }
+    }
+
+    async function togliChiave(c) {
+        const nome = c.etichetta || `codice #${c.id}`;
+        if (!window.confirm(`Togliere la chiave personale di "${nome}"? Tornerà a consumare il credito comune.`)) return;
+        setAzioneId(c.id);
+        try {
+            await rimuoviChiaveCodice(c.id);
+            toast.successo('Chiave rimossa.');
+            ricarica();
+        } catch (err) {
+            toast.errore(err.message);
+        } finally {
+            setAzioneId(null);
         }
     }
 
@@ -226,6 +263,11 @@ function CodiciPage() {
                                 <span className={`badge ${c.consensoDato ? 'badge-secondary' : 'badge-muted'}`}>
                                     {c.consensoDato ? 'Consenso dato' : 'Consenso in attesa'}
                                 </span>
+                                {c.chiavePropria && (
+                                    <span className="badge badge-success" title="Paga le proprie risposte con la sua chiave API">
+                                        chiave sua · {c.chiaveProvider}
+                                    </span>
+                                )}
                             </div>
                             <div className="card-detail" style={{ marginTop: '0.3rem', opacity: 0.75 }}>
                                 Emesso il {formattaData(c.creatoIl)}
@@ -249,7 +291,7 @@ function CodiciPage() {
                                     </div>
                                 );
                             })()}
-                            <div style={{ marginTop: '0.6rem' }}>
+                            <div style={{ marginTop: '0.6rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                                 <button
                                     className={c.attivo ? 'btn-ghost' : 'btn-secondary'}
                                     onClick={() => toggleStato(c)}
@@ -257,7 +299,59 @@ function CodiciPage() {
                                 >
                                     {azioneId === c.id ? '…' : (c.attivo ? 'Revoca accesso' : 'Riattiva')}
                                 </button>
+                                {c.chiavePropria ? (
+                                    <button className="btn-ghost" onClick={() => togliChiave(c)} disabled={azioneId === c.id}>
+                                        Togli la sua chiave
+                                    </button>
+                                ) : (
+                                    <button
+                                        className="btn-ghost"
+                                        onClick={() => { setChiaveApertaId(chiaveApertaId === c.id ? null : c.id); setChiaveTesto(''); }}
+                                    >
+                                        {chiaveApertaId === c.id ? 'Annulla' : 'Usa la sua chiave API'}
+                                    </button>
+                                )}
                             </div>
+
+                            {chiaveApertaId === c.id && !c.chiavePropria && (
+                                <div className="form-card" style={{ marginTop: '0.7rem', padding: '0.9rem 1rem' }}>
+                                    <p style={{ margin: '0 0 0.6rem', fontSize: '0.86rem', color: 'var(--text-2)' }}>
+                                        Da qui in poi <strong>paga lui</strong> le sue risposte, sul suo conto.
+                                        La chiave viene cifrata e <strong>non è più visibile</strong>, nemmeno a te.
+                                        Se un giorno smette di funzionare, glielo diciamo: non usiamo il credito comune al suo posto.
+                                    </p>
+                                    <div className="form-group">
+                                        <label htmlFor={`prov-${c.id}`}>Fornitore</label>
+                                        <select
+                                            id={`prov-${c.id}`}
+                                            value={chiaveProvider}
+                                            onChange={(e) => setChiaveProvider(e.target.value)}
+                                        >
+                                            <option value="anthropic">Anthropic</option>
+                                            <option value="openai">OpenAI</option>
+                                        </select>
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor={`chiave-${c.id}`}>Chiave API</label>
+                                        <input
+                                            id={`chiave-${c.id}`}
+                                            type="password"
+                                            value={chiaveTesto}
+                                            onChange={(e) => setChiaveTesto(e.target.value)}
+                                            placeholder="incolla qui la chiave che ti ha dato"
+                                            autoComplete="off"
+                                            spellCheck={false}
+                                        />
+                                    </div>
+                                    <button
+                                        className="btn-primary"
+                                        onClick={() => salvaChiave(c)}
+                                        disabled={azioneId === c.id || chiaveTesto.trim().length < 20}
+                                    >
+                                        {azioneId === c.id ? 'Salvo…' : 'Salva la chiave'}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

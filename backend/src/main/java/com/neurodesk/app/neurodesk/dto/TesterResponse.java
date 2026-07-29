@@ -21,4 +21,10 @@ public class TesterResponse {
     private long tokenInput;
     private long tokenOutput;
     private LocalDateTime ultimoUso;
+
+    /** Ha una chiave API propria? La chiave in se' non esce mai da qui. */
+    private boolean chiavePropria;
+
+    /** Per quale fornitore vale, se c'e'. */
+    private String chiaveProvider;
 }

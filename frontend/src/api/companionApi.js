@@ -43,7 +43,7 @@ export async function sendCompanionMessage({ message, mode, profile, history }) 
         // "riprova fra qualche minuto", che qui sarebbe falso — riprovare non
         // serve finché non si ricarica, e mandare a vuoto chi sta seguendo un
         // passo alla volta è il modo peggiore di fallire.
-        if (codice === 'companion_credito_esaurito' && serverMsg) {
+        if ((codice === 'companion_credito_esaurito' || codice === 'chiave_personale_non_valida') && serverMsg) {
             throw new Error(serverMsg);
         }
         throw new Error(messaggioAmichevole(response.status, serverMsg));

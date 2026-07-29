@@ -8,6 +8,7 @@ import com.neurodesk.app.neurodesk.entity.Utente;
 import com.neurodesk.app.neurodesk.repository.ConsumoAiRepository;
 import com.neurodesk.app.neurodesk.repository.UtenteRepository;
 import com.neurodesk.app.neurodesk.security.CodeGenerator;
+import com.neurodesk.app.neurodesk.security.CryptoService;
 import com.neurodesk.app.neurodesk.security.HashService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,6 +32,7 @@ public class TesterService {
     private final UtenteRepository utenteRepository;
     private final ConsumoAiRepository consumoRepository;
     private final HashService hashService;
+    private final CryptoService cryptoService;
     private final CodeGenerator codeGenerator;
 
     @Transactional
@@ -73,7 +75,11 @@ public class TesterService {
                             c == null ? 0L : ((Number) c[1]).longValue(),
                             c == null ? 0L : ((Number) c[2]).longValue(),
                             c == null ? 0L : ((Number) c[3]).longValue(),
-                            c == null ? null : (LocalDateTime) c[4]);
+                            c == null ? null : (LocalDateTime) c[4],
+                            // Solo se c'e', e per quale fornitore. La chiave in se'
+                            // non esce mai verso il browser.
+                            u.getChiaveAiCifrata() != null,
+                            u.getChiaveAiProvider());
                 })
                 .toList();
     }
@@ -111,6 +117,57 @@ public class TesterService {
                         ((Number) r[3]).longValue(),
                         ((Number) r[4]).longValue()))
                 .toList();
+    }
+
+    /** Fornitori per cui accettiamo una chiave personale. */
+    private static final java.util.Set<String> PROVIDER_AMMESSI = java.util.Set.of("anthropic", "openai");
+
+    /**
+     * Imposta (o sostituisce) la chiave API personale di un tester.
+     *
+     * "Bring your own token": da qui in poi le sue risposte le paga lui, sul suo
+     * conto. La chiave viene cifrata subito, con lo stesso servizio e la stessa
+     * chiave con cui si cifrano le conversazioni: e' una credenziale che spende
+     * soldi senza tetto, e merita la protezione piu' alta che abbiamo.
+     *
+     * Non viene mai registrata nei log, nemmeno parzialmente.
+     */
+    @Transactional
+    public void impostaChiaveAi(Long id, String provider, String chiave) {
+        Utente tester = utenteRepository.findById(id)
+                .filter(u -> u.getRuolo() == Ruolo.STUDENTE)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tester non trovato"));
+
+        String p = provider == null ? "" : provider.trim().toLowerCase();
+        if (!PROVIDER_AMMESSI.contains(p)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Fornitore non valido: usa 'anthropic' oppure 'openai'.");
+        }
+        String pulita = chiave == null ? "" : chiave.trim();
+        // Nessun controllo sul formato oltre alla lunghezza minima: i prefissi
+        // delle chiavi cambiano nel tempo, e rifiutare una chiave valida perche'
+        // non somiglia a quelle di un anno fa sarebbe peggio che accettarla.
+        if (pulita.length() < 20) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La chiave sembra troppo corta: controlla di averla copiata tutta.");
+        }
+
+        tester.setChiaveAiCifrata(cryptoService.cifra(pulita));
+        tester.setChiaveAiProvider(p);
+        tester.setChiaveAiImpostataIl(LocalDateTime.now());
+        utenteRepository.save(tester);
+    }
+
+    /** Toglie la chiave personale: da qui in poi torna a usare il credito comune. */
+    @Transactional
+    public void rimuoviChiaveAi(Long id) {
+        Utente tester = utenteRepository.findById(id)
+                .filter(u -> u.getRuolo() == Ruolo.STUDENTE)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tester non trovato"));
+        tester.setChiaveAiCifrata(null);
+        tester.setChiaveAiProvider(null);
+        tester.setChiaveAiImpostataIl(null);
+        utenteRepository.save(tester);
     }
 
     @Transactional

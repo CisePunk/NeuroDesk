@@ -35,16 +35,19 @@ public class InternalController {
 
     private final UtenteRepository utenteRepository;
     private final ConsumoAiRepository consumoRepository;
+    private final com.neurodesk.app.neurodesk.security.CryptoService cryptoService;
     private final byte[] tokenAtteso;
 
     public InternalController(
             UtenteRepository utenteRepository,
             ConsumoAiRepository consumoRepository,
+            com.neurodesk.app.neurodesk.security.CryptoService cryptoService,
             // Riusa il segreto JWT se non se ne configura uno dedicato: entrambi i
             // servizi lo hanno gia', quindi nessun nuovo segreto da distribuire.
             @Value("${neurodesk.internal.token:${neurodesk.jwt.secret}}") String internalToken) {
         this.utenteRepository = utenteRepository;
         this.consumoRepository = consumoRepository;
+        this.cryptoService = cryptoService;
         this.tokenAtteso = internalToken.getBytes(StandardCharsets.UTF_8);
     }
 
@@ -63,7 +66,26 @@ public class InternalController {
         Utente utente = trovato.get();
         boolean attivo = Boolean.TRUE.equals(utente.getAttivo());
         boolean consenso = utente.getConsensoIl() != null;
-        return ResponseEntity.ok(Map.of("attivo", attivo, "consenso", consenso));
+
+        // Chiave personale del tester, decifrata SOLO qui e SOLO per il canale
+        // interno: il companion deve poterla usare per chiamare il fornitore a
+        // suo nome. Non passa mai dal browser (Caddy risponde 404 su
+        // /api/internal/* verso il web) e non finisce in nessun log.
+        Map<String, Object> risposta = new java.util.HashMap<>();
+        risposta.put("attivo", attivo);
+        risposta.put("consenso", consenso);
+        if (utente.getChiaveAiCifrata() != null && utente.getChiaveAiProvider() != null) {
+            try {
+                risposta.put("chiaveAi", cryptoService.decifra(utente.getChiaveAiCifrata()));
+                risposta.put("chiaveAiProvider", utente.getChiaveAiProvider());
+            } catch (RuntimeException err) {
+                // Chiave illeggibile (es. cifrata con un segreto diverso): non e'
+                // un motivo per bloccare l'accesso. Si ricade sul credito comune,
+                // ma lo diciamo nel log perche' e' un guasto vero da sistemare.
+                System.err.println("[internal] chiave AI dell'utente " + id + " non decifrabile: " + err.getMessage());
+            }
+        }
+        return ResponseEntity.ok(risposta);
     }
 
     /**
@@ -95,6 +117,7 @@ public class InternalController {
                 .tokenInput(intero(corpo.get("tokenInput")))
                 .tokenOutput(intero(corpo.get("tokenOutput")))
                 .ripiegoDa(corpo.get("ripiegoDa") == null ? null : String.valueOf(corpo.get("ripiegoDa")))
+                .pagatoDaUtente(Boolean.TRUE.equals(corpo.get("pagatoDaUtente")))
                 .build());
         return ResponseEntity.noContent().build();
     }

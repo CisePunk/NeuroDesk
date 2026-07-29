@@ -50,6 +50,14 @@ public class ConsumoAi {
     @Column(nullable = false)
     private int tokenOutput;
 
+    /**
+     * La richiesta e' stata pagata dal tester con la sua chiave ("bring your own
+     * token"). Il consumo si misura lo stesso, ma non va sommato alla nostra
+     * spesa: altrimenti in euro conteremmo soldi di qualcun altro.
+     */
+    @Column(nullable = false)
+    private boolean pagatoDaUtente;
+
     /** Valorizzato solo se ha risposto il provider di ripiego: un guasto invisibile a chi scrive, visibile a noi. */
     @Column(length = 24)
     private String ripiegoDa;

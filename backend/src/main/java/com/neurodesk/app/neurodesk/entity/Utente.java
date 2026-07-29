@@ -41,6 +41,24 @@ public class Utente {
     /** Etichetta breve NON identificante, solo per l'admin (es. "tester 3"). Facoltativa. */
     private String etichetta;
 
+    /**
+     * Chiave API personale del tester, CIFRATA (mai in chiaro nel database).
+     *
+     * "Bring your own token": chi ce l'ha paga le proprie risposte sul proprio
+     * conto. Chi non ce l'ha usa il credito comune e non cambia niente per lui.
+     *
+     * Non esce mai verso il browser: la pagina Codici mostra solo se c'e'.
+     */
+    @Column(length = 512)
+    private String chiaveAiCifrata;
+
+    /** Per quale fornitore vale la chiave: 'anthropic' oppure 'openai'. */
+    @Column(length = 24)
+    private String chiaveAiProvider;
+
+    /** Da quando e' li'. Se un giorno quella chiave trapela, e' la prima domanda. */
+    private java.time.LocalDateTime chiaveAiImpostataIl;
+
     /** Momento in cui l'utente ha dato il consenso informato. Null = non ancora dato. */
     private LocalDateTime consensoIl;
 

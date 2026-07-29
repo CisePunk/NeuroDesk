@@ -43,7 +43,16 @@ async function statoUtente(id) {
     });
     if (resp.ok) {
       const j = await resp.json();
-      const val = { attivo: Boolean(j.attivo), consenso: Boolean(j.consenso), ts: now };
+      const val = {
+        attivo: Boolean(j.attivo),
+        consenso: Boolean(j.consenso),
+        // "Bring your own token": se questo tester ha portato la propria chiave,
+        // le sue risposte le paga lui. Sta in memoria per il tempo della cache
+        // (60s) e non viene mai scritta da nessuna parte, nemmeno nei log.
+        chiaveAi: j.chiaveAi || null,
+        chiaveAiProvider: j.chiaveAiProvider || null,
+        ts: now,
+      };
       statoCache.set(id, val);
       return val;
     }
@@ -67,9 +76,12 @@ async function statoUtente(id) {
  * irraggiungibile si perde una riga di statistica, non la risposta di chi sta
  * scrivendo. Nessun contenuto viene inviato, solo conteggi.
  */
-function registraConsumo(utenteId, ai) {
+function registraConsumo(utenteId, ai, pagatoDaUtente = false) {
   const corpo = {
     utenteId,
+    // Chi ha portato la propria chiave non pesa sul credito comune: il consumo
+    // si misura lo stesso, ma va letto in un'altra colonna.
+    pagatoDaUtente,
     provider: ai.provider,
     modello: ai.model,
     tokenInput: ai.usage?.estimatedInputTokens ?? 0,
@@ -240,15 +252,20 @@ const server = http.createServer(async (req, res) => {
       // forzare un provider a pagamento -> il costo resta sotto controllo.
       const overrideProvider = utente.ruolo === 'SCUOLA' ? payload.provider : undefined;
 
+      // Se il tester ha portato la propria chiave, si usa quella e il provider
+      // che ha indicato: le sue risposte le paga lui. Altrimenti tutto come prima.
+      const chiavePropria = stato?.chiaveAi || null;
+
       const ai = await generateCompanionReply({
         message,
         mode,
         profile: payload.profile || null,
         history: payload.history || [],
-        provider: overrideProvider,
+        provider: chiavePropria ? stato.chiaveAiProvider : overrideProvider,
+        chiaveUtente: chiavePropria,
       });
 
-      registraConsumo(utente.sub, ai);
+      registraConsumo(utente.sub, ai, Boolean(chiavePropria));
 
       return sendJson(res, 200, {
         mode,
@@ -267,6 +284,18 @@ const server = http.createServer(async (req, res) => {
       // serve. Alla persona diciamo la verita' e le togliamo di dosso l'idea che
       // dipenda da lei o da come ha scritto. A noi lo urla nel log, perche' e'
       // il momento in cui bisogna ricaricare.
+      // La chiave PERSONALE del tester non funziona: e' l'unico caso in cui il
+      // problema non e' nostro e non e' passeggero — e' suo, e puo' sistemarlo.
+      // Dirgli "riprova fra poco" lo lascerebbe a ritentare a vuoto.
+      if (err.chiaveUtenteFallita) {
+        return sendJson(res, 502, {
+          error: 'chiave_personale_non_valida',
+          message:
+            'La chiave API che hai fornito non è stata accettata dal fornitore. ' +
+            'Può essere scaduta, revocata, senza credito residuo, oppure copiata male. ' +
+            'Non abbiamo usato il credito di NeuroDesk al tuo posto: controlla la chiave sul tuo account e riprova.',
+        });
+      }
       if (err.creditoEsaurito) {
         console.error('[companion] CREDITO ESAURITO su tutti i provider configurati: ricaricare.');
         return sendJson(res, 503, {

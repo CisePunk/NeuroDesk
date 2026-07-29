@@ -44,6 +44,7 @@ public interface ConsumoAiRepository extends JpaRepository<ConsumoAi, Long> {
            SELECT c.provider, c.modello, COALESCE(SUM(c.tokenInput), 0),
                   COALESCE(SUM(c.tokenOutput), 0), COUNT(c)
              FROM ConsumoAi c
+            WHERE c.pagatoDaUtente = false
             GROUP BY c.provider, c.modello
            """)
     List<Object[]> riepilogoPerModello();
@@ -53,7 +54,7 @@ public interface ConsumoAiRepository extends JpaRepository<ConsumoAi, Long> {
            SELECT c.provider, c.modello, COALESCE(SUM(c.tokenInput), 0),
                   COALESCE(SUM(c.tokenOutput), 0), COUNT(c)
              FROM ConsumoAi c
-            WHERE c.creatoIl >= :da
+            WHERE c.creatoIl >= :da AND c.pagatoDaUtente = false
             GROUP BY c.provider, c.modello
            """)
     List<Object[]> riepilogoPerModelloDa(@Param("da") LocalDateTime da);

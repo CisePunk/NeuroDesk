@@ -220,8 +220,20 @@ export async function generateCompanionReply(opzioni) {
   const primario = resolveProvider(opzioni.provider);
 
   try {
-    return await chiamaProvider({ ...opzioni, provider: primario });
+    const risposta = await chiamaProvider({ ...opzioni, provider: primario });
+    return opzioni.chiaveUtente ? { ...risposta, pagatoDaUtente: true } : risposta;
   } catch (err) {
+    // CHIAVE PROPRIA DEL TESTER: qui NON si ripiega, mai.
+    //
+    // Ripiegare vorrebbe dire far pagare a noi la richiesta di chi si era offerto
+    // di pagarsela — e in silenzio, per giunta: una chiave scaduta ci svuoterebbe
+    // il credito senza che nessuno se ne accorga, cioe' l'esatto contrario dello
+    // scopo. Meglio dirgli che la SUA chiave non va, cosi' puo' sistemarla lui.
+    if (opzioni.chiaveUtente) {
+      err.chiaveUtenteFallita = true;
+      console.error(`[companion] la chiave personale dell'utente non funziona (${err.status ?? 'nessuna risposta'})`);
+      throw err;
+    }
     const ripiego = provideDiRipiego(primario);
     if (!ripiego || !valeIlRipiego(err)) {
       // Nessun secondo provider a cui appoggiarsi: se il primario e' a secco,
@@ -251,7 +263,7 @@ export async function generateCompanionReply(opzioni) {
 // Il provider effettivo si sceglie con AI_PROVIDER (env) oppure, per richiesta,
 // col campo "provider" nel body: comodo per confrontare openai e haiku nelle prove
 // senza riavviare il servizio.
-async function chiamaProvider({ message, mode, profile, history, provider: requested }) {
+async function chiamaProvider({ message, mode, profile, history, provider: requested, chiaveUtente }) {
   const provider = resolveProvider(requested);
 
   if (provider === 'mock') {
@@ -267,7 +279,10 @@ async function chiamaProvider({ message, mode, profile, history, provider: reque
   }
 
   if (provider === 'openai') {
-    if (!process.env.OPENAI_API_KEY) {
+    // Chiave del tester se ne ha portata una ("bring your own token"), altrimenti
+    // quella comune. La sua non viene mai scritta ne' registrata da nessuna parte.
+    const chiaveOpenai = chiaveUtente || process.env.OPENAI_API_KEY;
+    if (!chiaveOpenai) {
       throw new Error('OPENAI_API_KEY è richiesta quando il provider è openai');
     }
 
@@ -287,7 +302,7 @@ async function chiamaProvider({ message, mode, profile, history, provider: reque
       {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          Authorization: `Bearer ${chiaveOpenai}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -314,7 +329,8 @@ async function chiamaProvider({ message, mode, profile, history, provider: reque
   }
 
   if (provider === 'anthropic') {
-    if (!process.env.ANTHROPIC_API_KEY) {
+    const chiaveAnthropic = chiaveUtente || process.env.ANTHROPIC_API_KEY;
+    if (!chiaveAnthropic) {
       throw new Error('ANTHROPIC_API_KEY è richiesta quando il provider è anthropic');
     }
 
@@ -329,7 +345,7 @@ async function chiamaProvider({ message, mode, profile, history, provider: reque
         {
           method: 'POST',
           headers: {
-            'x-api-key': process.env.ANTHROPIC_API_KEY,
+            'x-api-key': chiaveAnthropic,
             'anthropic-version': '2023-06-01',
             'content-type': 'application/json',
           },

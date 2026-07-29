@@ -27,6 +27,22 @@ export function getConsumo() {
     return apiFetch('/api/tester/consumo');
 }
 
+/**
+ * Imposta la chiave API personale di un tester ("bring your own token").
+ *
+ * La chiave viaggia in chiaro SOLO in questa richiesta, su HTTPS, e non torna
+ * mai indietro: l'elenco dice soltanto SE c'e' e per quale fornitore. Nel
+ * database e' cifrata con la stessa chiave delle conversazioni.
+ */
+export function impostaChiaveCodice(id, provider, chiave) {
+    return apiFetch(`/api/tester/${id}/chiave`, { method: 'PUT', body: { provider, chiave } });
+}
+
+/** Toglie la chiave personale: quel tester torna a usare il credito comune. */
+export function rimuoviChiaveCodice(id) {
+    return apiFetch(`/api/tester/${id}/chiave`, { method: 'DELETE' });
+}
+
 /** Revoca (attivo=false) o riattiva un codice. La revoca ha effetto subito sul backend. */
 export function impostaStatoCodice(id, attivo) {
     return apiFetch(`/api/tester/${id}/stato`, { method: 'PUT', body: { attivo } });
