@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  NeuroDesk — scarica i backup dal server ogni giorno alle 10:00.
+
+  Va in ~/Library/LaunchAgents/it.neurodesk.backup.plist
+
+    cp deploy/scarica-backup.py ~/Library/Application\ Support/NeuroDesk/
+    cp deploy/it.neurodesk.backup.plist ~/Library/LaunchAgents/
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/it.neurodesk.backup.plist
+
+  Per toglierlo:
+
+    launchctl bootout gui/$(id -u)/it.neurodesk.backup
+    rm ~/Library/LaunchAgents/it.neurodesk.backup.plist
+
+  Perche' launchd e non cron: se il Mac e' spento o addormentato alle 10:00,
+  cron salta il giro in silenzio, launchd lo recupera appena la macchina si
+  sveglia. Su un portatile che non e' sempre acceso e' l'unica differenza che
+  conta davvero.
+
+  Perche' NON sulla Scrivania: macOS protegge Scrivania, Documenti e Download, e
+  un agente in background li' riceve "Operation not permitted". Il lavoro
+  sarebbe fallito ogni giorno alle 10:00 senza dire niente. Sulla Scrivania
+  resta una scorciatoia: cliccandoci TU, i backup si aprono lo stesso.
+
+  Perche' le 10:00: il server fa la sua copia alle 06:25 UTC, cioe' alle 08:25
+  ora italiana. Un'ora e mezza di margine e' abbondante, e scaricare piu' spesso
+  non aggiunge niente — il server produce una copia al giorno e basta.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>it.neurodesk.backup</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>/Users/cisepunk/Library/Application Support/NeuroDesk/scarica-backup.py</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>10</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <!-- L'uscita finisce qui oltre che nel registro della cartella dei backup:
+         se un giorno il comando non parte proprio, il motivo e' in questo file. -->
+    <key>StandardOutPath</key>
+    <string>/Users/cisepunk/Library/Application Support/NeuroDesk/backup/launchd.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/cisepunk/Library/Application Support/NeuroDesk/backup/launchd.log</string>
+
+    <key>RunAtLoad</key>
+    <false/>
+</dict>
+</plist>
