@@ -82,6 +82,34 @@ corretta è **«su questo log nessuna sessione con almeno 5 richieste cade nella
 banda intermedia»**, non «la metrica separa». Va rimisurata quando il traffico
 cresce.
 
+## Il campione ostile reale è n=1
+
+Delle cinque sessioni che innescavano le soglie proposte:
+
+| origine | cosa era |
+|---|---|
+| `34.150.133.136` | la scansione del 30 luglio — **unico caso ostile reale** |
+| `188.26.192.150` | raccoglitore di contatti commerciale (26 richieste a `/contact`, `/about`, `/privacy`, `/impressum`, `/sitemap.xml` in cinque lingue) |
+| `2a01:e11:800f:ad00::/64` ×3 | **mie prove** |
+
+Le tre IPv6 sono quattro identificativi di interfaccia dello **stesso /64**: curl
+8.7.1 (la scansione simulata del 29), Chrome su Macintosh (Playwright e il
+browser di Cinzia), Safari su iPhone (il suo telefono).
+
+**Da scrivere nel testo pubblico:** la taratura poggia su **un solo caso ostile
+reale**. Va rimisurata quando il traffico cresce.
+
+## Due limiti noti del metodo, dichiarati e non scoperti dopo
+
+**Raggruppamento delle origini.** Gli IPv6 vanno raggruppati per **/64**, non per
+indirizzo pieno: un singolo abbonato cambia identificativo di interfaccia e si
+spezzerebbe in più attori. Verificato: raggruppando per indirizzo pieno le mie
+prove risultavano quattro origini distinte.
+
+**Finestra di sessione a 120 secondi.** Chi distanzia le richieste oltre due
+minuti diventa invisibile al livello sessione, per costruzione. Non è
+risolvibile con questa metrica: va dichiarato come limite, non trovato dopo.
+
 ## Un falso positivo che la misura ha evitato
 
 Le soglie che avevo proposto per prime avrebbero classificato come scansione:
