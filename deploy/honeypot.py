@@ -152,6 +152,18 @@ ORIGINI_NOTE = [
     x.strip() for x in os.getenv("HONEYPOT_ORIGINI_NOTE", "").split(",") if x.strip()
 ]
 
+# ─── Canary ──────────────────────────────────────────────────────────────────
+# Percorsi disseminati come briciola nel robots.txt: un percorso dal nome ghiotto
+# che un visitatore vero non chiede MAI, ma che un attaccante trova leggendo
+# robots.txt in cerca di porte nascoste. Qualunque richiesta qui e' un segnale
+# forte da sola — non serve la forma di una sessione. Deve combaciare con la riga
+# Disallow in frontend/public/robots.txt.
+#
+# Sta nel repository come i percorsi-trappola, non fra i segreti: un attaccante
+# che legge il codice sa di evitarlo, ma cattura comunque scanner e curiosi che
+# leggono robots.txt senza leggere il repo — che e' la minaccia reale.
+CANARY = ("/internal-admin-metrics",)
+
 SALE = os.getenv("HONEYPOT_HASH_SALT", "")
 # Identificativo dell'epoca del sale. OBBLIGATORIO: senza, confrontando impronte
 # di epoche diverse si otterrebbe silenziosamente "origini diverse" dove era la
@@ -202,6 +214,10 @@ def e_nota(org: str) -> bool:
         except ValueError:
             continue
     return False
+
+
+def e_canary(percorso: str) -> bool:
+    return any(percorso == c or percorso.startswith(c + "/") for c in CANARY)
 
 
 def normalizza(uri: str):
@@ -326,8 +342,18 @@ def _applescript_sicuro(s: str) -> str:
 
 def avvisa(eventi):
     destinatario = os.getenv("NEURODESK_REPORT_EMAIL", "hello@neurodesk.it")
+    canary = [e for e in eventi if e.get("tipo") == "canary"]
+    sessioni_ev = [e for e in eventi if e.get("tipo") != "canary"]
+
     righe = []
-    for e in eventi:
+    if canary:
+        righe.append("  ⚠ CANARY — qualcuno ha seguito una briciola nascosta in robots.txt.")
+        righe.append("    Non e' rumore di scansione: quel percorso non lo chiede nessuno per caso.")
+        for e in canary:
+            righe.append(f"    origine [{e['impronta']}]  ha chiesto  {e['canary_percorso']}")
+            righe.append(f"    quando: {e['quando']}   host: {e['host']}   agente: {e['agente'][:80]}")
+        righe.append("")
+    for e in sessioni_ev:
         m = e["metriche"]
         righe.append(f"  origine [{e['impronta']}]  ({', '.join(e['inneschi'])})")
         righe.append(f"    {m['richieste']} richieste in {m['durata_s']}s, {m['pc404']}% non trovate, "
@@ -345,7 +371,7 @@ def avvisa(eventi):
 
     corpo = (
         f"To: {destinatario}\nFrom: {destinatario}\n"
-        f"Subject: NeuroDesk — attivita' anomala sul sito\n"
+        f"Subject: {'NeuroDesk — CANARY: briciola seguita' if any(e.get('tipo')=='canary' for e in eventi) else 'NeuroDesk — attivita anomala sul sito'}\n"
         f"Content-Type: text/plain; charset=UTF-8\n\n"
         "Il rilevamento ha visto qualcosa che non e' il normale rumore di internet.\n\n"
         + "\n".join(righe)
@@ -402,6 +428,29 @@ def main() -> int:
     gia = set(GIA_AVVISATE.read_text(encoding="utf-8").split()) if GIA_AVVISATE.exists() else set()
     nuovi, chiavi = [], set()
 
+    # CANARY: un colpo solo basta. Chi tocca un percorso disseminato in
+    # robots.txt ha cercato porte nascoste e ne ha seguita una. Non e' rumore,
+    # e non passa per le soglie di sessione.
+    for r in richieste:
+        if not e_canary(r["percorso"]):
+            continue
+        org = r["origine"]
+        imp = impronta(org)
+        chiave = f"canary:{EPOCA}:{imp}:{int(r['ts'])}"
+        chiavi.add(chiave)
+        if chiave in gia or e_nota(org):
+            continue
+        nuovi.append({
+            "quando": datetime.fromtimestamp(r["ts"], timezone.utc).isoformat(timespec="seconds"),
+            "epoca_sale": EPOCA,
+            "impronta": imp,
+            "tipo": "canary",
+            "origine_nota": False,
+            "canary_percorso": r["percorso"],
+            "agente": r["agente"],
+            "host": r["host"],
+        })
+
     for org, rs in sessioni(richieste):
         m = valuta(rs)
         if not m:
@@ -441,6 +490,9 @@ def main() -> int:
         return 0
 
     for e in nuovi:
+        if e.get("tipo") == "canary":
+            print(f"  [{e['impronta']}] CANARY seguito: {e['canary_percorso']}")
+            continue
         m = e["metriche"]
         marca = "  [origine nota: nessuna mail]" if e["origine_nota"] else ""
         print(f"  [{e['impronta']}] {', '.join(e['inneschi'])}: {m['richieste']} richieste, "
