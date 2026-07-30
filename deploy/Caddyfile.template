@@ -1,0 +1,123 @@
+# NeuroDesk — configurazione di Caddy. MODELLO: i ${...} li sostituisce
+# 01-prepara-server.sh.
+#
+# Questo file e' la FONTE UNICA. Prima viveva dentro un heredoc nello script di
+# preparazione, e infatti aveva divergiato: le trappole dell'honeypot e il log
+# degli accessi erano stati aggiunti solo al file vivo sul server. Un server
+# ricostruito da zero sarebbe nato senza. Ora si modifica qui, e lo script lo
+# copia.
+
+{
+    email ${EMAIL_TLS}
+}
+
+# Percorsi che nessun visitatore vero chiede mai: chi li cerca sta scansionando.
+# Definiti una volta e usati su entrambi i domini.
+(trappole) {
+    # QUALUNQUE percorso che inizia con un punto. Regola larga apposta: la lista
+    # puntuale non bastava — uno scanner ha chiesto /.gitconfig, /.github/,
+    # /.git-credentials e /.gitlab-ci.yml, che non c'erano, e si e' preso un 200
+    # (la pagina dell'app, per il ripiego della single-page). Non aveva ottenuto
+    # niente, ma un 200 gli dice "questo percorso esiste", ed e' il segnale
+    # sbagliato. Nessuna rotta legittima dell'app inizia con un punto.
+    #
+    # /.well-known/ resta fuori: serve ai certificati HTTPS.
+    @trappola {
+        not path /.well-known/*
+        path /.* /wp-admin* /wp-login.php /xmlrpc.php /wordpress* /phpmyadmin* /pma* /.env /.env.* /.git /.git/* /.aws/* /.ssh/* /admin /admin/* /administrator* /server-status /server-info /cgi-bin/* /vendor/* /config.php /shell* /debug /solr* /actuator /actuator/* /_ignition/* /autodiscover/*
+    }
+    handle @trappola {
+        # 404 secco e uguale per tutti: non confermiamo niente, non offriamo
+        # niente da leggere, e la richiesta resta comunque nel log degli accessi
+        # — che e' il punto: l'honeypot osserva, non punisce.
+        respond 404
+    }
+}
+
+# 1) Landing pubblica: file statici, piu' UN SOLO endpoint dinamico (il form contatti).
+${DOMINIO} {
+    encode gzip
+    root * /var/www/neurodesk-landing
+
+    # Log degli accessi: prima non esisteva, quindi di chi bussava e cosa cercava
+    # non restava traccia da nessuna parte. E' la materia prima dell'honeypot.
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 20mb
+            roll_keep 5
+        }
+        format json
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "no-referrer"
+    }
+    header /assets/* Cache-Control "no-cache"
+
+    import trappole
+
+    # L'unica eccezione al "solo file statici": il form contatti, che e' anche il
+    # modo in cui ci si candida come tester. Senza questa riga il form risponde
+    # 404 e rimanda a scrivere una mail, cioe' esattamente il mailto che il form
+    # doveva togliere di mezzo. Solo questo percorso: tutto il resto di /api
+    # sulla landing continua a non esistere.
+    handle /api/public/contact {
+        reverse_proxy 127.0.0.1:8080
+    }
+    handle {
+        file_server
+    }
+}
+
+# 2) www -> dominio nudo, per non avere due indirizzi che rispondono uguale.
+www.${DOMINIO} {
+    redir https://${DOMINIO}{uri} permanent
+}
+
+# 3) Applicazione. L'ordine conta: il companion PRIMA del backend,
+#    altrimenti /api/companion/* finirebbe a Spring.
+app.${DOMINIO} {
+    encode gzip
+    root * /var/www/neurodesk
+
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 20mb
+            roll_keep 5
+        }
+        format json
+    }
+
+    header {
+        Cache-Control "no-cache"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "no-referrer"
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-/E3QhDAADRe+2Xg/3MmIXCQPmdcxLC0nKEpgcB5tawQ='; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+    }
+
+    # Prima di tutto il resto: qui sotto c'e' il ripiego della single-page, che
+    # rimanda QUALUNQUE percorso a index.html. Senza queste trappole davanti,
+    # app.${DOMINIO} rispondeva 200 anche a /wp-admin e /.env — cioe' diceva
+    # "trovato" a ogni scansione automatica, che e' il modo migliore per
+    # sembrare un bersaglio interessante.
+    import trappole
+
+    handle /api/companion/* {
+        reverse_proxy 127.0.0.1:8090
+    }
+    handle /api/internal/* {
+        respond 404
+    }
+    handle /api/* {
+        reverse_proxy 127.0.0.1:8080
+    }
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
+}

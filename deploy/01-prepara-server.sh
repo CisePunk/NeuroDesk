@@ -217,80 +217,21 @@ systemctl enable neurodesk-backend neurodesk-companion >/dev/null
 
 # --- Caddy: due siti, un certificato ciascuno --------------------------------
 msg "Configuro Caddy"
-cat > /etc/caddy/Caddyfile <<CADDY
-{
-    email ${EMAIL_TLS}
-}
-
-# 1) Landing pubblica: file statici, piu' UN SOLO endpoint dinamico (il form contatti).
-${DOMINIO} {
-    encode gzip
-    root * /var/www/neurodesk-landing
-    # Header di sicurezza. La landing e' statica con script/stili inline, quindi
-    # NON mette una CSP stretta (la romperebbe): X-Frame-Options copre il clickjacking.
-    header {
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Frame-Options "DENY"
-        X-Content-Type-Options "nosniff"
-        Referrer-Policy "no-referrer"
-    }
-    # Gli asset della landing (site.css/site.js) hanno nome fisso: no-cache
-    # forza il browser a rivalidare, così gli aggiornamenti si vedono subito.
-    header /assets/* Cache-Control "no-cache"
-
-    # L'unica eccezione al "solo file statici": il form contatti, che e' anche il
-    # modo in cui ci si candida come tester. Senza questa riga il form risponde
-    # 404 e rimanda a scrivere una mail — cioe' esattamente il mailto che il form
-    # doveva togliere di mezzo. Solo questo percorso: tutto il resto di /api
-    # sulla landing continua a non esistere.
-    handle /api/public/contact {
-        reverse_proxy 127.0.0.1:8080
-    }
-    handle {
-        file_server
-    }
-}
-
-# 2) www -> dominio nudo, per non avere due indirizzi che rispondono uguale.
-www.${DOMINIO} {
-    redir https://${DOMINIO}{uri} permanent
-}
-
-# 3) Applicazione. L'ordine conta: il companion PRIMA del backend,
-#    altrimenti /api/companion/* finirebbe a Spring.
-${APP} {
-    encode gzip
-    root * /var/www/neurodesk
-    # SPA: no-cache così un nuovo deploy si vede subito (gli asset hanno hash nel nome).
-    # + header di sicurezza. La CSP e' STRETTA: l'app non carica risorse esterne.
-    # L'hash sha256 autorizza il solo script inline in index.html (imposta il tema
-    # prima del render). Se cambi quello script, rigenera l'hash o la pagina lampeggia.
-    header {
-        Cache-Control "no-cache"
-        Strict-Transport-Security "max-age=31536000; includeSubDomains"
-        X-Frame-Options "DENY"
-        X-Content-Type-Options "nosniff"
-        Referrer-Policy "no-referrer"
-        Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-/E3QhDAADRe+2Xg/3MmIXCQPmdcxLC0nKEpgcB5tawQ='; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
-    }
-
-    handle /api/companion/* {
-        reverse_proxy 127.0.0.1:8090
-    }
-    # Endpoint interno servizio-a-servizio: mai esposto al web. Il companion lo
-    # raggiunge in locale (127.0.0.1:8080), non da qui.
-    handle /api/internal/* {
-        respond 404
-    }
-    handle /api/* {
-        reverse_proxy 127.0.0.1:8080
-    }
-    handle {
-        try_files {path} /index.html
-        file_server
-    }
-}
-CADDY
+# La cartella del log degli accessi va creata E data a caddy PRIMA del reload:
+# se il file non e' scrivibile dall'utente caddy, il caricamento fallisce con
+# "permission denied" e resta attiva la configurazione precedente. Preso in
+# faccia il 29 luglio 2026.
+mkdir -p /var/log/caddy && chown caddy:caddy /var/log/caddy && chmod 750 /var/log/caddy
+# Caddyfile: il contenuto sta in deploy/Caddyfile.template, non qui.
+#
+# Stava in un heredoc dentro questo script, ed era divergiato: trappole
+# dell'honeypot e log degli accessi erano finiti solo sul file vivo del server.
+# Un server ricostruito da zero sarebbe nato senza. Una fonte sola, e questa
+# riga la sostituisce.
+MODELLO="$(dirname "${BASH_SOURCE[0]}")/Caddyfile.template"
+[ -f "$MODELLO" ] || err "Manca deploy/Caddyfile.template accanto a questo script."
+DOMINIO="$DOMINIO" EMAIL_TLS="$EMAIL_TLS" \
+  envsubst '${DOMINIO} ${EMAIL_TLS}' < "$MODELLO" > /etc/caddy/Caddyfile
 caddy validate --config /etc/caddy/Caddyfile >/dev/null && msg "Caddyfile valido"
 
 # --- Promemoria dei segreti --------------------------------------------------
