@@ -116,8 +116,39 @@ app.${DOMINIO} {
     handle /api/* {
         reverse_proxy 127.0.0.1:8080
     }
-    handle {
-        try_files {path} /index.html
+    # Ripiego della single-page, ma SOLO sulle rotte che esistono davvero.
+    #
+    # Prima era "try_files {path} /index.html" su qualunque percorso: il sito
+    # rispondeva 200 a tutto. Il 30 luglio 2026 uno scanner ha fatto 337
+    # richieste e ne ha ricevute 137 con esito 200 — 128 volte la stessa pagina
+    # da 511 byte. Non ha ottenuto niente, ma per 128 volte gli abbiamo
+    # risposto "si, quel percorso esiste": e' il contrario del segnale che
+    # serve dare.
+    #
+    # Questa e' una LISTA BIANCA e va tenuta allineata a App.jsx. Il costo di
+    # dimenticare una rotta e' visibile subito (la pagina non si apre), quindi
+    # e' un errore che si scopre, non uno che resta latente. L'opposto della
+    # lista nera dei percorsi-trappola, dove una dimenticanza non si vede.
+    #
+    # /.well-known/* e' in lista bianca anche se la sfida ACME viaggia sulla
+    # porta 80: non ho potuto dimostrare che il gestore ACME di Caddy preceda
+    # il redirect verso https, e la documentazione ufficiale non lo afferma.
+    # Tenerlo in lista bianca rende la domanda irrilevante — corretto in
+    # entrambi i casi.
+    @rotteApp path / /login /consenso /companion /feedback /codici /moduli /moduli/nuovo /task /task/nuovo
+    handle @rotteApp {
+        rewrite * /index.html
         file_server
+    }
+    handle /assets/* {
+        file_server
+    }
+    @fileRadice path /favicon.svg /icons.svg /index.html /robots.txt /.well-known/*
+    handle @fileRadice {
+        file_server
+    }
+    # Tutto il resto non esiste, e lo diciamo.
+    handle {
+        respond 404
     }
 }
