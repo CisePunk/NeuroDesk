@@ -119,7 +119,22 @@ Le soglie che avevo proposto per prime avrebbero classificato come scansione:
 - 25 sessioni composte **solo** da richieste di quel tipo
 
 Da qui la regola: i percorsi che un client chiede per convenzione senza sapere
-niente del sito (`favicon.ico`, `apple-touch-icon*`, `robots.txt`,
-`sitemap*.xml`, `/.well-known/*`, `security.txt`, `ads.txt`) **non contano nel
-rapporto dei 404**. Con l'esclusione, il traffico legittimo scende a zero
-percorsi 404 distinti.
+niente del sito **non contano nel rapporto dei 404**.
+
+La lista è deliberatamente **chiusa e minima**, quattro voci, perché in un
+repository pubblico ogni percorso escluso è un punto ciec:o pubblicato:
+
+```
+favicon.ico   favicon.png   apple-touch-icon*.png   robots.txt   browserconfig.xml
+```
+
+Criterio per aggiungerne: *il client lo chiede senza che nessuno gliel'abbia
+detto?* Sono state **escluse dalla lista** `manifest.json` e `site.webmanifest`
+(un browser li chiede solo se linkati nell'HTML), `sitemap.xml`, `ads.txt` e
+`security.txt` (convenzioni di crawler, non di browser). Anche `/.well-known/`
+è stato ristretto ad `acme-challenge/*`: il jolly rendeva invisibile un intero
+spazio dei nomi.
+
+Verificato che la restrizione non costa copertura: con quattro voci l'iPhone
+resta comunque escluso (10 sessioni svuotate invece di 25) e il traffico
+legittimo scende a **zero** percorsi 404 distinti.
