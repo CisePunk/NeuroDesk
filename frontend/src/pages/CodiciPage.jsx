@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { getCodici, emettiCodice, impostaStatoCodice, getConsumo, rimuoviChiaveCodice } from '../api/codiciApi';
+import { getCodici, emettiCodice, impostaStatoCodice, getConsumo, rimuoviChiaveCodice, rinominaCodice } from '../api/codiciApi';
 import { useAsyncData } from '../ui/useAsyncData';
 import { StatoLista } from '../ui/StatoLista';
 import { useToast } from '../ui/ToastProvider';
@@ -46,11 +46,20 @@ function CodiciPage() {
     const [appenaEmesso, setAppenaEmesso] = useState(null); // { id, codice, etichetta }
     const [azioneId, setAzioneId] = useState(null);
     const [filtro, setFiltro] = useState('');
+    // I revocati stanno nascosti: sono quasi tutti codici di prova, e gonfiavano
+    // i conteggi al punto da rendere la pagina difficile da leggere.
+    const [mostraRevocati, setMostraRevocati] = useState(false);
+    // Rinomina in linea: id del codice in modifica e testo corrente.
+    const [rinominaId, setRinominaId] = useState(null);
+    const [nuovoNome, setNuovoNome] = useState('');
 
     const riepilogo = useMemo(() => ({
         totale: codici.length,
         attivi: codici.filter(c => c.attivo).length,
-        conConsenso: codici.filter(c => c.consensoDato).length,
+        revocati: codici.filter(c => !c.attivo).length,
+        // Il consenso si conta solo su chi e' ancora attivo: includere i revocati
+        // (quasi tutti prove) faceva sembrare che avessero accettato in molti piu'.
+        conConsenso: codici.filter(c => c.attivo && c.consensoDato).length,
         tokenTotali: codici.reduce((s, c) => s + (c.tokenInput || 0) + (c.tokenOutput || 0), 0),
         // La media si calcola solo su chi ha davvero scritto: includere i codici
         // mai usati la schiaccerebbe verso zero e farebbe sembrare anomalo chiunque.
@@ -63,9 +72,10 @@ function CodiciPage() {
 
     const visibili = useMemo(() => {
         const q = filtro.trim().toLowerCase();
-        if (!q) return codici;
-        return codici.filter(c => (c.etichetta || '').toLowerCase().includes(q));
-    }, [codici, filtro]);
+        let lista = mostraRevocati ? codici : codici.filter(c => c.attivo);
+        if (q) lista = lista.filter(c => (c.etichetta || '').toLowerCase().includes(q));
+        return lista;
+    }, [codici, filtro, mostraRevocati]);
 
     async function handleEmetti(e) {
         e.preventDefault();
@@ -91,6 +101,20 @@ function CodiciPage() {
             // Su http non sicuro o senza permesso la clipboard non c'e': non e' un errore
             // dell'utente, quindi gli si dice cosa fare invece di lasciarlo fermo.
             toast.errore('Copia non riuscita: selezionalo a mano.');
+        }
+    }
+
+    async function salvaNome(c) {
+        setAzioneId(c.id);
+        try {
+            await rinominaCodice(c.id, nuovoNome);
+            setRinominaId(null);
+            toast.successo('Etichetta aggiornata.');
+            ricarica();
+        } catch (err) {
+            toast.errore(err.message);
+        } finally {
+            setAzioneId(null);
         }
     }
 
@@ -148,10 +172,24 @@ function CodiciPage() {
 
             {!caricamento && !errore && codici.length > 0 && (
                 <div className="card-detail" style={{ marginTop: '0.2rem' }}>
-                    <strong>{riepilogo.totale}</strong> emessi · <strong>{riepilogo.attivi}</strong> attivi
-                    {' '}· <strong>{riepilogo.conConsenso}</strong> hanno dato il consenso
+                    <strong>{riepilogo.attivi}</strong> accessi attivi ·{' '}
+                    <strong>{riepilogo.conConsenso}</strong> hanno dato il consenso
                     {riepilogo.tokenTotali > 0 && (
                         <> · <strong>{formattaToken(riepilogo.tokenTotali)}</strong> token consumati in tutto</>
+                    )}
+                    {riepilogo.revocati > 0 && (
+                        <>
+                            {' · '}
+                            <button
+                                type="button"
+                                className="link-inline"
+                                onClick={() => setMostraRevocati(v => !v)}
+                            >
+                                {mostraRevocati
+                                    ? `nascondi i ${riepilogo.revocati} revocati`
+                                    : `mostra anche i ${riepilogo.revocati} revocati`}
+                            </button>
+                        </>
                     )}
                 </div>
             )}
@@ -233,7 +271,35 @@ function CodiciPage() {
                 <div className="card-list">
                     {visibili.map((c, i) => (
                         <div key={c.id} className="card" style={{ animationDelay: `${i * 55}ms` }}>
-                            <div className="card-title">{c.etichetta || `Codice #${c.id}`}</div>
+                            {rinominaId === c.id ? (
+                                <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                                    <input
+                                        type="text"
+                                        value={nuovoNome}
+                                        onChange={(e) => setNuovoNome(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === 'Enter') salvaNome(c); if (e.key === 'Escape') setRinominaId(null); }}
+                                        maxLength={60}
+                                        autoFocus
+                                        style={{ flex: '1 1 12rem' }}
+                                    />
+                                    <button className="btn-primary" onClick={() => salvaNome(c)} disabled={azioneId === c.id}>
+                                        Salva
+                                    </button>
+                                    <button className="btn-ghost" onClick={() => setRinominaId(null)}>Annulla</button>
+                                </div>
+                            ) : (
+                                <div className="card-title" style={{ display: 'flex', gap: '0.5rem', alignItems: 'baseline' }}>
+                                    <span>{c.etichetta || `Codice #${c.id}`}</span>
+                                    <button
+                                        type="button"
+                                        className="link-inline"
+                                        style={{ fontSize: '0.78rem', fontWeight: 400 }}
+                                        onClick={() => { setRinominaId(c.id); setNuovoNome(c.etichetta || ''); }}
+                                    >
+                                        rinomina
+                                    </button>
+                                </div>
+                            )}
                             <div>
                                 <span className={`badge ${c.attivo ? 'badge-success' : 'badge-muted'}`}>
                                     {c.attivo ? 'Attivo' : 'Revocato'}

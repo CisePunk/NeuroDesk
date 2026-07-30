@@ -67,6 +67,15 @@ public class TesterController {
      * che si fida del solo JWT) ha effetto entro ~60s, perche' interroga l'endpoint interno
      * /api/internal/utente/{id}/stato con una cache di 60s.
      */
+    /** Rinomina un codice: l'etichetta e' l'unica cosa che dice a chi appartiene. */
+    @PutMapping("/{id}/etichetta")
+    public void rinomina(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        if (body == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Corpo della richiesta mancante.");
+        }
+        testerService.rinomina(id, body.get("etichetta"));
+    }
+
     @PutMapping("/{id}/stato")
     public void impostaStato(@PathVariable Long id, @RequestBody Map<String, Boolean> body) {
         Boolean attivo = body == null ? null : body.get("attivo");

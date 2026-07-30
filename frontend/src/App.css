@@ -1932,3 +1932,15 @@ main h1, main h2 { margin-top: 0; }
 .chiave-attiva { color: var(--success) !important; font-weight: 600; }
 .chiave-attiva span { font-weight: 400; opacity: 0.8; }
 .chiave-nota   { font-size: 12px !important; color: var(--text-3) !important; margin-bottom: 0 !important; }
+
+/* Piccolo comando testuale in mezzo a una frase: sembra un link, non un bottone. */
+.link-inline {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-inline:hover { color: var(--accent-l); }

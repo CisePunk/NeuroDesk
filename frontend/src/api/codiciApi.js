@@ -38,6 +38,11 @@ export function rimuoviChiaveCodice(id) {
     return apiFetch(`/api/tester/${id}/chiave`, { method: 'DELETE' });
 }
 
+/** Cambia l'etichetta di un codice gia' emesso. */
+export function rinominaCodice(id, etichetta) {
+    return apiFetch(`/api/tester/${id}/etichetta`, { method: 'PUT', body: { etichetta } });
+}
+
 /** Revoca (attivo=false) o riattiva un codice. La revoca ha effetto subito sul backend. */
 export function impostaStatoCodice(id, attivo) {
     return apiFetch(`/api/tester/${id}/stato`, { method: 'PUT', body: { attivo } });

@@ -170,6 +170,27 @@ public class TesterService {
         utenteRepository.save(tester);
     }
 
+    /**
+     * Cambia l'etichetta di un codice gia' emesso.
+     *
+     * Serve perche' l'etichetta e' l'unica cosa che dice a chi appartiene un
+     * accesso, e ci si ripensa: un nome proprio andrebbe sostituito col ruolo
+     * ("insegnante di sostegno") per non tenere identita' in una pagina che
+     * promette anonimato.
+     */
+    @Transactional
+    public void rinomina(Long id, String etichetta) {
+        Utente tester = utenteRepository.findById(id)
+                .filter(u -> u.getRuolo() == Ruolo.STUDENTE)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tester non trovato"));
+        String pulita = etichetta == null ? "" : etichetta.trim();
+        if (pulita.length() > 60) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Etichetta troppo lunga (max 60 caratteri).");
+        }
+        tester.setEtichetta(pulita.isEmpty() ? null : pulita);
+        utenteRepository.save(tester);
+    }
+
     @Transactional
     public void impostaStato(Long id, boolean attivo) {
         Utente tester = utenteRepository.findById(id)
