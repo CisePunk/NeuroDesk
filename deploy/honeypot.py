@@ -77,8 +77,12 @@ FINESTRA_SESSIONE_S = 120
 GIORNI_ARCHIVIO = 90
 
 # ─── Livello per sessione: soglie ────────────────────────────────────────────
-# A) scansioni ampie
-SOGLIA_A_404PC, SOGLIA_A_N = 25, 10
+# A) scansioni ampie. Serve anche un minimo di percorsi DISTINTI non trovati:
+#    una scansione esplora, e insistere su un solo file mancante e' l'opposto.
+#    Senza questo minimo, un client che ripeteva 6 volte /site.js (percorso
+#    relativo risolto male, non un attacco) faceva scattare l'allarme con 1
+#    solo percorso distinto. I casi ostili misurati ne avevano 24 e 164.
+SOGLIA_A_404PC, SOGLIA_A_N, SOGLIA_A_PERCORSI = 25, 10, 3
 # B) sonde piccole e mirate. Cinque percorsi distinti non trovati: sul traffico
 #    misurato il legittimo si ferma a ZERO, quindi il margine e' totale.
 SOGLIA_B_PERCORSI, SOGLIA_B_404PC = 5, 80
@@ -306,7 +310,8 @@ def valuta(rs):
 def inneschi(m):
     """Quali condizioni scattano. Vuoto = niente da segnalare."""
     fuori = []
-    if m["pc404"] >= SOGLIA_A_404PC and m["richieste"] >= SOGLIA_A_N:
+    if (m["pc404"] >= SOGLIA_A_404PC and m["richieste"] >= SOGLIA_A_N
+            and m["percorsi404"] >= SOGLIA_A_PERCORSI):
         fuori.append("A_scansione_ampia")
     if m["percorsi404"] >= SOGLIA_B_PERCORSI and m["pc404"] >= SOGLIA_B_404PC:
         fuori.append("B_sonda_mirata")
