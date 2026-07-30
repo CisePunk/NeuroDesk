@@ -135,6 +135,19 @@ INIEZIONE = (
     "/etc/passwd", "cmd=", "exec(", "eval(", "${jndi:", "<?php",
 )
 
+# Origini note: la tua connessione di casa, e qualunque altra da cui provi tu.
+# Gli eventi da qui finiscono COMUNQUE nell'archivio, marcati "origine_nota":
+# non si nasconde niente. Semplicemente non fanno suonare la mail, perche' un
+# allarme che scatta ogni volta che provi qualcosa smette di essere un allarme.
+#
+# Sta nella configurazione del SERVER, non in questo file: un elenco di origini
+# fidate in un repository pubblico direbbe a chiunque quali indirizzi non fanno
+# scattare niente. Formato: indirizzi o reti separati da virgola, es.
+#   HONEYPOT_ORIGINI_NOTE=2a01:e11:800f:ad00::/64,203.0.113.7
+ORIGINI_NOTE = [
+    x.strip() for x in os.getenv("HONEYPOT_ORIGINI_NOTE", "").split(",") if x.strip()
+]
+
 SALE = os.getenv("HONEYPOT_HASH_SALT", "")
 # Identificativo dell'epoca del sale. OBBLIGATORIO: senza, confrontando impronte
 # di epoche diverse si otterrebbe silenziosamente "origini diverse" dove era la
@@ -169,6 +182,22 @@ def origine(ip: str) -> str:
     if indirizzo.version == 6:
         return str(ipaddress.ip_network(f"{ip}/64", strict=False))
     return ip
+
+
+def e_nota(org: str) -> bool:
+    """L'origine e' una di quelle da cui proviamo noi?"""
+    for voce in ORIGINI_NOTE:
+        if org == voce:
+            return True
+        try:
+            rete = ipaddress.ip_network(voce, strict=False)
+            # org puo' gia' essere una rete (/64) o un indirizzo singolo.
+            altro = ipaddress.ip_network(org, strict=False)
+            if altro.subnet_of(rete) if altro.version == rete.version else False:
+                return True
+        except ValueError:
+            continue
+    return False
 
 
 def normalizza(uri: str):
@@ -385,6 +414,7 @@ def main() -> int:
             "quando": m["inizio"],
             "epoca_sale": EPOCA,
             "impronta": imp,
+            "origine_nota": e_nota(org),
             "inneschi": scattate,
             "metriche": m,
         })
@@ -407,9 +437,17 @@ def main() -> int:
 
     for e in nuovi:
         m = e["metriche"]
+        marca = "  [origine nota: nessuna mail]" if e["origine_nota"] else ""
         print(f"  [{e['impronta']}] {', '.join(e['inneschi'])}: {m['richieste']} richieste, "
-              f"{m['pc404']}% non trovate, {m['percorsi404']} percorsi")
-    avvisa(nuovi)
+              f"{m['pc404']}% non trovate, {m['percorsi404']} percorsi{marca}")
+
+    # Si avvisa solo per le origini che non siamo noi. Le altre restano
+    # nell'archivio: registrate, non annunciate.
+    da_avvisare = [e for e in nuovi if not e["origine_nota"]]
+    if da_avvisare:
+        avvisa(da_avvisare)
+    else:
+        print("  nessuna mail: tutte le sessioni vengono da origini note")
     return 0
 
 
