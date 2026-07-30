@@ -135,7 +135,13 @@ app.${DOMINIO} {
     # il redirect verso https, e la documentazione ufficiale non lo afferma.
     # Tenerlo in lista bianca rende la domanda irrilevante — corretto in
     # entrambi i casi.
-    @rotteApp path / /login /consenso /companion /feedback /codici /moduli /moduli/nuovo /task /task/nuovo
+    # Le rotte sono elencate anche con lo slash finale: il matcher "path" di Caddy
+    # e' esatto, quindi /login e /login/ sono due cose diverse e prima del
+    # cambiamento funzionavano entrambe. Senza le varianti, un link con lo slash
+    # finirebbe nel 404 e sembrerebbe un guasto.
+    @rotteApp path / /login /login/ /consenso /consenso/ /companion /companion/ \
+                   /feedback /feedback/ /codici /codici/ /moduli /moduli/ \
+                   /moduli/nuovo /moduli/nuovo/ /task /task/ /task/nuovo /task/nuovo/
     handle @rotteApp {
         rewrite * /index.html
         file_server
@@ -143,12 +149,23 @@ app.${DOMINIO} {
     handle /assets/* {
         file_server
     }
-    @fileRadice path /favicon.svg /icons.svg /index.html /robots.txt /.well-known/*
+    # /.well-known ristretto a acme-challenge: il jolly rendeva invisibile un
+    # intero spazio dei nomi, e una wordlist con quel prefisso sarebbe passata.
+    @fileRadice path /favicon.svg /icons.svg /index.html /404.html /robots.txt /.well-known/acme-challenge/*
     handle @fileRadice {
         file_server
     }
-    # Tutto il resto non esiste, e lo diciamo.
+    # Tutto il resto non esiste. "error 404" invece di "respond 404" perche' cosi'
+    # la richiesta passa a handle_errors, che serve una pagina leggibile MANTENENDO
+    # lo stato 404: chi ha sbagliato a digitare capisce cosa fare, chi sta
+    # scansionando non riceve nessuna conferma che il percorso esista.
+    # Su uno strumento per persone neurodivergenti un errore muto e' un errore
+    # di progetto.
     handle {
-        respond 404
+        error 404
+    }
+    handle_errors {
+        rewrite * /404.html
+        file_server
     }
 }

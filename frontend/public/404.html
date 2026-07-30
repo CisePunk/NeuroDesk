@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Questa pagina non c'è — NeuroDesk</title>
+  <!-- Pagina servita con stato 404. Serve a due cose insieme:
+       - a chi ha sbagliato a digitare un indirizzo, dire cosa fare adesso
+       - a chi sta scansionando, NON confermare che il percorso esiste
+       Lo stato HTTP resta 404, quindi il secondo obiettivo e' salvo.
+       Un errore muto, su uno strumento per persone neurodivergenti, e' un
+       errore di progetto: chi arriva qui non deve restare fermo. -->
+  <style>
+    :root { --bg:#f3efe8; --card:#faf8f3; --testo:#33333a; --testo2:#5d5d66; --accento:#5f8279; --bordo:rgba(95,130,121,.22); }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#1b1e24; --card:#262b33; --testo:#e6e3dc; --testo2:#a6a49c; --accento:#7d9a94; --bordo:rgba(230,227,220,.12); }
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+           background:var(--bg); color:var(--testo); line-height:1.65; padding:24px;
+           font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif; }
+    .scatola { max-width:34rem; background:var(--card); border:1px solid var(--bordo);
+               border-radius:16px; padding:32px 30px; }
+    h1 { margin:0 0 14px; font-size:1.35rem; }
+    p  { margin:0 0 14px; color:var(--testo2); }
+    ul { margin:0 0 18px; padding-left:20px; color:var(--testo2); }
+    li { margin-bottom:8px; }
+    a.bottone { display:inline-block; background:var(--accento); color:#fbfdfb; text-decoration:none;
+                padding:11px 18px; border-radius:10px; font-weight:600; min-height:44px; }
+    a.bottone:focus-visible { outline:2px solid var(--testo); outline-offset:2px; }
+    .piccolo { font-size:.85rem; color:var(--testo2); opacity:.8; margin-bottom:0; }
+  </style>
+</head>
+<body>
+  <main class="scatola">
+    <h1>Questa pagina non c'è</h1>
+    <p>Non è colpa tua e non hai rotto niente. L'indirizzo che hai aperto non esiste — capita con un link vecchio o una lettera sbagliata.</p>
+    <ul>
+      <li>Se stavi scrivendo al Companion, <strong>la tua conversazione è salva</strong>: la ritrovi dov'era.</li>
+      <li>Se ci sei arrivato da un link che ti abbiamo dato noi, scrivicelo: è un errore nostro da sistemare.</li>
+    </ul>
+    <p><a class="bottone" href="/companion">Torna al Companion</a></p>
+    <p class="piccolo">Oppure <a href="/">alla pagina iniziale</a> · <a href="https://neurodesk.it/aiuto.html">aiuto</a> · <a href="mailto:hello@neurodesk.it">hello@neurodesk.it</a></p>
+  </main>
+</body>
+</html>
