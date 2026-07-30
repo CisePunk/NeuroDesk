@@ -45,6 +45,14 @@ ${DOMINIO} {
         output file /var/log/caddy/access.log {
             roll_size 20mb
             roll_keep 5
+            # A TEMPO, non solo a dimensione. Con poco traffico la sola soglia
+            # sui megabyte avrebbe conservato mesi di log: e qui dentro le URI
+            # contengono identificativi di risorsa (/api/companion-sessions/11),
+            # cioe' la cronologia di quale conversazione e' stata riaperta e
+            # quando. La conservazione E' la misura di privacy, non un dettaglio
+            # operativo. Nell'archivio dell'honeypot quelle URI sono gia'
+            # normalizzate; qui restano in chiaro, quindi scadono prima.
+            roll_keep_for 336h
         }
         format json
     }
@@ -87,6 +95,14 @@ app.${DOMINIO} {
         output file /var/log/caddy/access.log {
             roll_size 20mb
             roll_keep 5
+            # A TEMPO, non solo a dimensione. Con poco traffico la sola soglia
+            # sui megabyte avrebbe conservato mesi di log: e qui dentro le URI
+            # contengono identificativi di risorsa (/api/companion-sessions/11),
+            # cioe' la cronologia di quale conversazione e' stata riaperta e
+            # quando. La conservazione E' la misura di privacy, non un dettaglio
+            # operativo. Nell'archivio dell'honeypot quelle URI sono gia'
+            # normalizzate; qui restano in chiaro, quindi scadono prima.
+            roll_keep_for 336h
         }
         format json
     }

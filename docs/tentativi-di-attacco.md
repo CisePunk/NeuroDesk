@@ -104,6 +104,26 @@ da tenere allineato.
 Prima del 29 luglio 2026 il server non registrava chi bussava. Di tutto quello
 che è arrivato prima di quella data **non sappiamo niente, e non lo scopriremo**.
 
+### Il risultato, misurato
+
+La stessa scansione, **rigiocata identica** contro il sito corretto (337
+richieste vere, riprodotte dal log congelato):
+
+| | prima | dopo |
+|---|---|---|
+| risposte «esiste» (200) | 137 | **11** |
+| non trovato (404) | 184 | **312** |
+| respinte dalle API (401) | 14 | 14 |
+| riconosciute dal rilevamento | **56 su 337** | **312 su 337** per richiesta, più la sessione intera |
+
+Le 11 risposte 200 rimaste sono esattamente i file pubblici: il bundle
+JavaScript, le pagine del sito, e la pagina vuota dell'app per le due sole
+rotte reali che aveva toccato.
+
+Al livello sessione la scansione fa scattare due condizioni su tre —
+«scansione ampia» e «sonda mirata» — con 92,6% di percorsi non trovati su 217
+distinti.
+
 ---
 
 ### Nota sul metodo, per chi legge da tecnico
