@@ -80,7 +80,7 @@ echo
 echo "═══ 3. Comportamento da stabilire, non da dedurre ═══"
 stato 200 "$APP/companion" HEAD
 stato 200 "$APP/" HEAD
-printf '  nota    /Login (maiuscola) risponde %s — Caddy distingue maiuscole e minuscole\n' \
+printf '  nota    /Login (maiuscola) risponde %s — il matcher path di Caddy NON distingue maiuscole e minuscole (stabilito, non dedotto)\n' \
     "$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$APP/Login")"
 
 echo

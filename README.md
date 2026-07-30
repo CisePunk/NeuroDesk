@@ -233,6 +233,18 @@ arriva al Companion entro ~60s tramite l'endpoint interno servizio-a-servizio.
 In produzione `neurodesk.test-mode` **deve restare `false`**: gli endpoint
 `/api/test/**` rispondono allora `404`, come se non esistessero.
 
+## Sicurezza in esercizio
+
+Il server registra gli accessi e un controllo automatico ogni quindici minuti
+riconosce le scansioni, senza bloccare nessuno: osserva e avvisa. Un secondo
+controllo ogni tre giorni verifica vulnerabilità note nelle librerie (fonte
+OSV.dev), certificati, porte aperte, e prova davvero che l'endpoint AI resti
+chiuso senza credenziali.
+
+Cosa è arrivato addosso al servizio e cosa abbiamo corretto di conseguenza sta
+in **`docs/tentativi-di-attacco.md`**. Il registro è pubblico di proposito: ogni
+voce lì dentro ha prodotto una correzione, e la correzione vale più del racconto.
+
 ## Stato attuale
 
 In prova con un piccolo gruppo di tester, su server pubblico con HTTPS, provider
@@ -259,6 +271,7 @@ Verifiche eseguite il 27 luglio 2026:
 - Esempi di flussi: `docs/example-flows.md`
 - Checklist di messa in produzione: `docs/DEPLOY_CHECKLIST.md`
 - Prove di sicurezza svolte: `docs/security-tests.md`
+- **Tentativi di attacco e cosa abbiamo cambiato: `docs/tentativi-di-attacco.md`**
 - Guida pubblica per i tester: `landing/aiuto.html` (IT), `.en` e `.fr`
 
 ## Struttura progetto
