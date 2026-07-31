@@ -103,7 +103,7 @@ Tutti eseguiti con `curl` contro l'endpoint `POST /api/companion/respond`.
 
 Analisi statica adversariale sulle modifiche successive al consolidamento: nuovo
 endpoint pubblico `POST /api/public/contact` e gestionale "Utenti" (registrazione con
-nome + generazione di un codice di accesso anonimo collegato).
+nome + generazione di un codice di accesso pseudonimo collegato).
 
 ### 6.1 Endpoint pubblico contatti (non autenticato)
 

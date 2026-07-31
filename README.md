@@ -73,7 +73,7 @@ NeuroDesk Companion nasce per questo: non per sostituire professionisti, tutor, 
 
 ### Gestionale principale
 
-- emissione e revoca dei **codici di accesso anonimi** (pagina *Codici*)
+- emissione e revoca dei **codici di accesso pseudonimi** — senza nome né email (pagina *Codici*)
 - dashboard con i codici emessi, quanti attivi e quanti hanno dato il consenso
 - gestione moduli e task di studio (strumenti di test, nascosti in produzione)
 - tema chiaro/scuro, interfaccia responsive
@@ -81,7 +81,8 @@ NeuroDesk Companion nasce per questo: non per sostituire professionisti, tutor, 
 
 ### Accesso e consenso
 
-- si entra con un **codice**, non con nome ed email: l'account e' anonimo
+- si entra con un **codice**, non con nome ed email: l'account e' **pseudonimo**
+  (nessun dato anagrafico; il legame con la persona resta separato, non nel database)
 - del codice il database conserva solo un hash con pepper, mai il valore in chiaro
 - schermata di **consenso informato** obbligatoria per gli utenti, revocabile in
   qualsiasi momento dalle opzioni del Companion
