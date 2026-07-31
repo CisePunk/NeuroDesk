@@ -1,7 +1,0 @@
-# NeuroDesk — app. Niente da indicizzare: e' dietro autenticazione.
-User-agent: *
-Disallow: /api/
-# Area amministrativa interna. Un motore la ignora, un visitatore vero non la
-# tocca mai. Chi la sonda ha letto questo file per cercare porte nascoste: e'
-# esattamente cio' che vogliamo sapere. (canary — vedi deploy/honeypot.py)
-Disallow: /internal-admin-metrics

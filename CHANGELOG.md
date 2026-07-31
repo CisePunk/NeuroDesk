@@ -2,9 +2,13 @@
 
 Registro delle modifiche, in ordine dalla più recente. Solo fatti.
 
+## 2026-07-31
+
+- Audit di sicurezza dall'esterno documentato: docs/audit-sicurezza-30-luglio-2026.md
+- Honeypot: la configurazione operativa (percorsi sorvegliati) esce dal repository, resta sul server.
+
 ## 2026-07-30
 
-- Esca canary: `robots.txt` vieta un percorso finto; chi lo sonda fa scattare un allarme dedicato.
 - Rilevamento honeypot: condizione A richiede ≥3 percorsi distinti non trovati (prima segnalava file singoli ripetuti).
 - Honeypot: le origini note (rete di casa) non fanno partire la mail; restano in archivio marcate.
 - Honeypot a due livelli: per richiesta (stato 404) + per sessione (rapporto, ampiezza, cardinalità). Soglie misurate sul traffico reale.

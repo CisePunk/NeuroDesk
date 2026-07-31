@@ -19,6 +19,9 @@ import pathlib
 
 os.environ.setdefault("HONEYPOT_HASH_SALT", "test-salt")
 os.environ.setdefault("HONEYPOT_SALT_EPOCA", "test")
+# Percorsi FINTI di prova: i reali stanno solo sul server, non nel repo.
+os.environ.setdefault("HONEYPOT_PERCORSI_SEGNALE", "/prova-segnale")
+os.environ.setdefault("HONEYPOT_PERCORSI_INTRUSIONE", "/prova-intrusione")
 
 _PATH = pathlib.Path(__file__).resolve().parents[1] / "deploy" / "honeypot.py"
 _spec = importlib.util.spec_from_file_location("honeypot", _PATH)
@@ -87,15 +90,18 @@ def test_origine_nota(monkeypatch):
     assert hp.e_nota("34.150.133.136") is False                          # lo scanner del 30/07
 
 
-# ─── Canary: la briciola in robots.txt ───────────────────────────────────────
+# ─── Percorsi sempre-segnale (configurati sul server) ───────────────────────
 
-def test_canary_riconosciuto():
-    assert hp.e_canary("/internal-admin-metrics") is True
-    assert hp.e_canary("/internal-admin-metrics/qualcosa") is True
+def test_percorso_segnale_riconosciuto():
+    assert hp.tocca_segnale("/prova-segnale") is True
+    assert hp.tocca_segnale("/prova-segnale/x") is True
 
-def test_canary_non_scatta_su_percorsi_normali():
-    assert hp.e_canary("/companion") is False
-    assert hp.e_canary("/api/tester") is False
+def test_percorso_intrusione_riconosciuto():
+    assert hp.tocca_intrusione("/prova-intrusione") is True
+
+def test_percorsi_normali_non_scattano():
+    assert hp.tocca_segnale("/companion") is False
+    assert hp.tocca_intrusione("/api/tester") is False
 
 
 # ─── Le tre condizioni di sessione ──────────────────────────────────────────

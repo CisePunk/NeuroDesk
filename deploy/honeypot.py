@@ -160,21 +160,16 @@ ORIGINI_PENTEST = [
     x.strip() for x in os.getenv("HONEYPOT_ORIGINI_PENTEST", "").split(",") if x.strip()
 ]
 
-# ─── Canary ──────────────────────────────────────────────────────────────────
-# Percorsi disseminati come briciola nel robots.txt: un percorso dal nome ghiotto
-# che un visitatore vero non chiede MAI, ma che un attaccante trova leggendo
-# robots.txt in cerca di porte nascoste. Qualunque richiesta qui e' un segnale
-# forte da sola — non serve la forma di una sessione. Deve combaciare con la riga
-# Disallow in frontend/public/robots.txt.
-#
-# Sta nel repository come i percorsi-trappola, non fra i segreti: un attaccante
-# che legge il codice sa di evitarlo, ma cattura comunque scanner e curiosi che
-# leggono robots.txt senza leggere il repo — che e' la minaccia reale.
-CANARY = ("/internal-admin-metrics",)
-# Il tripwire: l'endpoint-trappola citato dentro la finta config servita al
-# canary. Toccarlo NON e' curiosita' — vuol dire aver letto la config e provato
-# a usarla. E' il gradino sopra il canary: intrusione tentata.
-TRIPWIRE = "/internal-admin-metrics/collect"
+# ─── Percorsi sempre-segnale ────────────────────────────────────────────────
+# Alcuni percorsi non li chiede nessun visitatore per caso: toccarli e' di per
+# se' un segnale forte, indipendente dalla forma della sessione. Quali siano e'
+# configurazione del server, non repository — vedi PERCORSI_SEGNALE sopra.
+# Percorsi "sempre-segnale": non li tocca nessuno per caso, quindi un colpo solo
+# basta, fuori dalle soglie di sessione. PERCORSI_INTRUSIONE e' il gradino sopra.
+# QUALI siano sta nella configurazione del server (HONEYPOT_PERCORSI_*), NON qui:
+# il motivo resta operativo, non pubblico.
+PERCORSI_SEGNALE = tuple(x.strip() for x in os.getenv("HONEYPOT_PERCORSI_SEGNALE", "").split(",") if x.strip())
+PERCORSI_INTRUSIONE = tuple(x.strip() for x in os.getenv("HONEYPOT_PERCORSI_INTRUSIONE", "").split(",") if x.strip())
 
 # Log OPERATIVO: leggibile, con gli IP VERI (non le impronte). E' il registro che
 # leggi tu e il pentester per correlare col suo report. Solo root, ruotato a
@@ -240,12 +235,12 @@ def e_nota(org: str) -> bool:
     return _in_elenco(org, ORIGINI_NOTE)
 
 
-def e_canary(percorso: str) -> bool:
-    return any(percorso == c or percorso.startswith(c + "/") for c in CANARY)
+def tocca_segnale(percorso: str) -> bool:
+    return any(percorso == c or percorso.startswith(c + "/") for c in PERCORSI_SEGNALE)
 
 
-def e_tripwire(percorso: str) -> bool:
-    return percorso == TRIPWIRE or percorso.startswith(TRIPWIRE + "/")
+def tocca_intrusione(percorso: str) -> bool:
+    return any(percorso == c or percorso.startswith(c + "/") for c in PERCORSI_INTRUSIONE)
 
 
 def e_pentest(org: str) -> bool:
@@ -300,10 +295,10 @@ def provenienza(ip: str) -> dict:
 def etichetta_attore(ev: dict) -> str:
     """Una riga che dice, in italiano, cosa stava facendo."""
     tipo = ev.get("tipo")
-    if tipo == "tripwire":
-        return "USO DELL'ESCA — ha provato le credenziali finte (intrusione tentata)"
-    if tipo == "canary":
-        return "ha seguito una briciola nascosta in robots.txt (ricognizione mirata)"
+    if tipo == "intrusione":
+        return "ACCESSO A UN ENDPOINT RISERVATO (intrusione tentata)"
+    if tipo == "segnale":
+        return "ha toccato un percorso riservato (ricognizione mirata)"
     inn = ev.get("inneschi", [])
     m = ev.get("metriche", {})
     parti = []
@@ -332,8 +327,8 @@ def scrivi_log_operativo(ev: dict, origine_64: str, ip: str, marca: str):
         f"    impronta: {ev['impronta']} (epoca {ev.get('epoca_sale')})",
         f"    agente: {ev.get('agente','')[:90]}",
     ]
-    if ev.get("tipo") in ("canary", "tripwire"):
-        righe.append(f"    percorso: {ev.get('canary_percorso', TRIPWIRE)}")
+    if ev.get("tipo") in ("segnale", "intrusione"):
+        righe.append(f"    percorso: {ev.get('percorso_toccato', '?')}")
     if m:
         righe.append(f"    {m['richieste']} richieste, {m['pc404']}% non trovate, "
                      f"{m['percorsi404']} percorsi distinti")
@@ -500,24 +495,22 @@ def _applescript_sicuro(s: str) -> str:
 
 def avvisa(eventi):
     destinatario = os.getenv("NEURODESK_REPORT_EMAIL", "hello@neurodesk.it")
-    trip = [e for e in eventi if e.get("tipo") == "tripwire"]
-    canary = [e for e in eventi if e.get("tipo") == "canary"]
-    sessioni_ev = [e for e in eventi if e.get("tipo") not in ("canary", "tripwire")]
+    intrus = [e for e in eventi if e.get("tipo") == "intrusione"]
+    segnali = [e for e in eventi if e.get("tipo") == "segnale"]
+    sessioni_ev = [e for e in eventi if e.get("tipo") not in ("segnale", "intrusione")]
 
     righe = []
-    if trip:
-        righe.append("  ⛔ TRIPWIRE — qualcuno ha USATO le credenziali finte dell'esca.")
-        righe.append("    Non e' curiosita': ha letto la finta config e ha provato a usarla.")
-        righe.append("    E' il segnale piu' forte: intrusione tentata.")
-        for e in trip:
-            righe.append(f"    origine [{e['impronta']}]  ha toccato  {e['canary_percorso']}")
+    if intrus:
+        righe.append("  ⛔ INTRUSIONE TENTATA — qualcuno ha raggiunto un endpoint riservato.")
+        righe.append("    Non e' curiosita': e' il segnale piu' forte.")
+        for e in intrus:
+            righe.append(f"    origine [{e['impronta']}]  ha toccato  {e['percorso_toccato']}")
             righe.append(f"    quando: {e['quando']}   agente: {e['agente'][:80]}")
         righe.append("")
-    if canary:
-        righe.append("  ⚠ CANARY — qualcuno ha seguito una briciola nascosta in robots.txt.")
-        righe.append("    Non e' rumore di scansione: quel percorso non lo chiede nessuno per caso.")
-        for e in canary:
-            righe.append(f"    origine [{e['impronta']}]  ha chiesto  {e['canary_percorso']}")
+    if segnali:
+        righe.append("  ⚠ PERCORSO RISERVATO TOCCATO — non lo chiede nessuno per caso.")
+        for e in segnali:
+            righe.append(f"    origine [{e['impronta']}]  ha chiesto  {e['percorso_toccato']}")
             righe.append(f"    quando: {e['quando']}   host: {e['host']}   agente: {e['agente'][:80]}")
         righe.append("")
     for e in sessioni_ev:
@@ -538,7 +531,7 @@ def avvisa(eventi):
 
     corpo = (
         f"To: {destinatario}\nFrom: {destinatario}\n"
-        f"Subject: {'NeuroDesk — TRIPWIRE: esca usata' if trip else 'NeuroDesk — CANARY: briciola seguita' if canary else 'NeuroDesk — attivita anomala sul sito'}\n"
+        f"Subject: {'NeuroDesk — intrusione tentata' if intrus else 'NeuroDesk — percorso riservato toccato' if segnali else 'NeuroDesk — attivita anomala sul sito'}\n"
         f"Content-Type: text/plain; charset=UTF-8\n\n"
         "Il rilevamento ha visto qualcosa che non e' il normale rumore di internet.\n\n"
         + "\n".join(righe)
@@ -595,18 +588,16 @@ def main() -> int:
     gia = set(GIA_AVVISATE.read_text(encoding="utf-8").split()) if GIA_AVVISATE.exists() else set()
     nuovi, chiavi = [], set()
 
-    # CANARY e TRIPWIRE: un colpo solo basta. Chi tocca un percorso disseminato
-    # in robots.txt (canary) o l'endpoint-trappola della finta config (tripwire)
-    # non e' rumore, e non passa per le soglie di sessione. Il tripwire e' il
-    # gradino sopra: ha letto l'esca e ha provato a usarla.
+    # Percorsi sempre-segnale: un colpo solo basta, fuori dalle soglie di
+    # sessione. PERCORSI_INTRUSIONE e' il gradino sopra PERCORSI_SEGNALE.
     for r in richieste:
-        canary = e_canary(r["percorso"])
-        trip = e_tripwire(r["percorso"])
-        if not (canary or trip):
+        segnale = tocca_segnale(r["percorso"])
+        intrusione = tocca_intrusione(r["percorso"])
+        if not (segnale or intrusione):
             continue
         org = r["origine"]
         imp = impronta(org)
-        tipo = "tripwire" if trip else "canary"
+        tipo = "intrusione" if intrusione else "segnale"
         chiave = f"{tipo}:{EPOCA}:{imp}:{int(r['ts'])}"
         chiavi.add(chiave)
         if chiave in gia:
@@ -620,7 +611,7 @@ def main() -> int:
             "tipo": tipo,
             "origine_nota": e_nota(org),
             "origine_pentest": e_pentest(org),
-            "canary_percorso": r["percorso"],
+            "percorso_toccato": r["percorso"],
             "agente": r["agente"],
             "host": r["host"],
         })
@@ -680,8 +671,8 @@ def main() -> int:
     for e in nuovi:
         marca = ("[PENTEST] " if e["origine_pentest"]
                  else "[nota] " if e["origine_nota"] else "")
-        if e.get("tipo") in ("canary", "tripwire"):
-            print(f"  {marca}[{e['impronta']}] {e['tipo'].upper()}: {e['canary_percorso']}")
+        if e.get("tipo") in ("segnale", "intrusione"):
+            print(f"  {marca}[{e['impronta']}] {e['tipo'].upper()}: {e['percorso_toccato']}")
         else:
             m = e["metriche"]
             print(f"  {marca}[{e['impronta']}] {', '.join(e['inneschi'])}: {m['richieste']} richieste, "

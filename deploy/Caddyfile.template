@@ -132,6 +132,11 @@ app.${DOMINIO} {
     handle /api/* {
         reverse_proxy 127.0.0.1:8080
     }
+
+    # Frammenti di configurazione che vivono SOLO sul server (non nel repo): le
+    # cose che non devono stare in chiaro in un repository pubblico. Se la
+    # cartella e' vuota, Caddy importa il nulla senza errore.
+    import /etc/caddy/conf.d/*.conf
     # Ripiego della single-page, ma SOLO sulle rotte che esistono davvero.
     #
     # Prima era "try_files {path} /index.html" su qualunque percorso: il sito
@@ -166,21 +171,10 @@ app.${DOMINIO} {
         file_server
     }
 
-    # ESCA. Il percorso e' disseminato in robots.txt (canary): un visitatore vero
-    # non ci arriva mai, chi ci arriva ha cercato porte nascoste. Qui NON diamo
-    # 404, ma una finta config di telemetria interna con un token e un endpoint
-    # di raccolta (/collect). Chi legge la config e prova a usare quell'endpoint
-    # fa scattare il TRIPWIRE nell'honeypot: il gradino sopra la curiosita'.
-    # NON contiene "password" ne' "admin": e' un token di metriche. Se qualcuno
-    # la fotografa non ha niente di spendibile. L'esca sta nell'uso, non nella scena.
-    handle /internal-admin-metrics* {
-        header Content-Type "application/json; charset=utf-8"
-        respond `{"service":"internal-metrics","status":"ok","version":"2.3.1","interval_s":60,"collector":"/internal-admin-metrics/collect","auth":{"scheme":"bearer","token":"imx_live_7f3a91c4e08b2d65a1f0"},"note":"internal telemetry — do not expose"}` 200
-    }
 
     # /.well-known ristretto a acme-challenge: il jolly rendeva invisibile un
     # intero spazio dei nomi, e una wordlist con quel prefisso sarebbe passata.
-    @fileRadice path /favicon.svg /icons.svg /index.html /404.html /robots.txt /.well-known/acme-challenge/*
+    @fileRadice path /favicon.svg /icons.svg /index.html /404.html /.well-known/acme-challenge/*
     handle @fileRadice {
         file_server
     }
