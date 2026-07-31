@@ -23,6 +23,18 @@ function formattaData(iso) {
     }
 }
 
+// Con l'ora: "chi ha usato e QUANDO" ha bisogno del minuto, non solo del giorno.
+function formattaDataOra(iso) {
+    if (!iso) return '';
+    try {
+        return new Date(iso).toLocaleString('it-IT', {
+            day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+        });
+    } catch {
+        return '';
+    }
+}
+
 /**
  * Registro dei codici emessi: chi ce l'ha, da quando, chi ha dato il consenso,
  * chi e' stato revocato. Prima i codici si potevano emettere solo via API e non
@@ -60,6 +72,9 @@ function CodiciPage() {
         // Il consenso si conta solo su chi e' ancora attivo: includere i revocati
         // (quasi tutti prove) faceva sembrare che avessero accettato in molti piu'.
         conConsenso: codici.filter(c => c.attivo && c.consensoDato).length,
+        // Chi ha DAVVERO usato il Companion, dai messaggi: il numero che le serve
+        // a colpo d'occhio, senza aprire card per card.
+        hannoUsato: codici.filter(c => c.messaggiUsati > 0).length,
         tokenTotali: codici.reduce((s, c) => s + (c.tokenInput || 0) + (c.tokenOutput || 0), 0),
         // La media si calcola solo su chi ha davvero scritto: includere i codici
         // mai usati la schiaccerebbe verso zero e farebbe sembrare anomalo chiunque.
@@ -173,7 +188,8 @@ function CodiciPage() {
             {!caricamento && !errore && codici.length > 0 && (
                 <div className="card-detail" style={{ marginTop: '0.2rem' }}>
                     <strong>{riepilogo.attivi}</strong> accessi attivi ·{' '}
-                    <strong>{riepilogo.conConsenso}</strong> hanno dato il consenso
+                    <strong>{riepilogo.conConsenso}</strong> hanno dato il consenso ·{' '}
+                    <strong style={{ color: 'var(--success)' }}>{riepilogo.hannoUsato}</strong> hanno usato il Companion
                     {riepilogo.tokenTotali > 0 && (
                         <> · <strong>{formattaToken(riepilogo.tokenTotali)}</strong> token consumati in tutto</>
                     )}
@@ -315,8 +331,30 @@ function CodiciPage() {
                             </div>
                             <div className="card-detail" style={{ marginTop: '0.3rem', opacity: 0.75 }}>
                                 Emesso il {formattaData(c.creatoIl)}
-                                {c.ultimoUso && <> · ultimo uso {formattaData(c.ultimoUso)}</>}
                             </div>
+
+                            {/* ATTIVITA' REALE, dai messaggi: chi ha usato il Companion e
+                                quando. Copre anche chi l'ha usato prima che nascesse il
+                                conteggio dei token (28 luglio 2026). */}
+                            {c.messaggiUsati > 0 ? (
+                                <div className="card-detail" style={{ marginTop: '0.3rem' }}>
+                                    <span style={{ color: 'var(--success)', fontWeight: 600 }}>
+                                        ✓ ha usato il Companion
+                                    </span>{' — '}
+                                    <strong>{c.messaggiUsati}</strong> {c.messaggiUsati === 1 ? 'messaggio' : 'messaggi'}
+                                    <div style={{ opacity: 0.75, marginTop: '0.15rem' }}>
+                                        prima volta {formattaDataOra(c.primaAttivita)}
+                                        {c.ultimaAttivita && c.ultimaAttivita !== c.primaAttivita && (
+                                            <> · ultima {formattaDataOra(c.ultimaAttivita)}</>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="card-detail" style={{ marginTop: '0.3rem', opacity: 0.6 }}>
+                                    non è ancora entrato nel Companion
+                                </div>
+                            )}
+
                             {c.chiamate > 0 && (() => {
                                 const token = (c.tokenInput || 0) + (c.tokenOutput || 0);
                                 // Tre volte la media di chi usa il Companion: non e' una
@@ -324,9 +362,8 @@ function CodiciPage() {
                                 // un'occhiata. Non blocca e non avvisa nessuno.
                                 const fuoriScala = riepilogo.mediaAttivi > 0 && token > riepilogo.mediaAttivi * 3;
                                 return (
-                                    <div className="card-detail" style={{ marginTop: '0.2rem' }}>
-                                        <strong>{c.chiamate}</strong> richieste ·{' '}
-                                        <strong>{formattaToken(token)}</strong> token
+                                    <div className="card-detail" style={{ marginTop: '0.2rem', opacity: 0.75 }}>
+                                        token consumati: <strong>{formattaToken(token)}</strong>
                                         {fuoriScala && (
                                             <span style={{ color: '#b04545', fontWeight: 600 }}>
                                                 {' '}— oltre il triplo della media, vale un'occhiata

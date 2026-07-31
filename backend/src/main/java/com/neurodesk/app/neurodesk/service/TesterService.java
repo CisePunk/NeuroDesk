@@ -31,6 +31,7 @@ public class TesterService {
 
     private final UtenteRepository utenteRepository;
     private final ConsumoAiRepository consumoRepository;
+    private final com.neurodesk.app.neurodesk.repository.CompanionSessionRepository sessioniRepository;
     private final HashService hashService;
     private final CryptoService cryptoService;
     private final CodeGenerator codeGenerator;
@@ -63,9 +64,17 @@ public class TesterService {
         for (Object[] riga : consumoRepository.riepilogoPerUtente()) {
             consumo.put((Long) riga[0], riga);
         }
+        // Attivita' REALE dai messaggi: e' la fonte per "chi ha usato e quando",
+        // e copre anche chi ha usato il Companion prima che esistesse il conteggio
+        // dei token (28 luglio 2026). [utenteId, messaggi, prima, ultima].
+        Map<Long, Object[]> attivita = new HashMap<>();
+        for (Object[] riga : sessioniRepository.attivitaPerUtente()) {
+            attivita.put((Long) riga[0], riga);
+        }
         return utenteRepository.findByRuoloOrderByCreatoIlDesc(Ruolo.STUDENTE).stream()
                 .map(u -> {
                     Object[] c = consumo.get(u.getId());
+                    Object[] a = attivita.get(u.getId());
                     return new TesterResponse(
                             u.getId(),
                             u.getEtichetta(),
@@ -76,6 +85,10 @@ public class TesterService {
                             c == null ? 0L : ((Number) c[2]).longValue(),
                             c == null ? 0L : ((Number) c[3]).longValue(),
                             c == null ? null : (LocalDateTime) c[4],
+                            // Attivita' reale dai messaggi.
+                            a == null ? 0L : ((Number) a[1]).longValue(),
+                            a == null ? null : (LocalDateTime) a[2],
+                            a == null ? null : (LocalDateTime) a[3],
                             // Solo se c'e', e per quale fornitore. La chiave in se'
                             // non esce mai verso il browser.
                             u.getChiaveAiCifrata() != null,

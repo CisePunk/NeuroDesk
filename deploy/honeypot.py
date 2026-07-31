@@ -152,6 +152,14 @@ ORIGINI_NOTE = [
     x.strip() for x in os.getenv("HONEYPOT_ORIGINI_NOTE", "").split(",") if x.strip()
 ]
 
+# Origini del pentester: come le note NON fanno partire la mail, ma a differenza
+# delle note vengono REGISTRATE — nell'archivio e nel log operativo, marcate
+# "pentest". Cosi', quando arriva il suo report, si incrocia cio' che dice con
+# cio' che il log ha visto. Sta nella configurazione del server, non nel repo.
+ORIGINI_PENTEST = [
+    x.strip() for x in os.getenv("HONEYPOT_ORIGINI_PENTEST", "").split(",") if x.strip()
+]
+
 # ─── Canary ──────────────────────────────────────────────────────────────────
 # Percorsi disseminati come briciola nel robots.txt: un percorso dal nome ghiotto
 # che un visitatore vero non chiede MAI, ma che un attaccante trova leggendo
@@ -163,6 +171,17 @@ ORIGINI_NOTE = [
 # che legge il codice sa di evitarlo, ma cattura comunque scanner e curiosi che
 # leggono robots.txt senza leggere il repo — che e' la minaccia reale.
 CANARY = ("/internal-admin-metrics",)
+# Il tripwire: l'endpoint-trappola citato dentro la finta config servita al
+# canary. Toccarlo NON e' curiosita' — vuol dire aver letto la config e provato
+# a usarla. E' il gradino sopra il canary: intrusione tentata.
+TRIPWIRE = "/internal-admin-metrics/collect"
+
+# Log OPERATIVO: leggibile, con gli IP VERI (non le impronte). E' il registro che
+# leggi tu e il pentester per correlare col suo report. Solo root, ruotato a
+# parte. L'archivio JSONL resta con le impronte (condivisibile); qui c'e' il
+# dettaglio per l'analisi, che sta su una macchina sola e a permessi stretti.
+LOG_SICUREZZA = Path("/var/log/neurodesk/sicurezza.log")
+GIORNI_LOG_SICUREZZA = 30
 
 SALE = os.getenv("HONEYPOT_HASH_SALT", "")
 # Identificativo dell'epoca del sale. OBBLIGATORIO: senza, confrontando impronte
@@ -200,24 +219,161 @@ def origine(ip: str) -> str:
     return ip
 
 
-def e_nota(org: str) -> bool:
-    """L'origine e' una di quelle da cui proviamo noi?"""
-    for voce in ORIGINI_NOTE:
+def _in_elenco(org: str, elenco) -> bool:
+    """L'origine ricade in uno degli indirizzi/reti dell'elenco?"""
+    for voce in elenco:
         if org == voce:
             return True
         try:
             rete = ipaddress.ip_network(voce, strict=False)
             # org puo' gia' essere una rete (/64) o un indirizzo singolo.
             altro = ipaddress.ip_network(org, strict=False)
-            if altro.subnet_of(rete) if altro.version == rete.version else False:
+            if altro.version == rete.version and altro.subnet_of(rete):
                 return True
         except ValueError:
             continue
     return False
 
 
+def e_nota(org: str) -> bool:
+    """L'origine e' una di quelle da cui proviamo noi?"""
+    return _in_elenco(org, ORIGINI_NOTE)
+
+
 def e_canary(percorso: str) -> bool:
     return any(percorso == c or percorso.startswith(c + "/") for c in CANARY)
+
+
+def e_tripwire(percorso: str) -> bool:
+    return percorso == TRIPWIRE or percorso.startswith(TRIPWIRE + "/")
+
+
+def e_pentest(org: str) -> bool:
+    """L'origine e' quella del pentester volontario?"""
+    return _in_elenco(org, ORIGINI_PENTEST)
+
+
+# ─── Intelligence: da dove viene, che tipo e' ────────────────────────────────
+# Reverse DNS + euristica datacenter/residenziale. Nessuna chiamata esterna a
+# pagamento: il PTR e' una query DNS normale, e i nomi dei provider cloud si
+# riconoscono dal PTR. E' quel tanto che distingue "istanza noleggiata" da
+# "connessione di casa" — la differenza che conta per capire chi hai davanti.
+
+_PROVIDER_CLOUD = {
+    "googleusercontent": "Google Cloud", "amazonaws": "AWS", "compute-1.amazonaws": "AWS",
+    "ovh.net": "OVH", "ovh.ca": "OVH", "hetzner": "Hetzner", "your-server.de": "Hetzner",
+    "digitalocean": "DigitalOcean", "linode": "Linode", "vultr": "Vultr",
+    "scaleway": "Scaleway", "online.net": "Scaleway", "contabo": "Contabo",
+    "cloudapp.net": "Azure", "azure": "Azure", "oracle": "Oracle Cloud",
+}
+_SEGNI_RESIDENZIALE = ("dynamic", "dyn.", "dsl", "pool", "cable", "cust", "res.",
+                       "fibra", "adsl", "wind", "vodafone", "fastweb", "telecom",
+                       "iliad", "tim.", "business.", "clienti")
+
+
+def _reverse_dns(ip: str):
+    import socket
+    try:
+        return socket.gethostbyaddr(ip)[0]
+    except Exception:  # noqa: BLE001 — nessun PTR e' un dato di per se'
+        return None
+
+
+def provenienza(ip: str) -> dict:
+    """{'ptr':..., 'tipo':'datacenter (OVH)' | 'residenziale' | 'sconosciuto'}."""
+    # org puo' essere una rete /64: per il PTR serve un indirizzo, prendo il primo.
+    indirizzo = ip.split("/")[0]
+    if indirizzo.endswith("::"):
+        indirizzo += "1"
+    ptr = _reverse_dns(indirizzo)
+    if ptr:
+        low = ptr.lower()
+        for chiave, nome in _PROVIDER_CLOUD.items():
+            if chiave in low:
+                return {"ptr": ptr, "tipo": f"datacenter ({nome})"}
+        if any(s in low for s in _SEGNI_RESIDENZIALE):
+            return {"ptr": ptr, "tipo": "probabile residenziale"}
+        return {"ptr": ptr, "tipo": "ha nome host, provider non riconosciuto"}
+    return {"ptr": None, "tipo": "nessun nome host (spesso datacenter)"}
+
+
+def etichetta_attore(ev: dict) -> str:
+    """Una riga che dice, in italiano, cosa stava facendo."""
+    tipo = ev.get("tipo")
+    if tipo == "tripwire":
+        return "USO DELL'ESCA — ha provato le credenziali finte (intrusione tentata)"
+    if tipo == "canary":
+        return "ha seguito una briciola nascosta in robots.txt (ricognizione mirata)"
+    inn = ev.get("inneschi", [])
+    m = ev.get("metriche", {})
+    parti = []
+    if "C_enumerazione" in inn:
+        parti.append("enumerazione di identificativi")
+    if "B_sonda_mirata" in inn:
+        parti.append("sonda mirata a credenziali/pannelli")
+    if "A_scansione_ampia" in inn:
+        parti.append("scansione ampia")
+    if m.get("motivi", {}).get("iniezione"):
+        parti.append("tentativi di iniezione")
+    return ", ".join(parti) or "attivita' anomala"
+
+
+def scrivi_log_operativo(ev: dict, origine_64: str, ip: str, marca: str):
+    """Riga leggibile nel log operativo, CON l'IP vero. Solo root.
+
+    origine_64: il /64 usato per l'impronta (etichetta origine).
+    ip: l'indirizzo intero, per il reverse DNS (PTR migliore del /64)."""
+    prov = provenienza(ip)
+    m = ev.get("metriche", {})
+    righe = [
+        f"[{ev['quando']}] {marca}{etichetta_attore(ev).upper()}",
+        f"    origine: {ip}" + (f"  (rete {origine_64})" if origine_64 != ip else ""),
+        f"    provenienza: {prov['tipo']}" + (f" · {prov['ptr']}" if prov['ptr'] else ""),
+        f"    impronta: {ev['impronta']} (epoca {ev.get('epoca_sale')})",
+        f"    agente: {ev.get('agente','')[:90]}",
+    ]
+    if ev.get("tipo") in ("canary", "tripwire"):
+        righe.append(f"    percorso: {ev.get('canary_percorso', TRIPWIRE)}")
+    if m:
+        righe.append(f"    {m['richieste']} richieste, {m['pc404']}% non trovate, "
+                     f"{m['percorsi404']} percorsi distinti")
+        att = {k: v for k, v in m.get("motivi", {}).items() if v}
+        if att:
+            righe.append("    cercava: " + ", ".join(f"{k} ({v})" for k, v in att.items()))
+        for p in m.get("campione", [])[:6]:
+            righe.append(f"      {p}")
+    righe.append("")
+    try:
+        LOG_SICUREZZA.parent.mkdir(parents=True, exist_ok=True)
+        with LOG_SICUREZZA.open("a", encoding="utf-8") as f:
+            f.write("\n".join(righe) + "\n")
+        LOG_SICUREZZA.chmod(0o600)
+    except OSError as err:
+        print(f"  log operativo non scritto: {err}", file=sys.stderr)
+
+
+def pota_log_operativo():
+    """Toglie dal log operativo le righe piu' vecchie di GIORNI_LOG_SICUREZZA.
+
+    Il log ha gli IP in chiaro: una scadenza breve e' parte della misura di
+    privacy, non un vezzo. La conservazione a fini di sicurezza e' un interesse
+    legittimo, ma a tempo.
+    """
+    if not LOG_SICUREZZA.exists():
+        return
+    import re as _re
+    soglia = datetime.now(timezone.utc) - timedelta(days=GIORNI_LOG_SICUREZZA)
+    tenute, blocco_data = [], None
+    for riga in LOG_SICUREZZA.read_text(encoding="utf-8", errors="replace").splitlines():
+        intest = _re.match(r"^\[([0-9T:+\-]+)\]", riga)
+        if intest:
+            try:
+                blocco_data = datetime.fromisoformat(intest.group(1))
+            except ValueError:
+                blocco_data = None
+        if blocco_data is None or blocco_data >= soglia:
+            tenute.append(riga)
+    LOG_SICUREZZA.write_text("\n".join(tenute) + "\n", encoding="utf-8")
 
 
 def normalizza(uri: str):
@@ -260,9 +416,11 @@ def leggi_finestra():
             richiesta = voce.get("request", {})
             uri = richiesta.get("uri", "")
             percorso, identificativo = normalizza(uri)
+            ip = richiesta.get("remote_ip", "?")
             fuori.append({
                 "ts": voce["ts"],
-                "origine": origine(richiesta.get("remote_ip", "?")),
+                "origine": origine(ip),
+                "ip_grezzo": ip,
                 "host": richiesta.get("host", ""),
                 "metodo": richiesta.get("method", ""),
                 "uri_grezza": uri,
@@ -342,10 +500,19 @@ def _applescript_sicuro(s: str) -> str:
 
 def avvisa(eventi):
     destinatario = os.getenv("NEURODESK_REPORT_EMAIL", "hello@neurodesk.it")
+    trip = [e for e in eventi if e.get("tipo") == "tripwire"]
     canary = [e for e in eventi if e.get("tipo") == "canary"]
-    sessioni_ev = [e for e in eventi if e.get("tipo") != "canary"]
+    sessioni_ev = [e for e in eventi if e.get("tipo") not in ("canary", "tripwire")]
 
     righe = []
+    if trip:
+        righe.append("  ⛔ TRIPWIRE — qualcuno ha USATO le credenziali finte dell'esca.")
+        righe.append("    Non e' curiosita': ha letto la finta config e ha provato a usarla.")
+        righe.append("    E' il segnale piu' forte: intrusione tentata.")
+        for e in trip:
+            righe.append(f"    origine [{e['impronta']}]  ha toccato  {e['canary_percorso']}")
+            righe.append(f"    quando: {e['quando']}   agente: {e['agente'][:80]}")
+        righe.append("")
     if canary:
         righe.append("  ⚠ CANARY — qualcuno ha seguito una briciola nascosta in robots.txt.")
         righe.append("    Non e' rumore di scansione: quel percorso non lo chiede nessuno per caso.")
@@ -371,7 +538,7 @@ def avvisa(eventi):
 
     corpo = (
         f"To: {destinatario}\nFrom: {destinatario}\n"
-        f"Subject: {'NeuroDesk — CANARY: briciola seguita' if any(e.get('tipo')=='canary' for e in eventi) else 'NeuroDesk — attivita anomala sul sito'}\n"
+        f"Subject: {'NeuroDesk — TRIPWIRE: esca usata' if trip else 'NeuroDesk — CANARY: briciola seguita' if canary else 'NeuroDesk — attivita anomala sul sito'}\n"
         f"Content-Type: text/plain; charset=UTF-8\n\n"
         "Il rilevamento ha visto qualcosa che non e' il normale rumore di internet.\n\n"
         + "\n".join(righe)
@@ -428,24 +595,31 @@ def main() -> int:
     gia = set(GIA_AVVISATE.read_text(encoding="utf-8").split()) if GIA_AVVISATE.exists() else set()
     nuovi, chiavi = [], set()
 
-    # CANARY: un colpo solo basta. Chi tocca un percorso disseminato in
-    # robots.txt ha cercato porte nascoste e ne ha seguita una. Non e' rumore,
-    # e non passa per le soglie di sessione.
+    # CANARY e TRIPWIRE: un colpo solo basta. Chi tocca un percorso disseminato
+    # in robots.txt (canary) o l'endpoint-trappola della finta config (tripwire)
+    # non e' rumore, e non passa per le soglie di sessione. Il tripwire e' il
+    # gradino sopra: ha letto l'esca e ha provato a usarla.
     for r in richieste:
-        if not e_canary(r["percorso"]):
+        canary = e_canary(r["percorso"])
+        trip = e_tripwire(r["percorso"])
+        if not (canary or trip):
             continue
         org = r["origine"]
         imp = impronta(org)
-        chiave = f"canary:{EPOCA}:{imp}:{int(r['ts'])}"
+        tipo = "tripwire" if trip else "canary"
+        chiave = f"{tipo}:{EPOCA}:{imp}:{int(r['ts'])}"
         chiavi.add(chiave)
-        if chiave in gia or e_nota(org):
+        if chiave in gia:
             continue
         nuovi.append({
+            "_origine": org,     # /64, per l'impronta; NON finisce nell'archivio
+            "_ip": r.get("ip_grezzo", org),   # intero, per la provenienza
             "quando": datetime.fromtimestamp(r["ts"], timezone.utc).isoformat(timespec="seconds"),
             "epoca_sale": EPOCA,
             "impronta": imp,
-            "tipo": "canary",
-            "origine_nota": False,
+            "tipo": tipo,
+            "origine_nota": e_nota(org),
+            "origine_pentest": e_pentest(org),
             "canary_percorso": r["percorso"],
             "agente": r["agente"],
             "host": r["host"],
@@ -465,21 +639,35 @@ def main() -> int:
         if chiave in gia:
             continue
         nuovi.append({
+            "_origine": org,
+            "_ip": rs[0].get("ip_grezzo", org),
             "quando": m["inizio"],
             "epoca_sale": EPOCA,
             "impronta": imp,
             "origine_nota": e_nota(org),
+            "origine_pentest": e_pentest(org),
             "inneschi": scattate,
             "metriche": m,
         })
 
     tolti = pota_archivio()
-    if nuovi:
+    pota_log_operativo()
+
+    # LOG OPERATIVO: tutto, con l'IP vero e la marca. E' il registro da leggere
+    # col pentester. ARCHIVIO: solo le impronte, e non le origini note (rumore
+    # nostro). Le chiavi che iniziano con "_" restano fuori dall'archivio.
+    for e in nuovi:
+        marca = ("[PENTEST] " if e["origine_pentest"]
+                 else "[origine nota] " if e["origine_nota"] else "")
+        scrivi_log_operativo(e, e["_origine"], e.get("_ip", e["_origine"]), marca)
+
+    da_archiviare = [e for e in nuovi if not e["origine_nota"]]  # il pentest SI archivia
+    if da_archiviare:
         with ARCHIVIO.open("a", encoding="utf-8") as f:
-            for e in nuovi:
-                f.write(json.dumps(e, ensure_ascii=False) + "\n")
-    # Il segnalibro si aggiorna sempre, tenendo anche le chiavi ancora nella
-    # finestra: cosi' una sessione lunga non viene segnalata due volte.
+            for e in da_archiviare:
+                pulito = {k: v for k, v in e.items() if not k.startswith("_")}
+                pulito["marca"] = "pentest" if e["origine_pentest"] else "esterno"
+                f.write(json.dumps(pulito, ensure_ascii=False) + "\n")
     GIA_AVVISATE.write_text("\n".join(sorted(chiavi | (gia & chiavi))) + "\n", encoding="utf-8")
 
     print(f"finestra: {len(richieste)} richieste, {len(set(r['origine'] for r in richieste))} origini")
@@ -490,21 +678,22 @@ def main() -> int:
         return 0
 
     for e in nuovi:
-        if e.get("tipo") == "canary":
-            print(f"  [{e['impronta']}] CANARY seguito: {e['canary_percorso']}")
-            continue
-        m = e["metriche"]
-        marca = "  [origine nota: nessuna mail]" if e["origine_nota"] else ""
-        print(f"  [{e['impronta']}] {', '.join(e['inneschi'])}: {m['richieste']} richieste, "
-              f"{m['pc404']}% non trovate, {m['percorsi404']} percorsi{marca}")
+        marca = ("[PENTEST] " if e["origine_pentest"]
+                 else "[nota] " if e["origine_nota"] else "")
+        if e.get("tipo") in ("canary", "tripwire"):
+            print(f"  {marca}[{e['impronta']}] {e['tipo'].upper()}: {e['canary_percorso']}")
+        else:
+            m = e["metriche"]
+            print(f"  {marca}[{e['impronta']}] {', '.join(e['inneschi'])}: {m['richieste']} richieste, "
+                  f"{m['pc404']}% non trovate, {m['percorsi404']} percorsi")
 
-    # Si avvisa solo per le origini che non siamo noi. Le altre restano
-    # nell'archivio: registrate, non annunciate.
-    da_avvisare = [e for e in nuovi if not e["origine_nota"]]
+    # Mail SOLO per le origini esterne: non noi, non il pentester. Le sue mosse
+    # restano nel log operativo e nell'archivio, marcate.
+    da_avvisare = [e for e in nuovi if not e["origine_nota"] and not e["origine_pentest"]]
     if da_avvisare:
         avvisa(da_avvisare)
     else:
-        print("  nessuna mail: tutte le sessioni vengono da origini note")
+        print("  nessuna mail: solo origini note o pentester")
     return 0
 
 

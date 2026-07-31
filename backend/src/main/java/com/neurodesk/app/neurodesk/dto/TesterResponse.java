@@ -22,6 +22,15 @@ public class TesterResponse {
     private long tokenOutput;
     private LocalDateTime ultimoUso;
 
+    /** Messaggi REALI scritti dall'utente al Companion (fonte: conversazioni, non token). */
+    private long messaggiUsati;
+
+    /** Prima volta che ha scritto al Companion. */
+    private LocalDateTime primaAttivita;
+
+    /** Ultima volta che ha scritto al Companion. */
+    private LocalDateTime ultimaAttivita;
+
     /** Ha una chiave API propria? La chiave in se' non esce mai da qui. */
     private boolean chiavePropria;
 
