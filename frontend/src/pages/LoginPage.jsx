@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { login as apiLogin } from '../api/authApi';
 import { useAuth } from '../auth/AuthContext';
 import { testi } from '../i18n/lingua';
+import InstallaApp from '../ui/InstallaApp';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -89,6 +90,8 @@ function LoginPage() {
           </button>
         </form>
       </div>
+
+      <InstallaApp />
     </div>
   );
 }

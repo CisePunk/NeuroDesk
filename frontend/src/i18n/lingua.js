@@ -51,6 +51,8 @@ const DIZIONARIO = {
         loginInCorso: 'Accesso…',
         loginVaiScuola: 'Sei la scuola? Accedi con password',
         loginTornaTester: '← Entra come tester (solo codice)',
+        installaApp: 'Installa l’app',
+        installaIos: 'Vuoi NeuroDesk sul telefono? Tocca Condividi e poi “Aggiungi a Home”.',
 
         statoCaricamento: 'Caricamento…',
         statoRiprova: 'Riprova',
@@ -261,6 +263,8 @@ const DIZIONARIO = {
         loginInCorso: 'Signing in…',
         loginVaiScuola: 'Are you the school? Sign in with a password',
         loginTornaTester: '← Sign in as a tester (code only)',
+        installaApp: 'Install the app',
+        installaIos: 'Want NeuroDesk on your phone? Tap Share, then “Add to Home Screen”.',
 
         statoCaricamento: 'Loading…',
         statoRiprova: 'Try again',
@@ -464,6 +468,8 @@ const DIZIONARIO = {
         loginInCorso: 'Connexion…',
         loginVaiScuola: "Tu es l'école ? Connecte-toi avec un mot de passe",
         loginTornaTester: '← Entrer comme testeur (code seulement)',
+        installaApp: "Installer l'appli",
+        installaIos: 'NeuroDesk sur ton téléphone ? Appuie sur Partager, puis « Sur l’écran d’accueil ».',
 
         statoCaricamento: 'Chargement…',
         statoRiprova: 'Réessayer',
