@@ -38,17 +38,24 @@ public class InternalController {
     private final com.neurodesk.app.neurodesk.security.CryptoService cryptoService;
     private final byte[] tokenAtteso;
 
+    // Tetto di consumo sul credito comune, in token. 0 = SPENTO (default): non
+    // blocca nessuno. Quando servira', si imposta neurodesk.consumo.tetto-token-
+    // condiviso e si riavvia il backend; il resto dell'impalcatura e' gia' pronto.
+    private final long tettoTokenCondivisi;
+
     public InternalController(
             UtenteRepository utenteRepository,
             ConsumoAiRepository consumoRepository,
             com.neurodesk.app.neurodesk.security.CryptoService cryptoService,
             // Riusa il segreto JWT se non se ne configura uno dedicato: entrambi i
             // servizi lo hanno gia', quindi nessun nuovo segreto da distribuire.
-            @Value("${neurodesk.internal.token:${neurodesk.jwt.secret}}") String internalToken) {
+            @Value("${neurodesk.internal.token:${neurodesk.jwt.secret}}") String internalToken,
+            @Value("${neurodesk.consumo.tetto-token-condiviso:0}") long tettoTokenCondivisi) {
         this.utenteRepository = utenteRepository;
         this.consumoRepository = consumoRepository;
         this.cryptoService = cryptoService;
         this.tokenAtteso = internalToken.getBytes(StandardCharsets.UTF_8);
+        this.tettoTokenCondivisi = tettoTokenCondivisi;
     }
 
     @GetMapping("/utente/{id}/stato")
@@ -85,6 +92,15 @@ public class InternalController {
                 System.err.println("[internal] chiave AI dell'utente " + id + " non decifrabile: " + err.getMessage());
             }
         }
+
+        // Tetto di consumo sul credito COMUNE. Finche' la soglia e' 0 (default)
+        // questo e' sempre false e non blocca nessuno: e' l'impalcatura, spenta.
+        // Il companion applica il blocco solo a chi NON ha una chiave propria.
+        boolean creditoCondivisoEsaurito =
+                tettoTokenCondivisi > 0
+                && consumoRepository.tokenCondivisiPerUtente(id) >= tettoTokenCondivisi;
+        risposta.put("creditoCondivisoEsaurito", creditoCondivisoEsaurito);
+
         return ResponseEntity.ok(risposta);
     }
 

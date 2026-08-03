@@ -51,6 +51,10 @@ async function statoUtente(id) {
         // (60s) e non viene mai scritta da nessuna parte, nemmeno nei log.
         chiaveAi: j.chiaveAi || null,
         chiaveAiProvider: j.chiaveAiProvider || null,
+        // Tetto di consumo sul credito comune (impalcatura, spenta nel backend
+        // finche' la soglia e' 0): quando accesa, chi lo supera senza chiave
+        // propria viene invitato ad aggiungere la sua.
+        creditoCondivisoEsaurito: Boolean(j.creditoCondivisoEsaurito),
         ts: now,
       };
       statoCache.set(id, val);
@@ -255,6 +259,20 @@ const server = http.createServer(async (req, res) => {
       // Se il tester ha portato la propria chiave, si usa quella e il provider
       // che ha indicato: le sue risposte le paga lui. Altrimenti tutto come prima.
       const chiavePropria = stato?.chiaveAi || null;
+
+      // Tetto di consumo sul credito COMUNE (impalcatura, spenta finche' il tetto
+      // nel backend e' 0). Chi ha esaurito la quota condivisa e non ha portato la
+      // propria chiave viene invitato ad aggiungerla, invece di continuare a
+      // pesare sul credito di tutti. Chi ha la chiave propria non e' toccato.
+      if (!chiavePropria && stato?.creditoCondivisoEsaurito) {
+        return sendJson(res, 429, {
+          error: 'tetto_credito_condiviso',
+          message:
+            'Hai raggiunto il limite di utilizzo sul credito condiviso di NeuroDesk. ' +
+            'Per continuare puoi aggiungere la tua chiave API dalle opzioni avanzate: ' +
+            'da quel momento le tue conversazioni le paghi tu. Quello che hai scritto resta salvato.',
+        });
+      }
 
       const ai = await generateCompanionReply({
         message,

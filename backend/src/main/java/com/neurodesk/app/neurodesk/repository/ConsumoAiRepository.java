@@ -62,4 +62,16 @@ public interface ConsumoAiRepository extends JpaRepository<ConsumoAi, Long> {
     /** Quando e' cominciato il registro: sotto i sette giorni la proiezione si fa su questo. */
     @Query("SELECT MIN(c.creatoIl) FROM ConsumoAi c")
     LocalDateTime primaRegistrazione();
+
+    /**
+     * Token totali a carico del credito COMUNE per un tester (esclusa la sua
+     * chiave propria): base del tetto di consumo, da confrontare con la soglia
+     * configurata. Chi porta la propria chiave non pesa qui.
+     */
+    @Query("""
+           SELECT COALESCE(SUM(c.tokenInput + c.tokenOutput), 0)
+             FROM ConsumoAi c
+            WHERE c.utenteId = :utenteId AND c.pagatoDaUtente = false
+           """)
+    long tokenCondivisiPerUtente(@Param("utenteId") Long utenteId);
 }
