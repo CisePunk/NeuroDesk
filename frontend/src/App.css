@@ -1680,6 +1680,40 @@ main h1, main h2 { margin-top: 0; }
 
 /* Thread della conversazione (memoria a schermo). */
 .companion-thread { display: flex; flex-direction: column; gap: 16px; }
+
+/* Pulsante "scrivi": compare solo su schermo stretto, dove form e risposta si
+   impilano. In basso a SINISTRA, perché il "?" dell'aiuto è a destra. Riporta al
+   campo di scrittura mentre si legge la risposta, senza scorrere su a mano. */
+.companion-scrivi-fab { display: none; }
+@media (max-width: 1024px) {
+  .companion-scrivi-fab {
+    position: fixed;
+    left: 16px;
+    bottom: 20px;
+    z-index: 200;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 17px;
+    border: none;
+    border-radius: 999px;
+    background: var(--accent, #5f8279);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  }
+  .companion-scrivi-fab:active { transform: translateY(1px); }
+}
+/* Sui telefoni la barra di navigazione sta in basso e il "?" è rialzato a
+   bottom:100px: allineo il pulsante scrivi a sinistra alla stessa altezza. */
+@media (max-width: 767px) {
+  .companion-scrivi-fab { bottom: 100px; left: 14px; }
+  /* Lo scroll automatico si ferma sopra la barra di navigazione in basso, non
+     dietro: così l'ultima riga della risposta resta leggibile. */
+  .companion-fondo { scroll-margin-bottom: 84px; }
+}
 .companion-msg { display: flex; flex-direction: column; gap: 4px; }
 .companion-msg-label {
   font-size: 11px;

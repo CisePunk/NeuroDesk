@@ -56,10 +56,18 @@ function leggiCache() {
     }
 }
 
+// Solo su schermo stretto form e risposta si impilano (una colonna): è lì che
+// serve portare la vista sulla risposta da sola. Su desktop stanno affiancate.
+function schermoStretto() {
+    return typeof window !== 'undefined' && window.matchMedia
+        && window.matchMedia('(max-width: 1024px)').matches;
+}
+
 function CompanionPage() {
     const toast = useToast();
     const { ruolo, segnaRevocaConsenso } = useAuth();
     const textareaRef = useRef(null);
+    const fondoRef = useRef(null); // fine della conversazione: ci si scorre dopo l'invio
     // Stato iniziale ripristinato dal browser (istantaneo, regge refresh e disconnessioni).
     const [mode, setMode] = useState(() => leggiCache()?.mode ?? 'crisis_mode');
     const [message, setMessage] = useState('');
@@ -170,6 +178,19 @@ function CompanionPage() {
         } catch { /* niente copia locale: resta quella sul server */ }
     }, [conversation, sessioneId, mode]);
 
+    // Su telefono la risposta esce sotto il form: dopo l'invio (e all'arrivo della
+    // risposta) porto la vista in fondo alla conversazione da sola, così non si
+    // deve scorrere giù a cercarla. Le risposte sono brevi per scelta, quindi in
+    // fondo si vede tutta. Su desktop stanno affiancate: qui non fa nulla.
+    useEffect(() => {
+        if (!schermoStretto()) return;
+        if (conversation.length === 0 && !caricamento) return;
+        const id = requestAnimationFrame(() =>
+            fondoRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        );
+        return () => cancelAnimationFrame(id);
+    }, [conversation, caricamento]);
+
     async function handleSubmit(event) {
         event.preventDefault();
         setErrore('');
@@ -219,6 +240,13 @@ function CompanionPage() {
             setCaricamento(false);
             setTimeout(() => textareaRef.current?.focus(), 50);
         }
+    }
+
+    // Pulsante "scrivi": riporta al campo di scrittura in un tocco, senza
+    // scorrere su a mano. Lo centro e poi gli do il fuoco, pronto a digitare.
+    function tornaAlCampo() {
+        textareaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => textareaRef.current?.focus(), 350);
     }
 
     function nuovaConversazione() {
@@ -528,10 +556,25 @@ function CompanionPage() {
                                     )}
                                 </div>
                             )}
+                            <div ref={fondoRef} className="companion-fondo" aria-hidden="true" />
                         </div>
                     )}
                 </section>
             </div>
+
+            {/* Pulsante "scrivi": sempre a portata mentre leggi la risposta, per
+                tornare al campo senza scorrere su a mano. Compare solo quando c'è
+                una conversazione; il CSS lo mostra solo su schermo stretto. */}
+            {!vuota && (
+                <button
+                    type="button"
+                    className="companion-scrivi-fab"
+                    onClick={tornaAlCampo}
+                    aria-label={t.compScriviAria}
+                >
+                    <span aria-hidden="true">✎</span> {t.compScrivi}
+                </button>
+            )}
         </div>
     );
 }
