@@ -9,6 +9,43 @@ tiene fuori dal mazzo di chiavi, non il disegno della serratura.
 
 Dall'esterno verso l'interno.
 
+```
+                     I N T E R N E T
+              utenti veri · scanner · bot
+                           │
+   ┌───────────────────────▼───────────────────────┐
+   │  L4 · REPUTAZIONE                    CrowdSec  │
+   │  IP già malevoli nel mondo,                    │
+   │  fermati PRIMA che arrivino                    │
+   └───────────────────────┬───────────────────────┘
+                           │
+   ┌───────────────────────▼───────────────────────┐
+   │  L3 · BLOCCO ATTIVO                  fail2ban  │
+   │  banna payload d'attacco e flood di 404        │
+   │  recidivi → 1 settimana                        │
+   └───────────────────────┬───────────────────────┘
+                           │
+   ┌───────────────────────▼───────────────────────┐      ┌──────────────────────┐
+   │  L0 · PERIMETRO                                │      │  L2 · HONEYPOT       │
+   │  ufw: aperte solo 22 / 80 / 443                │ log  │  legge il log e      │
+   │  Caddy: HTTPS · header · CSP                   │·····▶│  riconosce la forma  │
+   │  whitelist-404: se non è rotta vera → 404      │      │  di una scansione.   │
+   └───────────────────────┬───────────────────────┘      │  Osserva, e alimenta │
+                           │  solo rotte vere              │  il blocco (L3).     │
+   ┌───────────────────────▼───────────────────────┐      └──────────────────────┘
+   │  L1 · APPLICAZIONE                             │
+   │  Spring Boot · 401 / 403 · niente IDOR         │
+   │  companion-service (Node) → solo localhost     │
+   │                                                │
+   │      ╔══════════════════════════════════════╗  │
+   │      ║  ◈  I DATI  —  solo localhost         ║  │  ◄── il centro:
+   │      ║  AES-256-GCM · cancellati a 30 giorni ║  │      ciò che tutto
+   │      ╚══════════════════════════════════════╝  │      il resto protegge
+   └────────────────────────────────────────────────┘
+
+   L5 · SORVEGLIANZA — controllo ogni 3 giorni + riepilogo email al giorno
+```
+
 ## La porta
 
 Davanti a tutto c'è Caddy. Fa l'HTTPS da sé e lascia aperte solo tre porte; il
