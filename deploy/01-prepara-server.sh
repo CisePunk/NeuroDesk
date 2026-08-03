@@ -110,7 +110,7 @@ cat > /etc/cron.daily/neurodesk-dump <<'DUMP'
 # Uno snapshot del disco di una macchina accesa può essere incoerente, questo no.
 D=/var/backups/neurodesk
 mkdir -p "$D" && chmod 700 "$D"
-mysqldump --single-transaction --quick neurodesk_db | gzip > "$D/neurodesk-$(date +%F).sql.gz"
+mysqldump --single-transaction --quick --no-tablespaces neurodesk_db | gzip > "$D/neurodesk-$(date +%F).sql.gz"
 find "$D" -name 'neurodesk-*.sql.gz' -mtime +14 -delete
 DUMP
 chmod 700 /etc/cron.daily/neurodesk-dump
