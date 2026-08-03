@@ -5,11 +5,9 @@
 // NON vengono MAI messe in cache. Le conversazioni restano sul server cifrato,
 // non nella cache del dispositivo. In cache va solo il "guscio" statico dell'app.
 
-const CACHE = 'neurodesk-shell-v1';
+const CACHE = 'neurodesk-shell-v2';
 
-// Guscio noto da precaricare. Gli asset di build hanno il nome con hash e
-// entrano in cache a runtime (cache-first): quando esce un deploy nuovo il nome
-// cambia, quindi non resta mai servita una versione vecchia.
+// Guscio noto da precaricare, così l'app apre anche offline.
 const SHELL = [
   '/', '/index.html', '/404.html', '/manifest.webmanifest',
   '/favicon.svg', '/icon-192.png', '/icon-512.png', '/apple-touch-icon.png',
@@ -49,16 +47,33 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Asset statici (JS/CSS/immagini con hash): cache-prima, poi rete.
+  // Asset di build (/assets/index-<hash>.js): il nome cambia a ogni deploy,
+  // quindi sono immutabili — cache-prima, veloci e senza rischio di stantìo.
+  if (url.pathname.startsWith('/assets/')) {
+    e.respondWith(
+      caches.match(req).then((hit) =>
+        hit || fetch(req).then((res) => {
+          if (res.ok && res.type === 'basic') {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy));
+          }
+          return res;
+        }).catch(() => hit)
+      )
+    );
+    return;
+  }
+
+  // Resto del guscio (icone, manifest, favicon): nome FISSO ma contenuto che
+  // può cambiare tra un deploy e l'altro. Rete-prima, così l'aggiornamento
+  // passa da solo appena si è online; la cache resta solo riserva offline.
   e.respondWith(
-    caches.match(req).then((hit) =>
-      hit || fetch(req).then((res) => {
-        if (res.ok && res.type === 'basic') {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy));
-        }
-        return res;
-      }).catch(() => hit)
-    )
+    fetch(req).then((res) => {
+      if (res.ok && res.type === 'basic') {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(req, copy));
+      }
+      return res;
+    }).catch(() => caches.match(req))
   );
 });
