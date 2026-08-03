@@ -62,6 +62,7 @@ ${DOMINIO} {
         X-Frame-Options "DENY"
         X-Content-Type-Options "nosniff"
         Referrer-Policy "no-referrer"
+        Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=(), usb=()"
     }
     header /assets/* Cache-Control "no-cache"
 
@@ -113,7 +114,11 @@ app.${DOMINIO} {
         X-Frame-Options "DENY"
         X-Content-Type-Options "nosniff"
         Referrer-Policy "no-referrer"
-        Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-/E3QhDAADRe+2Xg/3MmIXCQPmdcxLC0nKEpgcB5tawQ='; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+        Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=(), usb=()"
+        # script-src 'self' senza hash: nessuno script inline nell'app (tema e SW
+        # sono file esterni/nel bundle), così un XSS iniettato non gira e non ruba
+        # il token. 'unsafe-inline' resta solo sugli stili (React), rischio basso.
+        Content-Security-Policy "default-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
     }
 
     # Prima di tutto il resto: qui sotto c'e' il ripiego della single-page, che
@@ -174,7 +179,7 @@ app.${DOMINIO} {
 
     # /.well-known ristretto a acme-challenge: il jolly rendeva invisibile un
     # intero spazio dei nomi, e una wordlist con quel prefisso sarebbe passata.
-    @fileRadice path /favicon.svg /icons.svg /index.html /404.html /.well-known/acme-challenge/*
+    @fileRadice path /favicon.svg /icons.svg /index.html /404.html /manifest.webmanifest /sw.js /theme-init.js /icon-192.png /icon-512.png /apple-touch-icon.png /maskable-512.png /.well-known/acme-challenge/*
     handle @fileRadice {
         file_server
     }

@@ -198,9 +198,12 @@ import json, sys
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 
+# Formato attuale dell'archivio: ogni evento ha "impronta" e o un "tipo"
+# (segnale/intrusione) o delle "metriche" con dentro "inneschi". Niente piu'
+# "motivo"/"rischio"/"impronta_ip": quelli erano il formato vecchio.
 soglia = datetime.now(timezone.utc) - timedelta(days=3)
-per_impronta = defaultdict(lambda: {"n": 0, "rischio": 0})
-motivi = defaultdict(int)
+per_impronta = defaultdict(int)
+tipi = defaultdict(int)
 totale = 0
 for riga in open(sys.argv[1], encoding="utf-8", errors="replace"):
     try:
@@ -210,23 +213,26 @@ for riga in open(sys.argv[1], encoding="utf-8", errors="replace"):
     except Exception:
         continue
     totale += 1
-    motivi[e["motivo"]] += 1
-    r = per_impronta[e["impronta_ip"]]
-    r["n"] += 1
-    r["rischio"] = max(r["rischio"], e["rischio"])
+    per_impronta[e.get("impronta", "?")] += 1
+    tipo = e.get("tipo")
+    if tipo:
+        tipi[tipo] += 1
+    else:
+        for innesco in e.get("inneschi", []):
+            tipi[innesco] += 1
 
 if totale == 0:
     print("  [ok]      nessun tentativo negli ultimi 3 giorni")
 else:
-    print(f"  [ok]      {totale} tentativi da {len(per_impronta)} origini distinte (ultimi 3 giorni)")
-    for m, n in sorted(motivi.items(), key=lambda x: -x[1]):
-        print(f"            {m}: {n}")
-    insistenti = [(i, r) for i, r in per_impronta.items() if r["n"] >= 20]
+    print(f"  [ok]      {totale} eventi da {len(per_impronta)} origini distinte (ultimi 3 giorni)")
+    for t, n in sorted(tipi.items(), key=lambda x: -x[1]):
+        print(f"            {t}: {n}")
+    insistenti = [(i, n) for i, n in per_impronta.items() if n >= 5]
     if insistenti:
-        for i, r in sorted(insistenti, key=lambda x: -x[1]["n"])[:5]:
-            print(f"  [nota]    [{i}] ha fatto {r['n']} richieste: e' una scansione, non rumore")
+        for i, n in sorted(insistenti, key=lambda x: -x[1])[:5]:
+            print(f"  [nota]    [{i}] segnalata {n} volte: vale un'occhiata")
     else:
-        print("            nessuna origine insistente: e' il rumore di fondo di internet")
+        print("            nessuna origine insistente: rumore di fondo di internet")
 PYTHON
 fi
 

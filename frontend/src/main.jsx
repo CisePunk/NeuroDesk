@@ -22,3 +22,9 @@ createRoot(document.getElementById('root')).render(
     </ErrorBoundary>
   </StrictMode>,
 )
+
+// Registrazione del service worker (guscio offline; /api mai in cache). Qui e non
+// inline nell'HTML, così la CSP può vietare gli script inline.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {})
+}

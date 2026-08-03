@@ -146,6 +146,65 @@ sessione.
 
 ---
 
+## 31 luglio 2026 — scansione di vulnerabilità, e il primo blocco attivo
+
+**Quando.** Fra le 16:20 e le 16:43 UTC, a ondate.
+
+**Cosa.** Una scansione molto più ampia di quella del giorno prima: fino a
+**14.280 richieste in poco più di quattro minuti** da una sola origine, oltre
+8.000 percorsi distinti, l'84% non trovati. Non più solo mappatura e credenziali,
+ma **tentativi di iniezione** veri — espressioni OGNL/Struts, XSS, path
+traversal, e un fuzzer di CRLF injection (`crlfuzz`).
+
+**Da dove.** Tre origini:
+
+- `89.187.165.103` — Datacamp (AS60068), un endpoint di **VPN/datacenter** a
+  Zurigo. È la macchina che ha fatto la parte pesante (iniezioni più sonde a
+  pannelli e credenziali). Chi la usa è nascosto dietro la VPN: la «posizione» è
+  il server svizzero, non la persona.
+- due **connessioni residenziali italiane** (Fastweb, zona di Napoli; e
+  Iliad/Free) che hanno eseguito lo stesso fuzzer CRLF. Gli indirizzi
+  residenziali non li pubblichiamo — restano nel log operativo interno: possono
+  essere macchine di casa compromesse in un botnet, o la stessa persona da linee
+  diverse.
+
+> Una nota onesta, senza accuse. Il grosso arriva da una VPN — cioè da qualcuno
+> che si nasconde — e il resto da linee residenziali italiane. È un profilo
+> diverso dal rumore di fondo abituale, che di solito viene da server noleggiati
+> sparsi nel mondo. Non prova chi sia, ma non somiglia a un botnet qualsiasi.
+
+**Cosa cercava.** Le vulnerabilità più sfruttate del web: Apache Struts (OGNL
+RCE), vecchi CMS PHP/Joomla (inclusione di file via
+`/index.php?...=../../etc/passwd`), response splitting via CRLF, callback
+out-of-band (`oast.me`) per scovare SSRF/RCE cieche, e ancora pannelli e file di
+credenziali. È l'arsenale standard di uno scanner automatico tipo Nuclei: si
+spara tutto contro tutti, sperando che giri un software bucato.
+
+**Cosa ha ottenuto: niente.** Payload generici contro uno stack che non li ha
+(niente Struts, niente PHP). L'84–88% è finito in 404 grazie alla lista bianca;
+le rotte vere hanno risposto 401.
+
+### Cosa abbiamo cambiato
+
+Fin qui l'honeypot **osservava e basta**. Un attacco di questa intensità ha dato
+il motivo per il passo successivo: **il primo blocco attivo.**
+
+Abbiamo aggiunto `fail2ban` con un filtro che riconosce le *firme d'attacco* nel
+log di Caddy — `%00`, `${…}` OGNL, `../`, `/etc/passwd`, iniezione di header
+CRLF, `<script>`, callback `oast.me` — cose che un utente vero non invia mai. Due
+colpi in dieci minuti e l'indirizzo viene bloccato al firewall per 24 ore.
+
+Prima di attivarlo l'abbiamo **validato sul traffico reale**: 314 righe malevole,
+tutte da un solo indirizzo; 1.172 righe normali intatte. **Zero falsi positivi.**
+La lista bianca copre la rete di casa e quella del server, così il blocco non può
+colpire noi — nemmeno su SSH.
+
+Un limite dichiarato: `fail2ban` colpisce sul *payload*, non sul volume. Uno
+scanner che sonda senza payload sporchi passerebbe ancora — per quello la difesa
+vera restano la lista bianca e il 401. Questo è uno strato in più, non il muro.
+
+---
+
 ## Altre attività registrate
 
 **29 luglio 2026, 22:13 UTC** — `185.8.106.162`, tre richieste, user agent

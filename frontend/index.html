@@ -4,16 +4,18 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- PWA: installabile e standalone, senza store né SDK di terzi -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3efe8" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1e24" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="NeuroDesk" />
+    <meta name="description" content="Il tuo compagno per sbloccarti, un passo alla volta." />
     <title>NeuroDesk</title>
-    <!-- Applica il tema prima del render React per evitare il flash -->
-    <script>
-      (function () {
-        var saved = localStorage.getItem('nd-theme');
-        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        var theme = saved || (prefersDark ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme', theme);
-      })();
-    </script>
+    <!-- Tema prima del render (file esterno, così la CSP può vietare gli script inline) -->
+    <script src="/theme-init.js"></script>
   </head>
   <body>
     <div id="root"></div>
