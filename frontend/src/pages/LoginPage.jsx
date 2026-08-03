@@ -4,6 +4,7 @@ import { login as apiLogin } from '../api/authApi';
 import { useAuth } from '../auth/AuthContext';
 import { testi } from '../i18n/lingua';
 import InstallaApp from '../ui/InstallaApp';
+import SelettoreLingua from '../ui/SelettoreLingua';
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -91,6 +92,7 @@ function LoginPage() {
         </form>
       </div>
 
+      <SelettoreLingua />
       <InstallaApp />
     </div>
   );

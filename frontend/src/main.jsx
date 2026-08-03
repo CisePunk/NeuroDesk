@@ -6,6 +6,11 @@ import App from './App.jsx'
 import { AuthProvider } from './auth/AuthContext'
 import { ToastProvider } from './ui/ToastProvider'
 import ErrorBoundary from './ui/ErrorBoundary'
+import { linguaCorrente } from './i18n/lingua'
+
+// L'HTML nasce con lang="it": lo allineiamo alla lingua effettiva (scelta o del
+// browser) così gli screen reader leggono nella lingua giusta.
+try { document.documentElement.lang = linguaCorrente() } catch { /* ignora */ }
 
 // ErrorBoundary sta piu' in alto di tutto (router e provider compresi): cosi'
 // nessun errore puo' lasciare l'utente davanti a una pagina bianca.

@@ -1497,6 +1497,33 @@ main h1, main h2 { margin-top: 0; }
   color: var(--text-3);
 }
 
+/* Selettore di lingua: pill, quella attiva evidenziata (stato di selezione
+   chiaro, nessuna freccia). */
+.selettore-lingua {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+.lingua-pill {
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--btn-sec-border, rgba(127, 127, 127, 0.3));
+  background: transparent;
+  color: var(--text-3);
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.lingua-pill:hover { color: var(--text); }
+.lingua-pill.attiva {
+  background: color-mix(in srgb, var(--accent, #5f8279) 18%, transparent);
+  border-color: color-mix(in srgb, var(--accent, #5f8279) 45%, transparent);
+  color: var(--text);
+  font-weight: 600;
+}
+.selettore-lingua--aiuto { justify-content: flex-start; margin-bottom: 14px; }
+
 .auth-card {
   width: 100%;
   max-width: 400px;

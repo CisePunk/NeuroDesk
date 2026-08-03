@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { testi } from '../i18n/lingua';
+import SelettoreLingua from './SelettoreLingua';
 
 /**
  * Aiuto raggiungibile da qualsiasi punto dell'app, sempre.
@@ -75,6 +76,11 @@ export function AiutoInLinea() {
                                 {t.aiutoChiudi}
                             </button>
                         </div>
+
+                        {/* Cambiare lingua qui: l'aiuto (e tutta l'app) si
+                            ricarica nella lingua scelta. È il punto in cui serve
+                            di più — chi apre l'aiuto è chi si è bloccato. */}
+                        <SelettoreLingua className="selettore-lingua--aiuto" />
 
                         <p className="aiuto-intro">{t.aiutoIntro}</p>
 

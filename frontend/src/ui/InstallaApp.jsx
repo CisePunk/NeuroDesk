@@ -6,12 +6,14 @@ import { testi } from '../i18n/lingua';
  *
  * L'installazione la offre il browser, non la pagina — e i browser non sono
  * d'accordo su come. Chrome/Edge (Android, desktop) emettono `beforeinstallprompt`:
- * lo intercettiamo e mostriamo un pulsante che lancia il loro dialog. Safari su
- * iPhone non emette niente e non ha un pulsante: l'unico modo è Condividi →
- * Aggiungi a Home, quindi lì mostriamo l'istruzione a parole.
+ * lo intercettiamo e mostriamo un pulsante che lancia il loro dialog. Ma quell'evento
+ * NON arriva se l'app è già installata, e su Safari iPhone non arriva mai. In quei
+ * casi il pulsante da solo lascerebbe la pagina muta — chi vuole (ri)mettere l'app
+ * sulla Home non troverebbe niente. Perciò, quando l'evento non c'è, mostriamo
+ * comunque le istruzioni a parole: quelle di Safari, o quelle generiche del menu.
  *
- * Se l'app è già installata (avviata in display-mode standalone) non mostriamo
- * niente: non ha senso invitare a installare ciò che è già installato.
+ * Se l'app è già aperta come app (display-mode standalone) non mostriamo niente:
+ * lì l'invito non ha senso.
  */
 
 function giaInstallata() {
@@ -36,15 +38,18 @@ function iOsSafari() {
 export default function InstallaApp() {
   const t = testi();
   const [evento, setEvento] = useState(null); // beforeinstallprompt (Chrome/Edge)
-  const [istruzioneIos, setIstruzioneIos] = useState(false);
+  const [manuale, setManuale] = useState(null); // null | 'ios' | 'generico'
   const [nascondi, setNascondi] = useState(giaInstallata());
 
   useEffect(() => {
     if (giaInstallata()) return;
 
+    let timer;
     function onPrompt(e) {
       e.preventDefault(); // impedisce il mini-banner automatico: vogliamo il nostro pulsante
       setEvento(e);
+      setManuale(null); // il pulsante batte le istruzioni: se possiamo installare, installiamo
+      clearTimeout(timer);
     }
     function onInstalled() {
       setNascondi(true);
@@ -52,17 +57,25 @@ export default function InstallaApp() {
 
     window.addEventListener('beforeinstallprompt', onPrompt);
     window.addEventListener('appinstalled', onInstalled);
-    if (iOsSafari()) setIstruzioneIos(true);
+
+    if (iOsSafari()) {
+      setManuale('ios');
+    } else {
+      // Diamo a Chrome un attimo per emettere l'evento. Se non arriva — già
+      // installata, o browser che non lo supporta — mostriamo le istruzioni
+      // manuali invece di restare muti.
+      timer = setTimeout(() => setManuale((m) => m || 'generico'), 1500);
+    }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', onPrompt);
       window.removeEventListener('appinstalled', onInstalled);
+      clearTimeout(timer);
     };
   }, []);
 
   if (nascondi) return null;
-  // Browser che non emette l'evento e non è iOS: nessun invito da mostrare.
-  if (!evento && !istruzioneIos) return null;
+  if (!evento && !manuale) return null;
 
   async function installa() {
     if (!evento) return;
@@ -82,7 +95,7 @@ export default function InstallaApp() {
           {t.installaApp}
         </button>
       ) : (
-        <p className="installa-hint">{t.installaIos}</p>
+        <p className="installa-hint">{manuale === 'ios' ? t.installaIos : t.installaManuale}</p>
       )}
     </div>
   );

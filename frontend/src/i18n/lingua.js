@@ -16,16 +16,33 @@
 
 export const LINGUE = ['it', 'en', 'fr'];
 
-/** Lingua del browser ridotta a due lettere; qualunque altra cosa diventa italiano. */
+const CHIAVE_LINGUA = 'nd-lingua';
+
+/**
+ * Lingua da usare: prima la scelta esplicita dell'utente (il selettore), poi la
+ * lingua del browser, infine italiano. Sempre ridotta a due lettere.
+ *
+ * L'ordine conta: senza la scelta salvata, chi ha il telefono in italiano non
+ * potrebbe mai vedere l'inglese, e viceversa. La deduzione dal browser resta,
+ * ma come ripiego, non come gabbia.
+ */
 export function linguaCorrente() {
     try {
+        const scelta = localStorage.getItem(CHIAVE_LINGUA);
+        if (scelta && LINGUE.includes(scelta)) return scelta;
         // "en-NZ" -> "en", "fr-CA" -> "fr": del tag ci serve solo la prima parte.
         const tag = (navigator.language || 'it').toLowerCase().slice(0, 2);
         return LINGUE.includes(tag) ? tag : 'it';
     } catch {
-        // Ambienti senza navigator (test, rendering lato server): italiano.
+        // Ambienti senza navigator/storage (test, rendering lato server): italiano.
         return 'it';
     }
+}
+
+/** Salva la lingua scelta. La rilegge linguaCorrente() al primo render utile. */
+export function impostaLingua(lang) {
+    if (!LINGUE.includes(lang)) return;
+    try { localStorage.setItem(CHIAVE_LINGUA, lang); } catch { /* storage negato: pazienza */ }
 }
 
 const DIZIONARIO = {
@@ -53,6 +70,7 @@ const DIZIONARIO = {
         loginTornaTester: '← Entra come tester (solo codice)',
         installaApp: 'Installa l’app',
         installaIos: 'Vuoi NeuroDesk sul telefono? Tocca Condividi e poi “Aggiungi a Home”.',
+        installaManuale: 'Per metterla sulla Home: apri il menu del browser (⋮) e tocca «Aggiungi a schermata Home». Se ce l’hai già, prima disinstallala per aggiornare l’icona.',
 
         statoCaricamento: 'Caricamento…',
         statoRiprova: 'Riprova',
@@ -265,6 +283,7 @@ const DIZIONARIO = {
         loginTornaTester: '← Sign in as a tester (code only)',
         installaApp: 'Install the app',
         installaIos: 'Want NeuroDesk on your phone? Tap Share, then “Add to Home Screen”.',
+        installaManuale: 'To add it to your Home screen: open the browser menu (⋮) and tap “Add to Home screen”. If you already have it, uninstall it first to refresh the icon.',
 
         statoCaricamento: 'Loading…',
         statoRiprova: 'Try again',
@@ -470,6 +489,7 @@ const DIZIONARIO = {
         loginTornaTester: '← Entrer comme testeur (code seulement)',
         installaApp: "Installer l'appli",
         installaIos: 'NeuroDesk sur ton téléphone ? Appuie sur Partager, puis « Sur l’écran d’accueil ».',
+        installaManuale: 'Pour l’ajouter à l’écran d’accueil : ouvre le menu du navigateur (⋮) et touche « Ajouter à l’écran d’accueil ». Si tu l’as déjà, désinstalle-la d’abord pour rafraîchir l’icône.',
 
         statoCaricamento: 'Chargement…',
         statoRiprova: 'Réessayer',
