@@ -1,17 +1,29 @@
 /* NeuroDesk landing — stili condivisi: menu di navigazione, banner cookie, form contatti.
    Usa le stesse variabili CSS (:root) definite inline in ogni pagina. */
 
-/* ---- Cursore cerchio+pallino (come nell'app), su tutto: link e selezioni
-   compresi. 32px è il massimo affidabile; per ipovedenti la via vera è la
-   dimensione puntatore del sistema, che però un cursore CSS scavalca. ---- */
-html, body, body * {
-  cursor: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='13'%20fill='none'%20stroke='%23ffffff'%20stroke-width='4'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='13'%20fill='none'%20stroke='%235f8279'%20stroke-width='2.5'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='4.5'%20fill='%235f8279'%20stroke='%23ffffff'%20stroke-width='1.5'/%3E%3C/svg%3E") 16 16, auto !important;
+/* ---- Cursore "a mirino" (cerchio + pallino) disegnato da site.js, come
+   sull'app e ispirato a centrireset.it. Elementi nel DOM, quindi grandi quanto
+   serve (un cursore CSS è tappato a 32px). Solo su mouse. ---- */
+.cursore-anello,
+.cursore-pallino {
+  position: fixed; left: 0; top: 0;
+  pointer-events: none; z-index: 9999;
+  border-radius: 50%;
+  transform: translate(-100px, -100px);
+  will-change: transform;
 }
-input[type="text"], input[type="password"], input[type="email"],
-input[type="search"], input[type="url"], input[type="tel"], input:not([type]),
-textarea, [contenteditable="true"] {
-  cursor: text !important;
+.cursore-anello {
+  width: 46px; height: 46px;
+  border: 2px solid var(--accent, #5f8279);
+  transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease;
 }
+.cursore-pallino { width: 8px; height: 8px; background: var(--accent, #5f8279); }
+.cursore-su-link .cursore-anello {
+  width: 66px; height: 66px;
+  background: color-mix(in srgb, var(--accent, #5f8279) 12%, transparent);
+}
+.cursore-attivo, .cursore-attivo * { cursor: none !important; }
+@media (prefers-reduced-motion: reduce) { .cursore-anello { transition: none; } }
 
 /* ---- Menu di navigazione ---- */
 .top-right { display: flex; align-items: center; gap: 0.6rem; }

@@ -6,6 +6,7 @@ import App from './App.jsx'
 import { AuthProvider } from './auth/AuthContext'
 import { ToastProvider } from './ui/ToastProvider'
 import ErrorBoundary from './ui/ErrorBoundary'
+import CursorePersonalizzato from './ui/CursorePersonalizzato'
 import { linguaCorrente } from './i18n/lingua'
 
 // L'HTML nasce con lang="it": lo allineiamo alla lingua effettiva (scelta o del
@@ -21,6 +22,7 @@ createRoot(document.getElementById('root')).render(
         <ToastProvider>
           <AuthProvider>
             <App />
+            <CursorePersonalizzato />
           </AuthProvider>
         </ToastProvider>
       </BrowserRouter>

@@ -6,20 +6,43 @@ body,
   min-height: 100%;
 }
 
-/* Cursore: cerchio con pallino al centro, al posto della freccia — e al posto
-   della manina su link e selezioni (scelta dell'utente). Alone bianco + anello
-   sage: si vede su crema e su scuro. 32px è il massimo che i browser mostrano in
-   modo affidabile (oltre, Firefox lo ignora); per un cursore DAVVERO grande da
-   ipovedenti serve la dimensione puntatore del sistema, che però questo scavalca. */
-:root {
-  --cursore-cerchio: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='13'%20fill='none'%20stroke='%23ffffff'%20stroke-width='4'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='13'%20fill='none'%20stroke='%235f8279'%20stroke-width='2.5'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='4.5'%20fill='%235f8279'%20stroke='%23ffffff'%20stroke-width='1.5'/%3E%3C/svg%3E") 16 16, auto;
+/* Cursore "a mirino" (cerchio + pallino) disegnato da JS — CursorePersonalizzato.jsx,
+   ispirato a centrireset.it. Un cursore CSS è tappato a ~32px; questi sono elementi
+   nel DOM, quindi grandi quanto serve. L'anello insegue con un filo di ritardo, il
+   pallino è preciso. Solo su mouse (su touch non tocchiamo niente). */
+.cursore-anello,
+.cursore-pallino {
+  position: fixed;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 50%;
+  transform: translate(-100px, -100px);
+  will-change: transform;
 }
-html, body, body * {
-  cursor: var(--cursore-cerchio) !important;
+.cursore-anello {
+  width: 46px;
+  height: 46px;
+  border: 2px solid #5f8279;
+  transition: width 0.2s ease, height 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
-/* Nei campi di testo resta il cursore di scrittura, o non si capisce dove si digita. */
-input[type="text"], input[type="password"], input[type="email"],
-input[type="search"], input[type="url"], input[type="number"], input[type="tel"],
-input:not([type]), textarea, [contenteditable="true"] {
-  cursor: text !important;
+.cursore-pallino {
+  width: 8px;
+  height: 8px;
+  background: #5f8279;
+}
+/* Sopra un elemento cliccabile l'anello cresce e si vela di colore. */
+.cursore-su-link .cursore-anello {
+  width: 66px;
+  height: 66px;
+  background: rgba(95, 130, 121, 0.12);
+}
+/* Il nostro cursore è attivo (solo su mouse): nascondiamo quello di sistema. */
+.cursore-attivo,
+.cursore-attivo * {
+  cursor: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cursore-anello { transition: none; }
 }

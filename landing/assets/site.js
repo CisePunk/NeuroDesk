@@ -57,4 +57,48 @@
       });
     }
   }
+
+  // --- Cursore "a mirino" (cerchio + pallino) che segue il mouse, come sull'app
+  //     e ispirato a centrireset.it. Elementi nel DOM: grandi quanto serve (un
+  //     cursore CSS è tappato a 32px). Solo su mouse; l'anello insegue con easing,
+  //     il pallino è preciso. ---
+  (function cursore() {
+    if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    var ridotto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var root = document.documentElement;
+
+    var anello = document.createElement('div');
+    anello.className = 'cursore-anello';
+    anello.setAttribute('aria-hidden', 'true');
+    var pallino = document.createElement('div');
+    pallino.className = 'cursore-pallino';
+    pallino.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(anello);
+    document.body.appendChild(pallino);
+    root.classList.add('cursore-attivo');
+
+    var mx = window.innerWidth / 2, my = window.innerHeight / 2, ax = mx, ay = my;
+    function poni(el, x, y) { el.style.transform = 'translate(' + x + 'px, ' + y + 'px) translate(-50%, -50%)'; }
+
+    window.addEventListener('mousemove', function (e) {
+      mx = e.clientX; my = e.clientY;
+      poni(pallino, mx, my);
+      if (ridotto) poni(anello, mx, my);
+    }, { passive: true });
+
+    document.addEventListener('mouseover', function (e) {
+      var cliccabile = e.target.closest ? e.target.closest('a, button, [role="button"], summary, label, input, select, textarea, [onclick]') : null;
+      if (cliccabile) { root.classList.add('cursore-su-link'); } else { root.classList.remove('cursore-su-link'); }
+    }, { passive: true });
+
+    document.addEventListener('mouseleave', function () { poni(pallino, -100, -100); poni(anello, -100, -100); });
+
+    if (!ridotto) {
+      (function loop() {
+        ax += (mx - ax) * 0.2; ay += (my - ay) * 0.2;
+        poni(anello, ax, ay);
+        requestAnimationFrame(loop);
+      })();
+    }
+  })();
 })();
