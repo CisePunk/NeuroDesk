@@ -6,10 +6,20 @@ body,
   min-height: 100%;
 }
 
-/* Cursore: un cerchio con il pallino al centro, al posto della freccia. Alone
-   bianco + anello sage: si vede sia sul crema chiaro sia sullo scuro. Il punto
-   di clic (hotspot 15 15) è il pallino centrale. Su link e pulsanti resta la
-   manina (affordance); sui campi di testo resta il cursore di scrittura. */
-body {
-  cursor: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='30'%20height='30'%20viewBox='0%200%2030%2030'%3E%3Ccircle%20cx='15'%20cy='15'%20r='11'%20fill='none'%20stroke='%23ffffff'%20stroke-width='4'/%3E%3Ccircle%20cx='15'%20cy='15'%20r='11'%20fill='none'%20stroke='%235f8279'%20stroke-width='2'/%3E%3Ccircle%20cx='15'%20cy='15'%20r='4'%20fill='%235f8279'%20stroke='%23ffffff'%20stroke-width='1.5'/%3E%3C/svg%3E") 15 15, auto;
+/* Cursore: cerchio con pallino al centro, al posto della freccia — e al posto
+   della manina su link e selezioni (scelta dell'utente). Alone bianco + anello
+   sage: si vede su crema e su scuro. 32px è il massimo che i browser mostrano in
+   modo affidabile (oltre, Firefox lo ignora); per un cursore DAVVERO grande da
+   ipovedenti serve la dimensione puntatore del sistema, che però questo scavalca. */
+:root {
+  --cursore-cerchio: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='13'%20fill='none'%20stroke='%23ffffff'%20stroke-width='4'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='13'%20fill='none'%20stroke='%235f8279'%20stroke-width='2.5'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='4.5'%20fill='%235f8279'%20stroke='%23ffffff'%20stroke-width='1.5'/%3E%3C/svg%3E") 16 16, auto;
+}
+html, body, body * {
+  cursor: var(--cursore-cerchio) !important;
+}
+/* Nei campi di testo resta il cursore di scrittura, o non si capisce dove si digita. */
+input[type="text"], input[type="password"], input[type="email"],
+input[type="search"], input[type="url"], input[type="number"], input[type="tel"],
+input:not([type]), textarea, [contenteditable="true"] {
+  cursor: text !important;
 }

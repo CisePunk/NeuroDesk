@@ -1,6 +1,18 @@
 /* NeuroDesk landing — stili condivisi: menu di navigazione, banner cookie, form contatti.
    Usa le stesse variabili CSS (:root) definite inline in ogni pagina. */
 
+/* ---- Cursore cerchio+pallino (come nell'app), su tutto: link e selezioni
+   compresi. 32px è il massimo affidabile; per ipovedenti la via vera è la
+   dimensione puntatore del sistema, che però un cursore CSS scavalca. ---- */
+html, body, body * {
+  cursor: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='32'%20height='32'%20viewBox='0%200%2032%2032'%3E%3Ccircle%20cx='16'%20cy='16'%20r='13'%20fill='none'%20stroke='%23ffffff'%20stroke-width='4'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='13'%20fill='none'%20stroke='%235f8279'%20stroke-width='2.5'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='4.5'%20fill='%235f8279'%20stroke='%23ffffff'%20stroke-width='1.5'/%3E%3C/svg%3E") 16 16, auto !important;
+}
+input[type="text"], input[type="password"], input[type="email"],
+input[type="search"], input[type="url"], input[type="tel"], input:not([type]),
+textarea, [contenteditable="true"] {
+  cursor: text !important;
+}
+
 /* ---- Menu di navigazione ---- */
 .top-right { display: flex; align-items: center; gap: 0.6rem; }
 .site-nav { display: flex; align-items: center; gap: 0.15rem; }
