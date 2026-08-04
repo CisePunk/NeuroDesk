@@ -120,8 +120,9 @@ for (const c of CONVERSAZIONI) {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 2 });
     const page = await ctx.newPage();
     await page.goto(BASE + '/', { waitUntil: 'networkidle' });
-    const toggle = page.locator('.auth-toggle').first();
-    if (await toggle.count()) await toggle.click();
+    // Scegli "Amministratore" per far comparire il campo password.
+    const admin = page.locator('label:has-text("Amministratore")').first();
+    if (await admin.count()) await admin.click();
     await page.fill('input[type="text"]', 'scuola');
     await page.fill('input[type="password"]', 'CambiaMi123!');
     await page.click('button:has-text("Entra")');

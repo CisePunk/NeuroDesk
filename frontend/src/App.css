@@ -1578,6 +1578,26 @@ main h1, main h2 { margin-top: 0; }
 .auth-submit { width: 100%; margin-top: 4px; }
 .auth-toggle { width: 100%; margin-top: 10px; font-size: 13px; }
 
+/* Scelta del ruolo all'accesso: due opzioni radio (cerchio+pallino), quella
+   attiva evidenziata. Amministratore fa comparire il campo password. */
+.auth-ruolo { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.auth-ruolo-label { font-size: 13px; color: var(--text-2); }
+.auth-ruolo-opzioni { display: flex; flex-direction: column; gap: 8px; }
+.auth-ruolo-opt {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 13px; border-radius: var(--r, 10px);
+  border: 1px solid var(--btn-sec-border, rgba(127, 127, 127, 0.3));
+  cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease;
+}
+.auth-ruolo-opt.is-active {
+  border-color: var(--accent, #5f8279);
+  background: color-mix(in srgb, var(--accent, #5f8279) 8%, transparent);
+}
+.auth-ruolo-opt input { accent-color: var(--accent, #5f8279); width: 16px; height: 16px; flex: none; margin: 0; }
+.auth-ruolo-opt > span { display: flex; flex-direction: column; }
+.auth-ruolo-opt strong { font-size: 14px; color: var(--text); font-weight: 600; }
+.auth-ruolo-opt small { font-size: 12px; color: var(--text-3); }
+
 .consent-text { color: var(--text-2); font-size: 15px; line-height: 1.6; }
 .consent-text p { margin: 0 0 12px; }
 .consent-text ul { margin: 0 0 18px; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }

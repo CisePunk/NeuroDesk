@@ -44,6 +44,38 @@ function LoginPage() {
           <span className="auth-tagline">{t.loginTagline}</span>
         </div>
 
+        <div className="auth-ruolo" role="radiogroup" aria-label={t.loginComeEntrare}>
+          <span className="auth-ruolo-label">{t.loginComeEntrare}</span>
+          <div className="auth-ruolo-opzioni">
+            <label className={`auth-ruolo-opt${!mostraPassword ? ' is-active' : ''}`}>
+              <input
+                type="radio"
+                name="ruolo-accesso"
+                checked={!mostraPassword}
+                onChange={() => { setMostraPassword(false); setErrore(''); }}
+                disabled={caricamento}
+              />
+              <span>
+                <strong>{t.loginRuoloTester}</strong>
+                <small>{t.loginRuoloTesterNota}</small>
+              </span>
+            </label>
+            <label className={`auth-ruolo-opt${mostraPassword ? ' is-active' : ''}`}>
+              <input
+                type="radio"
+                name="ruolo-accesso"
+                checked={mostraPassword}
+                onChange={() => { setMostraPassword(true); setErrore(''); }}
+                disabled={caricamento}
+              />
+              <span>
+                <strong>{t.loginRuoloAdmin}</strong>
+                <small>{t.loginRuoloAdminNota}</small>
+              </span>
+            </label>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} noValidate>
           <label className="auth-field">
             <span>{t.loginCampoCodice}</span>
@@ -79,15 +111,6 @@ function LoginPage() {
 
           <button type="submit" className="btn-primary auth-submit" disabled={caricamento}>
             {caricamento ? t.loginInCorso : t.loginEntra}
-          </button>
-
-          <button
-            type="button"
-            className="btn-ghost auth-toggle"
-            onClick={() => setMostraPassword((v) => !v)}
-            disabled={caricamento}
-          >
-            {mostraPassword ? t.loginTornaTester : t.loginVaiScuola}
           </button>
         </form>
       </div>
