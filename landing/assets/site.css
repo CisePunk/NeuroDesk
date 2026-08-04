@@ -25,6 +25,21 @@
 .cursore-attivo, .cursore-attivo * { cursor: none !important; }
 @media (prefers-reduced-motion: reduce) { .cursore-anello { transition: none; } }
 
+/* ---- Tasto "torna su": tondo, nel colore del sito, in basso a destra;
+   compare dopo un po' di scroll. La freccia in su è l'affordance standard. ---- */
+.torna-su {
+  position: fixed; right: 22px; bottom: 22px; z-index: 300;
+  width: 48px; height: 48px; border-radius: 50%;
+  border: none; background: var(--accent, #5f8279); color: #fbfdfb;
+  display: grid; place-items: center; cursor: pointer;
+  box-shadow: 0 8px 22px rgba(128, 32, 92, 0.18);
+  opacity: 0; transform: translateY(12px); pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.15s ease;
+}
+.torna-su.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+.torna-su:hover { background: var(--accent-deep, #4a6b62); }
+@media (prefers-reduced-motion: reduce) { .torna-su { transition: opacity 0.2s ease; transform: none; } }
+
 /* ---- Menu di navigazione ---- */
 .top-right { display: flex; align-items: center; gap: 0.6rem; }
 .site-nav { display: flex; align-items: center; gap: 0.15rem; }

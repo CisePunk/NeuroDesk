@@ -101,4 +101,23 @@
       })();
     }
   })();
+
+  // --- Tasto "torna su": compare dopo un po' di scroll, riporta in cima ---
+  (function tornaSu() {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'torna-su';
+    btn.setAttribute('aria-label', 'Torna su');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V6"/><path d="M6 12l6-6 6 6"/></svg>';
+    document.body.appendChild(btn);
+    function aggiorna() {
+      if (window.scrollY > 500) { btn.classList.add('is-visible'); } else { btn.classList.remove('is-visible'); }
+    }
+    window.addEventListener('scroll', aggiorna, { passive: true });
+    aggiorna();
+    btn.addEventListener('click', function () {
+      var ridotto = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      window.scrollTo({ top: 0, behavior: ridotto ? 'auto' : 'smooth' });
+    });
+  })();
 })();
