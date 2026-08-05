@@ -154,10 +154,27 @@ async function conContinuazione(messaggiIniziali, chiamata) {
   return { testo, inTok: inTokPrimo, outTok: outTokTot };
 }
 
+// Un numero preso dall'ambiente, con la garanzia che sia davvero un numero.
+// Number('') e Number('duemila') danno NaN, e un NaN qui non esplode subito: se
+// ne va zitto dentro al corpo della richiesta e il provider risponde 400 —
+// l'errore arriva a chi sta scrivendo, lontano dalla riga sbagliata. Meglio
+// tenere il valore di riferimento e dirlo nel log una volta sola, all'avvio.
+function numeroEnv(nome, difetto) {
+  const grezzo = process.env[nome];
+  if (grezzo === undefined || grezzo === '') return difetto;
+  const n = Number(grezzo);
+  if (!Number.isFinite(n) || n <= 0) {
+    // Il valore, non il contenuto di nessuna conversazione: si puo' registrare.
+    console.warn(`[ai] ${nome}="${grezzo}" non e' un numero positivo: uso ${difetto}`);
+    return difetto;
+  }
+  return n;
+}
+
 // Timeout della chiamata al provider. Senza, fetch() di Node aspetta all'infinito:
 // una richiesta appesa terrebbe occupata la connessione e l'utente resterebbe a
 // fissare lo spinner. Meglio un errore onesto dopo N secondi.
-const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 30_000);
+const AI_TIMEOUT_MS = numeroEnv('AI_TIMEOUT_MS', 30_000);
 
 // Errori transitori che vale la pena riprovare una volta sola:
 // 429 = rate limit del provider, 529 = sovraccarico (Anthropic), 5xx = problema loro.
@@ -337,7 +354,7 @@ async function chiamaProvider({ message, mode, profile, history, provider: reque
     // Sonnet 5, qui non puo' esserci un modello piccolo. Chi riceve la risposta
     // non sa che il provider e' cambiato, e non deve accorgersene dal tono.
     const model = process.env.OPENAI_MODEL || 'gpt-5.6-terra';
-    const tetto = Number(process.env.OPENAI_MAX_TOKENS || 2048);
+    const tetto = numeroEnv('OPENAI_MAX_TOKENS', 2048);
     // I modelli di ragionamento (gpt-5.x, o1/o3/o4) rifiutano con 400 sia
     // `max_tokens` (vogliono `max_completion_tokens`) sia `temperature`
     // diversa dal default. Senza questa distinzione ogni chiamata fallirebbe.
@@ -346,7 +363,7 @@ async function chiamaProvider({ message, mode, profile, history, provider: reque
     // ragionamento, che non si vedono mai. Col solo tetto della risposta il
     // pensiero se lo mangerebbe e uscirebbe un testo tronco: serve una riserva
     // sopra al tetto, altrimenti si tronca proprio quando il modello ragiona di piu'.
-    const riserva = Number(process.env.OPENAI_RISERVA_RAGIONAMENTO || 2048);
+    const riserva = numeroEnv('OPENAI_RISERVA_RAGIONAMENTO', 2048);
     const parametri = ragionamento
       ? { max_completion_tokens: tetto + riserva }
       : { max_tokens: tetto, temperature: 0.4 };
@@ -400,7 +417,7 @@ async function chiamaProvider({ message, mode, profile, history, provider: reque
     }
 
     const model = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5';
-    const maxTokens = Number(process.env.ANTHROPIC_MAX_TOKENS || 2048);
+    const maxTokens = numeroEnv('ANTHROPIC_MAX_TOKENS', 2048);
     const { system, messages } = splitSystemAndMessages({ message, mode, profile, history });
 
     // Una singola chiamata all'API: ritorna testo, motivo di stop e usage grezzo.

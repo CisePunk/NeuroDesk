@@ -238,7 +238,15 @@ function CompanionPage() {
             setErrore(err.message);
         } finally {
             setCaricamento(false);
-            setTimeout(() => textareaRef.current?.focus(), 50);
+            // Su schermo stretto la vista è appena scesa sulla risposta: dare il
+            // fuoco al campo la riporterebbe su (il browser scorre da sé
+            // sull'elemento a fuoco) e la risposta sparirebbe prima di essere
+            // letta. Lì si torna al campo col pulsante "scrivi", quando lo
+            // decide chi legge. Su desktop il fuoco resta, comodo per chi usa la
+            // tastiera, ma senza il permesso di spostare la vista.
+            if (!schermoStretto()) {
+                setTimeout(() => textareaRef.current?.focus({ preventScroll: true }), 50);
+            }
         }
     }
 
