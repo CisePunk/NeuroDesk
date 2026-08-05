@@ -161,7 +161,14 @@ ANTHROPIC_MODEL=claude-sonnet-5
 # in automatico (vedi aiProvider.js): niente risposte tagliate a meta'.
 ANTHROPIC_MAX_TOKENS=2048
 OPENAI_API_KEY=${OPENAI_KEY}
-OPENAI_MODEL=gpt-4.1-mini
+# Il ripiego risponde al posto del principale: se il principale e' un Sonnet 5,
+# qui non puo' esserci un modello piccolo. Chi legge non sa che il provider e'
+# cambiato e non deve accorgersene dal tono.
+OPENAI_MODEL=gpt-5.6-terra
+OPENAI_MAX_TOKENS=2048
+# Sui modelli di ragionamento il tetto conta anche i token di pensiero, invisibili:
+# questa riserva evita che il pensiero si mangi lo spazio della risposta.
+OPENAI_RISERVA_RAGIONAMENTO=2048
 ENV
 chown "$UTENTE:$UTENTE" /opt/neurodesk/companion-service/.env
 chmod 600 /opt/neurodesk/companion-service/.env

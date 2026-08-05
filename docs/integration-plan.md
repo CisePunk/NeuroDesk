@@ -64,7 +64,7 @@ Impostare:
 ```text
 AI_PROVIDER=openai
 OPENAI_API_KEY=...
-OPENAI_MODEL=gpt-4.1-mini
+OPENAI_MODEL=gpt-5.6-terra
 ```
 
 Nota prodotto:

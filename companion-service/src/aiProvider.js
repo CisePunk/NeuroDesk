@@ -107,6 +107,53 @@ function splitSystemAndMessages({ message, mode, profile, history }) {
   return { system, messages };
 }
 
+// Continuazione AUTOMATICA se la risposta si tronca. Vale per TUTTI i provider:
+// una persona neurodivergente puo' non sapere di dover scrivere "continua", e una
+// risposta tagliata a meta' non deve mai arrivarle — men che meno quando arriva
+// dal ripiego, cioe' proprio nel momento in cui qualcosa e' gia' andato storto.
+// I modelli recenti non accettano il prefill assistant, quindi la continuazione
+// e' un nuovo turno utente con istruzione esplicita a non ripetere.
+// Una sola continuazione: basta e limita costi e duplicazioni.
+const MAX_CONTINUAZIONI = 1;
+const NUDGE_CONTINUA =
+  'La tua risposta si è interrotta per limite di spazio. Continua da dove eri rimasta, '
+  + 'riprendendo dall\'ultima frase incompleta. Non ripetere ciò che hai già scritto e non aggiungere saluti o premesse.';
+
+/**
+ * Ciclo comune di continuazione: chiama, e se la risposta risulta troncata
+ * riprende da dove si era fermata. `chiamata(msgs)` deve restituire
+ * { testo, troncata, inTok, outTok }; ogni provider sa riconoscere il proprio
+ * segnale di troncamento (stop_reason / finish_reason) e lo traduce qui.
+ * I token in ingresso sono quelli del PRIMO giro: e' la misura del prompt vero.
+ */
+async function conContinuazione(messaggiIniziali, chiamata) {
+  let msgs = messaggiIniziali;
+  let completo = '';
+  let inTokPrimo = null;
+  let outTokTot = 0;
+
+  for (let giro = 0; giro <= MAX_CONTINUAZIONI; giro += 1) {
+    const r = await chiamata(msgs);
+    const chunk = r.testo.trim();
+    completo = completo ? `${completo}\n${chunk}` : chunk;
+    if (inTokPrimo === null) inTokPrimo = r.inTok ?? null;
+    outTokTot += r.outTok ?? 0;
+    if (!r.troncata) break;
+    // Riparte da un nuovo turno utente: la conversazione DEVE finire con "user".
+    msgs = [...msgs, { role: 'assistant', content: chunk }, { role: 'user', content: NUDGE_CONTINUA }];
+  }
+
+  const testo = completo.trim();
+  // Una bolla vuota e' peggio di una risposta tronca: chi legge non capisce se
+  // ha sbagliato lei, se e' rotto, o se deve aspettare. Se dopo la continuazione
+  // non e' uscita nemmeno una frase, fallisco: cosi' scatta il ripiego sull'altro
+  // provider, e in ultima istanza arriva un errore onesto invece del nulla.
+  if (!testo) {
+    throw new Error('Il modello non ha prodotto testo (tetto di token troppo basso o risposta vuota).');
+  }
+  return { testo, inTok: inTokPrimo, outTok: outTokTot };
+}
+
 // Timeout della chiamata al provider. Senza, fetch() di Node aspetta all'infinito:
 // una richiesta appesa terrebbe occupata la connessione e l'utente resterebbe a
 // fissare lo spinner. Meglio un errore onesto dopo N secondi.
@@ -286,42 +333,60 @@ async function chiamaProvider({ message, mode, profile, history, provider: reque
       throw new Error('OPENAI_API_KEY è richiesta quando il provider è openai');
     }
 
-    const model = process.env.OPENAI_MODEL || 'gpt-4.1-mini';
-    const tetto = Number(process.env.OPENAI_MAX_TOKENS || 1536);
+    // Il ripiego risponde al posto del principale: se il principale e' un
+    // Sonnet 5, qui non puo' esserci un modello piccolo. Chi riceve la risposta
+    // non sa che il provider e' cambiato, e non deve accorgersene dal tono.
+    const model = process.env.OPENAI_MODEL || 'gpt-5.6-terra';
+    const tetto = Number(process.env.OPENAI_MAX_TOKENS || 2048);
     // I modelli di ragionamento (gpt-5.x, o1/o3/o4) rifiutano con 400 sia
-    // `max_tokens` (vogliono `max_completion_tokens`) sia `temperature`.
-    // Senza questa distinzione, mettere un gpt-5 in OPENAI_MODEL romperebbe
-    // ogni chiamata. Cap sull'output in entrambi i casi: freno ai costi.
+    // `max_tokens` (vogliono `max_completion_tokens`) sia `temperature`
+    // diversa dal default. Senza questa distinzione ogni chiamata fallirebbe.
     const ragionamento = /^(gpt-5|o[0-9])/.test(model);
+    // Su quei modelli `max_completion_tokens` comprende ANCHE i token di
+    // ragionamento, che non si vedono mai. Col solo tetto della risposta il
+    // pensiero se lo mangerebbe e uscirebbe un testo tronco: serve una riserva
+    // sopra al tetto, altrimenti si tronca proprio quando il modello ragiona di piu'.
+    const riserva = Number(process.env.OPENAI_RISERVA_RAGIONAMENTO || 2048);
     const parametri = ragionamento
-      ? { max_completion_tokens: tetto }
+      ? { max_completion_tokens: tetto + riserva }
       : { max_tokens: tetto, temperature: 0.4 };
 
-    const response = await fetchProvider(
-      'https://api.openai.com/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${chiaveOpenai}`,
-          'Content-Type': 'application/json',
+    const chiamata = async (msgs) => {
+      const response = await fetchProvider(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${chiaveOpenai}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ model, messages: msgs, ...parametri }),
         },
-        body: JSON.stringify({
-          model,
-          messages: buildMessages({ message, mode, profile, history }),
-          ...parametri,
-        }),
-      },
-      'OpenAI',
+        'OpenAI',
+      );
+      const data = await response.json();
+      const scelta = data.choices?.[0];
+      return {
+        testo: scelta?.message?.content || '',
+        // OpenAI segnala il taglio per tetto raggiunto con finish_reason='length'.
+        troncata: scelta?.finish_reason === 'length',
+        inTok: data.usage?.prompt_tokens,
+        outTok: data.usage?.completion_tokens,
+      };
+    };
+
+    const esito = await conContinuazione(
+      buildMessages({ message, mode, profile, history }),
+      chiamata,
     );
 
-    const data = await response.json();
     return {
       provider: 'openai',
       model,
-      text: data.choices?.[0]?.message?.content?.trim() || '',
+      text: esito.testo,
       usage: normalizeUsage({
-        inputTokens: data.usage?.prompt_tokens,
-        outputTokens: data.usage?.completion_tokens,
+        inputTokens: esito.inTok,
+        outputTokens: esito.outTok,
         message,
         note: 'Conteggio reale dal provider (OpenAI).',
       }),
@@ -358,43 +423,26 @@ async function chiamaProvider({ message, mode, profile, history, provider: reque
         .filter((block) => block.type === 'text')
         .map((block) => block.text)
         .join('');
-      return { testo, stop: data.stop_reason, inTok: data.usage?.input_tokens, outTok: data.usage?.output_tokens };
+      return {
+        testo,
+        // Anthropic segnala il taglio per tetto raggiunto con stop_reason='max_tokens'.
+        troncata: data.stop_reason === 'max_tokens',
+        inTok: data.usage?.input_tokens,
+        outTok: data.usage?.output_tokens,
+      };
     };
 
-    // Continuazione AUTOMATICA se la risposta si tronca (stop_reason=max_tokens).
-    // Un utente neurodivergente puo' non sapere di dover scrivere "continua": la
-    // risposta troncata a meta' (es. una bozza interrotta) non deve mai arrivargli.
-    // I modelli recenti (sonnet-5) NON accettano il prefill assistant, quindi la
-    // continuazione e' un nuovo turno utente con istruzione esplicita a non ripetere.
-    // Il tetto a 2048 fa completare in un colpo quasi ogni risposta; questa e' la
-    // rete per i casi rari. Una sola continuazione: basta e limita costi/duplicazioni.
-    const MAX_CONTINUAZIONI = 1;
-    const NUDGE_CONTINUA =
-      'La tua risposta si è interrotta per limite di spazio. Continua da dove eri rimasta, '
-      + 'riprendendo dall\'ultima frase incompleta. Non ripetere ciò che hai già scritto e non aggiungere saluti o premesse.';
-    let msgs = messages;
-    let completo = '';
-    let inTokPrimo = null;
-    let outTokTot = 0;
-
-    for (let giro = 0; giro <= MAX_CONTINUAZIONI; giro += 1) {
-      const r = await chiamata(msgs);
-      const chunk = r.testo.trim();
-      completo = completo ? `${completo}\n${chunk}` : chunk;
-      if (inTokPrimo === null) inTokPrimo = r.inTok ?? null;
-      outTokTot += r.outTok ?? 0;
-      if (r.stop !== 'max_tokens') break;
-      // Riparte da un nuovo turno utente: la conversazione DEVE finire con "user".
-      msgs = [...msgs, { role: 'assistant', content: chunk }, { role: 'user', content: NUDGE_CONTINUA }];
-    }
+    // Il tetto a 2048 fa completare in un colpo quasi ogni risposta; la
+    // continuazione (vedi conContinuazione) e' la rete per i casi rari.
+    const esito = await conContinuazione(messages, chiamata);
 
     return {
       provider: 'anthropic',
       model,
-      text: completo.trim(),
+      text: esito.testo,
       usage: normalizeUsage({
-        inputTokens: inTokPrimo,
-        outputTokens: outTokTot,
+        inputTokens: esito.inTok,
+        outputTokens: esito.outTok,
         message,
         note: 'Conteggio reale dal provider (Anthropic).',
       }),

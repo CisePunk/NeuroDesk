@@ -8,9 +8,10 @@
  * misura niente: si moltiplica soltanto.
  */
 
-// Prezzi in DOLLARI per milione di token. Fonte: listino Anthropic.
+// Prezzi in DOLLARI per milione di token.
 // `introFino` = prezzo di lancio valido fino a quella data (compresa).
 const LISTINO = {
+    // --- Anthropic (principale). Fonte: listino Anthropic.
     'claude-sonnet-5': { in: 3.0, out: 15.0, introIn: 2.0, introOut: 10.0, introFino: '2026-08-31' },
     'claude-sonnet-4-6': { in: 3.0, out: 15.0 },
     'claude-haiku-4-5': { in: 1.0, out: 5.0 },
@@ -18,9 +19,21 @@ const LISTINO = {
     'claude-opus-4-8': { in: 5.0, out: 25.0 },
     'claude-opus-4-7': { in: 5.0, out: 25.0 },
     'claude-opus-4-6': { in: 5.0, out: 25.0 },
-    // I modelli OpenAI non sono qui apposta: il loro listino non l'abbiamo
-    // verificato. Meglio dire "non lo so" che mostrare un euro inventato —
-    // vedi `prezzoMancante` più sotto.
+    // --- OpenAI (ripiego). Fonte: developers.openai.com/api/docs/pricing,
+    // verificata il 5 agosto 2026 (dopo il taglio prezzi del 30 luglio 2026).
+    // Nota: su questi modelli i token di ragionamento NON si vedono nella
+    // risposta ma si pagano come output. Il conto qui sotto li comprende,
+    // perche' parte dal `completion_tokens` che dichiara il provider.
+    'gpt-5.6-sol': { in: 5.0, out: 30.0 },
+    'gpt-5.6-terra': { in: 2.0, out: 12.0 },
+    'gpt-5.6-luna': { in: 0.2, out: 1.2 },
+    'gpt-5.4': { in: 2.5, out: 15.0 },
+    'gpt-5.4-mini': { in: 0.75, out: 4.5 },
+    'gpt-5.4-nano': { in: 0.2, out: 1.25 },
+    // Non lo usiamo piu', ma resta nel registro: il ripiego del 3 agosto 2026 e'
+    // passato di qui. Senza il suo prezzo, quella riga terrebbe acceso per sempre
+    // l'avviso "consumo non conteggiato in euro" per una spesa di frazioni di centesimo.
+    'gpt-4.1-mini': { in: 0.4, out: 1.6 },
 };
 
 // Cambio euro/dollaro: approssimato di proposito. Serve solo a mostrare un
