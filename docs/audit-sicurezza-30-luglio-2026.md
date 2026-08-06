@@ -1,15 +1,16 @@
 # Audit di sicurezza — 30 luglio 2026
 
 Verifica condotta **dall'esterno**, sull'applicazione in produzione, prendendo
-come modello il difetto del caso *Baudr* (app pubblicata con un pannello di
-amministrazione raggiungibile senza autenticazione, da cui lettura e scarico dei
-dati di tutti gli utenti). La domanda non è «è sicura?» ma «ha *quel* buco?».
+come modello una classe nota di **broken access control**: un'app pubblicata con
+un pannello di amministrazione raggiungibile senza autenticazione, da cui lettura
+e scarico dei dati di tutti gli utenti (caso *Baudr*). La domanda non è «è
+sicura?» ma «ha *quel* buco?».
 
 Ogni riga qui sotto è un esito misurato con una richiesta HTTP reale, non una
 convinzione. I comandi sono quelli di un pentest black-box: nessuna conoscenza
 interna, solo ciò che vede chi arriva da fuori.
 
-## Il difetto di Baudr — cercato, non trovato
+## Broken access control (caso Baudr) — cercato, non trovato
 
 **Pannello di amministrazione senza credenziali.** Sette funzioni riservate,
 chiamate da anonimo:
@@ -30,7 +31,7 @@ pannello nascosto raggiungibile.
 
 ## Lettura incrociata tra utenti (IDOR)
 
-In Baudr, entrati una volta, si leggevano i dati di tutti. Prova diretta: l'utente
+Nel caso *Baudr*, entrati una volta, si leggevano i dati di tutti. Prova diretta: l'utente
 A tenta di leggere la conversazione dell'utente B cambiando il numero nell'URL.
 
 - B salva una conversazione con un marcatore segreto

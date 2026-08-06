@@ -1,0 +1,7 @@
+# NeuroDesk — https://neurodesk.it
+# Tutto indicizzabile: la landing è pubblica per scelta.
+User-agent: *
+Allow: /
+
+# La mappa del sito, così i motori trovano tutte le pagine e le tre lingue.
+Sitemap: https://neurodesk.it/sitemap.xml

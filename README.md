@@ -194,14 +194,15 @@ Questa scelta nasce dal fatto che movimento periferico, rumore visivo e testo sf
 
 ## Privacy, token e limiti
 
-Il Companion Service puo' funzionare in due modi:
+Il Companion Service sceglie il provider con la variabile `AI_PROVIDER`:
 
 - `AI_PROVIDER=mock`: nessun dato viene inviato a provider AI esterni
-- `AI_PROVIDER=openai`: il messaggio e il profilo fornito possono essere inviati al provider configurato
+- `AI_PROVIDER=anthropic`: il messaggio e il profilo fornito vengono inviati ad **Anthropic**, il provider usato in produzione
+- `AI_PROVIDER=openai`: in alternativa, verso un endpoint OpenAI compatibile
 
-In modalita' AI reale, l'utente finale deve collegare una propria API key o sottoscrivere un piano che copra il costo dei token.
+In produzione i tester usano il credito condiviso di NeuroDesk sul provider reale, senza dover configurare nulla. Chi preferisce puo' collegare una **propria** chiave API (BYOT): in quel caso i token li paga direttamente lei, e il consumo non pesa sul credito comune.
 
-Prima di inviare dati sensibili, l'interfaccia dovra' informare chiaramente l'utente. Dati come diagnosi, invalidita', terapie, salute, difficolta' cognitive, burocrazia e situazione economica sono dati delicati.
+Prima di inviare dati sensibili, l'utente passa da una schermata di **consenso informato** obbligatoria e revocabile (vedi *Accesso e consenso*). Dati come diagnosi, invalidita', terapie, salute, difficolta' cognitive, burocrazia e situazione economica sono dati delicati.
 
 NeuroDesk Companion non:
 
@@ -237,14 +238,23 @@ In produzione `neurodesk.test-mode` **deve restare `false`**: gli endpoint
 ## Sicurezza in esercizio
 
 Il server registra gli accessi e un controllo automatico ogni quindici minuti
-riconosce le scansioni, senza bloccare nessuno: osserva e avvisa. Un secondo
-controllo ogni tre giorni verifica vulnerabilità note nelle librerie (fonte
-OSV.dev), certificati, porte aperte, e prova davvero che l'endpoint AI resti
-chiuso senza credenziali.
+riconosce le scansioni: questo strato osserva e avvisa soltanto. Il blocco vero
+e proprio lo fanno altri due: fail2ban mette al bando per 24 ore gli IP che
+insistono, e CrowdSec filtra al firewall gli indirizzi gia' segnalati altrove.
+Un controllo separato, ogni tre giorni, verifica vulnerabilità note nelle
+librerie (fonte OSV.dev), certificati, porte aperte, e prova davvero che
+l'endpoint AI resti chiuso senza credenziali.
 
 Cosa è arrivato addosso al servizio e cosa abbiamo corretto di conseguenza sta
-in **`docs/tentativi-di-attacco.md`**. Il registro è pubblico di proposito: ogni
-voce lì dentro ha prodotto una correzione, e la correzione vale più del racconto.
+in **[docs/tentativi-di-attacco.md](docs/tentativi-di-attacco.md)**. Il registro è
+pubblico di proposito: ogni voce lì dentro ha prodotto una correzione, e la
+correzione vale più del racconto.
+
+Aggiornamento del 5 agosto 2026: l'accesso SSH al server è stato chiuso alle
+password — solo chiavi. Una scansione lenta stava provando a indovinare le
+credenziali; ora il metodo password non è più nemmeno offerto, quindi non c'è
+più niente da indovinare (verificato: un tentativo con password riceve
+`Permission denied`). È configurazione del server, non codice, e vive sul VPS.
 
 ## Stato attuale
 
@@ -264,16 +274,30 @@ Verifiche eseguite il 27 luglio 2026:
 
 ## Documentazione
 
-- HOWTO operativo: `docs/HOWTO_USO.md`
-- MVP Companion: `docs/neurodesk-companion-mvp.md`
-- Prompt di sistema: `docs/system-prompt.md`
-- Contratto API: `docs/api-contract.md`
-- Piano di integrazione: `docs/integration-plan.md`
-- Esempi di flussi: `docs/example-flows.md`
-- Checklist di messa in produzione: `docs/DEPLOY_CHECKLIST.md`
-- Prove di sicurezza svolte: `docs/security-tests.md`
-- **Tentativi di attacco e cosa abbiamo cambiato: `docs/tentativi-di-attacco.md`**
-- Guida pubblica per i tester: `landing/aiuto.html` (IT), `.en` e `.fr`
+**Prodotto e uso**
+
+- [Panoramica del progetto](docs/panoramica-progetto.md)
+- [MVP del Companion](docs/neurodesk-companion-mvp.md)
+- [HOWTO operativo](docs/HOWTO_USO.md)
+- [Prompt di sistema](docs/system-prompt.md)
+- [Esempi di flussi](docs/example-flows.md)
+- [Contratto API](docs/api-contract.md)
+- [Piano di integrazione](docs/integration-plan.md)
+- Guida pubblica per i tester: [italiano](landing/aiuto.html) · [English](landing/aiuto.en.html) · [français](landing/aiuto.fr.html)
+
+**Sicurezza**
+
+- [Modello di minaccia](docs/modello-di-minaccia.md)
+- [La difesa, a più livelli](docs/difesa-a-livelli.md)
+- [Prove di sicurezza svolte](docs/security-tests.md)
+- [Audit di sicurezza — 30 luglio 2026](docs/audit-sicurezza-30-luglio-2026.md)
+- **[Tentativi di attacco e cosa abbiamo cambiato](docs/tentativi-di-attacco.md)**
+- [Evento del 30 luglio 2026 — registro delle affermazioni e delle ritrattazioni](docs/evento-30-luglio-2026.md)
+
+**Messa in produzione e decisioni tecniche**
+
+- [Checklist di deploy](docs/DEPLOY_CHECKLIST.md)
+- [Confronto dei modelli AI (luglio 2026)](docs/confronto-modelli-2026-07.md)
 
 ## Struttura progetto
 
@@ -331,15 +355,14 @@ risposta generata dal mock mostrerebbe una cosa che l'app non fa.
 ## Prossimi passi tecnici
 
 Fatti nel frattempo: storico delle conversazioni, salvataggio cifrato lato Spring
-Boot, tabelle `CompanionSession`/`CompanionMessaggio`, rate limiting, consenso
+Boot, tabelle `CompanionSession`/`CompanionMessaggio`, migrazioni di schema con
+Flyway (`ddl-auto=validate`, tre migrazioni versionate), rate limiting, consenso
 esplicito e revocabile, provider Anthropic, deploy con HTTPS.
 
 Restano:
 
-1. Migrazioni di schema esplicite (Flyway) al posto di `ddl-auto=update`, prima del
-   primo cambio di schema con dati reali dentro.
-2. Aggiungere una tabella `MicroAction` per tracciare i passi proposti e completati.
-3. Tradurre l'applicazione: oggi e' solo in italiano, mentre il sito e la guida
+1. Aggiungere una tabella `MicroAction` per tracciare i passi proposti e completati.
+2. Tradurre l'applicazione: oggi e' solo in italiano, mentre il sito e la guida
    sono anche in inglese e francese.
 4. Tradurre gli screenshot delle pagine pubbliche nelle altre lingue man mano
    che l'interfaccia viene tradotta (oggi le catture mostrano l'interfaccia

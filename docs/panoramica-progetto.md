@@ -127,9 +127,9 @@ un'anonimizzazione che non c'è.
 
 ## 4. Sicurezza applicativa
 
-**Come ci siamo arrivati.** Il modello è il caso *Baudr*: un'app pubblicata con
-un pannello di amministrazione raggiungibile senza login, da cui si scaricavano
-i dati di tutti. La domanda non è "è sicura?" ma "ha *quel* buco?". Ogni verifica
+**Come ci siamo arrivati.** Il modello è una classe nota di broken access
+control (caso *Baudr*): un'app pubblicata con un pannello di amministrazione
+raggiungibile senza login, da cui si scaricavano i dati di tutti. La domanda non è "è sicura?" ma "ha *quel* buco?". Ogni verifica
 è una richiesta HTTP reale, dall'esterno — non una convinzione.
 
 **Cosa è stato fatto** (dettaglio in [audit-sicurezza-30-luglio-2026.md](audit-sicurezza-30-luglio-2026.md)):
@@ -309,7 +309,7 @@ La linea del tempo, per capire l'ordine delle scelte:
 3. Contact form e rate-limiting sistemati; aiuto in-app; mobile.
 4. Multilingua e BYOT.
 5. Backup automatico.
-6. Audit "modello Baudr": nessun pannello anonimo, nessun IDOR.
+6. Audit su broken access control (modello *Baudr*): nessun pannello anonimo, nessun IDOR.
 7. Whitelist 404 in Caddy.
 8. Honeypot passivo → due livelli → intelligence → log operativo.
 9. Tarature bloccate in test automatici.

@@ -55,7 +55,7 @@ l'host — chi diventa amministratore ha tutto ciò che sta sopra.
 | minaccia | controllo | rischio residuo |
 |---|---|---|
 | Dump del database o backup rubato | cifratura a riposo (AES-256-GCM); la chiave sta fuori dal backup | Coperto per il furto offline; resta la compromissione dell'host, dove la chiave è in memoria |
-| Accesso incrociato tra utenti (il difetto di Baudr) | 401/403; ogni query cerca per id *e* proprietario insieme | Basso, verificato dall'audit esterno |
+| Accesso incrociato tra utenti — broken access control / IDOR (caso Baudr) | 401/403; ogni query cerca per id *e* proprietario insieme | Basso, verificato dall'audit esterno |
 | ID progressivi rivelano il volume | nessuno | Informazione di scala, non un dato di nessuno |
 | Chiave AI di un tester (BYOT) | cifrata, decifrata solo dal companion sul canale interno | Host compromesso |
 
