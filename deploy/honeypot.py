@@ -243,6 +243,30 @@ def tocca_intrusione(percorso: str) -> bool:
     return any(percorso == c or percorso.startswith(c + "/") for c in PERCORSI_INTRUSIONE)
 
 
+def credenziale_su_esca(r: dict) -> bool:
+    """Qualcuno ha presentato una credenziale su un percorso che non esiste.
+
+    Perche' e' il segnale piu' forte di tutti — piu' del percorso toccato.
+
+    L'esca risponde con un JSON che contiene un token finto e il percorso del
+    collector. Uno scanner che legge la risposta e segue il campo `collector`
+    arriva su /ingest **da solo**: e' l'esca stessa a consegnargli il passo
+    successivo. Per questo raggiungere /ingest non prova nessuna intenzione, e
+    infatti nell'episodio dell'8 agosto 2026 tutte e quattro le origini sono
+    state promosse a "intrusione" avendo solo letto e seguito un collegamento.
+
+    Presentare una CREDENZIALE e' un'altra cosa. Nessun crawler manda un header
+    di autorizzazione a un percorso che non esiste: chi lo fa ha letto il token
+    civetta e sta provando a usarlo. Quello e' intento, non ricognizione.
+
+    Del valore non ci interessa niente e non viene mai letto: Caddy oscura
+    Authorization nel log JSON, e va tenuto cosi'.
+    """
+    return bool(r.get("credenziale")) and (
+        tocca_segnale(r["percorso"]) or tocca_intrusione(r["percorso"])
+    )
+
+
 def e_pentest(org: str) -> bool:
     """L'origine e' quella del pentester volontario?"""
     return _in_elenco(org, ORIGINI_PENTEST)
@@ -295,8 +319,10 @@ def provenienza(ip: str) -> dict:
 def etichetta_attore(ev: dict) -> str:
     """Una riga che dice, in italiano, cosa stava facendo."""
     tipo = ev.get("tipo")
+    if tipo == "credenziale":
+        return "CREDENZIALE PRESENTATA SULL'ESCA (intento dimostrato)"
     if tipo == "intrusione":
-        return "ACCESSO A UN ENDPOINT RISERVATO (intrusione tentata)"
+        return "ESCA SEGUITA FINO AL COLLECTOR (ricognizione automatica)"
     if tipo == "segnale":
         return "ha toccato un percorso riservato (ricognizione mirata)"
     inn = ev.get("inneschi", [])
@@ -327,7 +353,7 @@ def scrivi_log_operativo(ev: dict, origine_64: str, ip: str, marca: str):
         f"    impronta: {ev['impronta']} (epoca {ev.get('epoca_sale')})",
         f"    agente: {ev.get('agente','')[:90]}",
     ]
-    if ev.get("tipo") in ("segnale", "intrusione"):
+    if ev.get("tipo") in ("segnale", "intrusione", "credenziale"):
         righe.append(f"    percorso: {ev.get('percorso_toccato', '?')}")
     if m:
         righe.append(f"    {m['richieste']} richieste, {m['pc404']}% non trovate, "
@@ -423,6 +449,15 @@ def leggi_finestra():
                 "identificativo": identificativo,
                 "stato": voce.get("status", 0),
                 "agente": (richiesta.get("headers", {}).get("User-Agent") or [""])[0][:200],
+                # Presenza di una credenziale, MAI il valore: Caddy oscura
+                # Authorization nel log JSON e va benissimo cosi'. Quello che
+                # conta e' che qualcuno abbia PROVATO ad autenticarsi su un
+                # percorso che non esiste — vedi credenziale_su_esca().
+                "credenziale": bool(
+                    richiesta.get("headers", {}).get("Authorization")
+                    or richiesta.get("headers", {}).get("X-Api-Key")
+                    or richiesta.get("headers", {}).get("Api-Key")
+                ),
             })
     return fuori
 
@@ -495,14 +530,25 @@ def _applescript_sicuro(s: str) -> str:
 
 def avvisa(eventi):
     destinatario = os.getenv("NEURODESK_REPORT_EMAIL", "hello@neurodesk.it")
+    creds = [e for e in eventi if e.get("tipo") == "credenziale"]
     intrus = [e for e in eventi if e.get("tipo") == "intrusione"]
     segnali = [e for e in eventi if e.get("tipo") == "segnale"]
-    sessioni_ev = [e for e in eventi if e.get("tipo") not in ("segnale", "intrusione")]
+    sessioni_ev = [e for e in eventi
+                   if e.get("tipo") not in ("segnale", "intrusione", "credenziale")]
 
     righe = []
+    if creds:
+        righe.append("  ⛔ CREDENZIALE PRESENTATA SULL'ESCA — questo e' intento, non ricognizione.")
+        righe.append("    Ha letto il token civetta e sta provando a usarlo.")
+        righe.append("    Nessun crawler manda un header di autorizzazione a un percorso inesistente.")
+        for e in creds:
+            righe.append(f"    origine [{e['impronta']}]  su  {e['percorso_toccato']}")
+            righe.append(f"    quando: {e['quando']}   agente: {e['agente'][:80]}")
+        righe.append("")
     if intrus:
-        righe.append("  ⛔ INTRUSIONE TENTATA — qualcuno ha raggiunto un endpoint riservato.")
-        righe.append("    Non e' curiosita': e' il segnale piu' forte.")
+        righe.append("  ⚠ ESCA SEGUITA FINO IN FONDO — ha letto la risposta e seguito il collector.")
+        righe.append("    Attenzione: l'esca stessa indica /ingest nel campo \"collector\",")
+        righe.append("    quindi arrivarci NON dimostra che il percorso fosse noto.")
         for e in intrus:
             righe.append(f"    origine [{e['impronta']}]  ha toccato  {e['percorso_toccato']}")
             righe.append(f"    quando: {e['quando']}   agente: {e['agente'][:80]}")
@@ -531,7 +577,7 @@ def avvisa(eventi):
 
     corpo = (
         f"To: {destinatario}\nFrom: {destinatario}\n"
-        f"Subject: {'NeuroDesk — intrusione tentata' if intrus else 'NeuroDesk — percorso riservato toccato' if segnali else 'NeuroDesk — attivita anomala sul sito'}\n"
+        f"Subject: {'NeuroDesk — CREDENZIALE usata sull-esca' if creds else 'NeuroDesk — esca seguita fino al collector' if intrus else 'NeuroDesk — percorso riservato toccato' if segnali else 'NeuroDesk — attivita anomala sul sito'}\n"
         f"Content-Type: text/plain; charset=UTF-8\n\n"
         "Il rilevamento ha visto qualcosa che non e' il normale rumore di internet.\n\n"
         + "\n".join(righe)
@@ -597,7 +643,12 @@ def main() -> int:
             continue
         org = r["origine"]
         imp = impronta(org)
-        tipo = "intrusione" if intrusione else "segnale"
+        if credenziale_su_esca(r):
+            tipo = "credenziale"
+        elif intrusione:
+            tipo = "intrusione"
+        else:
+            tipo = "segnale"
         chiave = f"{tipo}:{EPOCA}:{imp}:{int(r['ts'])}"
         chiavi.add(chiave)
         if chiave in gia:
