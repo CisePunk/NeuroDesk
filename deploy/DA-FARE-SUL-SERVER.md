@@ -8,8 +8,13 @@ sotto-percorso 404.
 `HONEYPOT_PERCORSI_*` in `neurodesk-controllo.service`, ma il rilevatore gira da
 `neurodesk-honeypot.service` — un'unità diversa, ogni quindici minuti invece che
 ogni tre giorni. Le variabili erano nel posto sbagliato e il nuovo gradino non
-sarebbe mai scattato, senza che niente lo segnalasse. Corretto a mano; lo script
-va sistemato prima del prossimo uso.
+sarebbe mai scattato, senza che niente lo segnalasse.
+
+Corretto in due modi. Le unità adesso lo script **le cerca** invece di elencarle:
+guarda dentro ogni `.service` e dentro l'eseguibile che lancia. Sul VPS ne trova
+quattro — honeypot, sale, controllo, riepilogo — mentre a mano ne avevo sistemata
+una. E alla fine **rilegge da systemd** quello che è davvero arrivato, invece di
+fidarsi di aver scritto: se una sola unità non ce l'ha, si ferma.
 
 Quello che segue resta per memoria.
 

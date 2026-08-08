@@ -31,13 +31,16 @@ set -euo pipefail
 msg() { printf '\n\033[1;32m==>\033[0m %s\n' "$1"; }
 err() { printf '\n\033[1;31m!!\033[0m %s\n' "$1" >&2; exit 1; }
 avv() { printf '\033[1;33m ~ \033[0m%s\n' "$1"; }
+# Servono nella rilettura delle unità. Nella prima stesura non c'erano — li
+# avevo presi a memoria da un altro script — e ogni riga di esito finiva con
+# «verde: command not found». Il controllo funzionava, il modo di raccontarlo no.
+verde() { printf '\033[1;32m%s\033[0m' "$1"; }
+rosso() { printf '\033[1;31m%s\033[0m' "$1"; }
 
 [ "$(id -u)" -eq 0 ] || err "Esegui come root."
 command -v caddy >/dev/null || err "Caddy non è installato su questa macchina."
 
-UNITA=/etc/systemd/system/neurodesk-controllo.service
 CONF=/etc/caddy/conf.d/esca.conf
-[ -f "$UNITA" ] || err "Manca $UNITA: lancia prima 03-installa-controllo.sh."
 
 # --- Cosa serve --------------------------------------------------------------
 
@@ -134,15 +137,61 @@ caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null 2>&1
 
 # --- Le variabili del rilevatore ---------------------------------------------
 
-msg "Aggiorno le variabili in $UNITA"
-cp "$UNITA" "$UNITA.$(date +%Y%m%d%H%M%S).bak"
+# Le unità NON sono elencate a mano: si cercano.
+#
+# La prima stesura scriveva le variabili in neurodesk-controllo.service, e
+# basta. Ma il rilevatore gira da neurodesk-honeypot.service — un'unità
+# diversa, ogni quindici minuti invece che ogni tre giorni. Le variabili
+# finivano nel posto sbagliato, il gradino nuovo non sarebbe MAI scattato, e
+# lo script diceva "Fatto." lo stesso.
+#
+# Cercarle invece di elencarle significa che il giorno in cui nasce una quarta
+# unità che usa l'honeypot, questa la trova da sola.
+msg "Cerco le unità che usano l'honeypot"
+mapfile -t UNITA < <(grep -ln "honeypot" /etc/systemd/system/*.service 2>/dev/null || true)
+# Il controllo periodico invoca l'honeypot al proprio interno: va incluso anche
+# se il nome del file non lo dice.
+for u in /etc/systemd/system/*.service; do
+    exe=$(grep -m1 '^ExecStart=' "$u" 2>/dev/null | cut -d= -f2- | awk '{print $1}')
+    [ -n "$exe" ] && [ -f "$exe" ] && grep -q "honeypot" "$exe" 2>/dev/null \
+        && UNITA+=("$u")
+done
+# Tolgo i doppioni mantenendo l'ordine.
+mapfile -t UNITA < <(printf '%s\n' "${UNITA[@]}" | awk '!v[$0]++')
 
-# Tolgo le righe vecchie e le riscrivo dentro [Service]: così lo script si può
-# rilanciare quante volte serve senza accumulare duplicati.
-sed -i '/^Environment=HONEYPOT_PERCORSI_/d' "$UNITA"
-sed -i "/^\[Service\]/a Environment=HONEYPOT_PERCORSI_SEGNALE=${BASE}\nEnvironment=HONEYPOT_PERCORSI_ANNUNCIATI=${ANNUNCIATO}\nEnvironment=HONEYPOT_PERCORSI_INTRUSIONE=${SEGRETO}" "$UNITA"
+[ "${#UNITA[@]}" -gt 0 ] || err "Nessuna unità systemd usa l'honeypot.
+   Senza, le variabili non arriverebbero a nessuno e il rilevamento resterebbe
+   fermo alla configurazione precedente."
+
+for u in "${UNITA[@]}"; do
+    printf '  %s\n' "$(basename "$u")"
+    cp "$u" "$u.$(date +%Y%m%d%H%M%S).bak"
+    # Tolgo le righe vecchie e le riscrivo dentro [Service]: così lo script si
+    # può rilanciare quante volte serve senza accumulare duplicati.
+    sed -i '/^Environment=HONEYPOT_PERCORSI_/d' "$u"
+    sed -i "/^\[Service\]/a Environment=HONEYPOT_PERCORSI_SEGNALE=${BASE}\nEnvironment=HONEYPOT_PERCORSI_ANNUNCIATI=${ANNUNCIATO}\nEnvironment=HONEYPOT_PERCORSI_INTRUSIONE=${SEGRETO}" "$u"
+done
 
 systemctl daemon-reload
+
+# E adesso si RILEGGE quello che systemd ha davvero caricato. Scrivere in un
+# file non è la stessa cosa che averlo fatto arrivare al processo: è
+# esattamente il passaggio dove la prima stesura si era persa.
+msg "Rileggo dalle unità caricate, invece di fidarmi di aver scritto"
+MANCANTI=0
+for u in "${UNITA[@]}"; do
+    nome=$(basename "$u" .service)
+    letto=$(systemctl show "$nome" -p Environment --value 2>/dev/null)
+    if printf '%s' "$letto" | grep -q "HONEYPOT_PERCORSI_ANNUNCIATI=${ANNUNCIATO}"; then
+        printf '  %-34s %s\n' "$nome" "$(verde ok)"
+    else
+        printf '  %-34s %s  le variabili non sono arrivate\n' "$nome" "$(rosso NO)"
+        MANCANTI=1
+    fi
+done
+[ "$MANCANTI" -eq 0 ] || err "Almeno un'unità non ha le variabili: il rilevamento
+   userebbe la configurazione vecchia senza dirlo. I backup sono accanto agli
+   originali, con il timestamp nel nome."
 systemctl reload caddy || systemctl restart caddy
 
 # --- Verifica, invece di dare per scontato ----------------------------------
