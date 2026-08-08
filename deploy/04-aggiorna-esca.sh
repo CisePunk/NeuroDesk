@@ -74,10 +74,22 @@ fi
 
 # --- L'esca ------------------------------------------------------------------
 #
-# Risponde 200 sia sul percorso base sia su quello annunciato: se il collector
-# dichiarato restituisse 404, chi lo segue capirebbe di essere in una trappola.
-# Il percorso segreto NON è servito da qui: cade nel 404 generale, e il valore
-# sta proprio nel fatto che qualcuno lo chieda lo stesso.
+# Tre comportamenti diversi, come li avrebbe un servizio vero.
+#
+#   percorso base e collector annunciato -> 200 con il JSON
+#   percorso segreto                     -> 401 con WWW-Authenticate: Bearer
+#   qualunque altro sotto-percorso       -> 404
+#
+# Il 404 sul resto è la parte che conta. Un servizio vero non risponde 200 a
+# ogni sotto-percorso inventato: se lo fa, chi fuzza lo scopre in due richieste,
+# capisce che è un'esca e se ne va — e con lui se ne va il segnale che ci
+# interessa, quello di chi prova a usare il token. L'esca vale finché è
+# credibile. È la stessa dottrina della lista bianca dell'app, applicata qui.
+#
+# Il 401 sul percorso segreto è deliberato: è quello che farebbe un collector
+# vero, e dice a chi ci è arrivato «hai trovato la porta giusta, ora
+# autenticati» — con un token che ha letto dieci secondi prima. Trasforma il
+# percorso segreto da vicolo cieco in innesco del gradino più alto.
 
 msg "Scrivo l'esca in $CONF"
 mkdir -p /etc/caddy/conf.d
@@ -91,8 +103,9 @@ cat > "$CONF" <<CONFFILE
 # a mano: i percorsi qui dentro devono restare allineati alle variabili
 # HONEYPOT_PERCORSI_* dell'unità systemd, e lo script li cambia insieme.
 #
-# Il percorso segreto NON compare qui: non viene servito, cade nel 404 generale.
-# È voluto — chi ci arriva lo ha indovinato.
+# Il percorso segreto compare qui SOLO per rispondere 401: non è annunciato da
+# nessuna risposta, quindi chi ci arriva lo ha indovinato. Il 401 è l'invito a
+# usare il token, che è il segnale che ci interessa davvero.
 handle ${BASE} {
     header Content-Type application/json
     respond \`${CORPO}\` 200
@@ -101,9 +114,17 @@ handle ${ANNUNCIATO} {
     header Content-Type application/json
     respond \`${CORPO}\` 200
 }
-handle ${BASE}/* {
+# Il percorso segreto: 401, come un collector vero senza credenziali. Non
+# compare in nessuna risposta dell'esca — chi ci arriva lo ha indovinato.
+handle ${SEGRETO} {
     header Content-Type application/json
-    respond \`${CORPO}\` 200
+    header WWW-Authenticate \`Bearer realm="internal-metrics"\`
+    respond \`{"error":"missing bearer token"}\` 401
+}
+# Tutto il resto sotto l'esca: 404. Un servizio vero non dice "trovato" a
+# qualunque percorso inventato, e dirlo rivelerebbe l'esca in due richieste.
+handle ${BASE}/* {
+    respond 404
 }
 CONFFILE
 
@@ -126,7 +147,7 @@ systemctl reload caddy || systemctl restart caddy
 
 # --- Verifica, invece di dare per scontato ----------------------------------
 
-msg "Verifico che l'esca risponda e che il segreto no"
+msg "Verifico che ogni percorso risponda come deve"
 DOMINIO_APP=$(grep -oE '^app\.[a-z0-9.-]+' /etc/caddy/Caddyfile | head -1)
 DOMINIO_APP="${DOMINIO_APP:-app.neurodesk.it}"
 
@@ -145,7 +166,8 @@ controlla() {
 ESITO=0
 controlla "$BASE"       200 "l'esca risponde"            || ESITO=1
 controlla "$ANNUNCIATO" 200 "il collector annunciato c'è" || ESITO=1
-controlla "$SEGRETO"    200 "il segreto è servito dal ramo ${BASE}/*" || ESITO=1
+controlla "$SEGRETO"    401 "il segreto chiede il token"    || ESITO=1
+controlla "${BASE}/zzz-inesistente" 404 "il resto è 404, come un servizio vero" || ESITO=1
 
 echo
 printf '  il collector dichiarato nel JSON: '
