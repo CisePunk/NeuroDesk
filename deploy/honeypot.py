@@ -170,6 +170,12 @@ ORIGINI_PENTEST = [
 # il motivo resta operativo, non pubblico.
 PERCORSI_SEGNALE = tuple(x.strip() for x in os.getenv("HONEYPOT_PERCORSI_SEGNALE", "").split(",") if x.strip())
 PERCORSI_INTRUSIONE = tuple(x.strip() for x in os.getenv("HONEYPOT_PERCORSI_INTRUSIONE", "").split(",") if x.strip())
+# Il percorso che l'esca ANNUNCIA nella propria risposta (il campo "collector").
+# Deve essere DIVERSO da quelli in PERCORSI_INTRUSIONE, ed e' il punto di tutto:
+# chi legge il JSON e segue il collegamento finisce qui, e finirci non dimostra
+# niente — glielo abbiamo detto noi. Chi invece arriva su un percorso che non
+# abbiamo mai annunciato lo ha indovinato, e quello si' che e' un segnale.
+PERCORSI_ANNUNCIATI = tuple(x.strip() for x in os.getenv("HONEYPOT_PERCORSI_ANNUNCIATI", "").split(",") if x.strip())
 
 # Log OPERATIVO: leggibile, con gli IP VERI (non le impronte). E' il registro che
 # leggi tu e il pentester per correlare col suo report. Solo root, ruotato a
@@ -235,12 +241,24 @@ def e_nota(org: str) -> bool:
     return _in_elenco(org, ORIGINI_NOTE)
 
 
+# I tipi di evento che nascono da UN percorso toccato, invece che dalle soglie
+# di sessione. Elencarli qui e non in giro serve a non dimenticarne uno: la
+# prima stesura del gradino "credenziale" ne aveva lasciato indietro un ramo,
+# e l'evento piu' grave sarebbe stato stampato con il formato sbagliato.
+TIPI_A_PERCORSO = ("segnale", "seguito", "intrusione", "credenziale")
+
+
 def tocca_segnale(percorso: str) -> bool:
     return any(percorso == c or percorso.startswith(c + "/") for c in PERCORSI_SEGNALE)
 
 
 def tocca_intrusione(percorso: str) -> bool:
     return any(percorso == c or percorso.startswith(c + "/") for c in PERCORSI_INTRUSIONE)
+
+
+def tocca_annunciato(percorso: str) -> bool:
+    """Il percorso che l'esca stessa dichiara nella propria risposta."""
+    return any(percorso == c or percorso.startswith(c + "/") for c in PERCORSI_ANNUNCIATI)
 
 
 def credenziale_su_esca(r: dict) -> bool:
@@ -263,7 +281,9 @@ def credenziale_su_esca(r: dict) -> bool:
     Authorization nel log JSON, e va tenuto cosi'.
     """
     return bool(r.get("credenziale")) and (
-        tocca_segnale(r["percorso"]) or tocca_intrusione(r["percorso"])
+        tocca_segnale(r["percorso"])
+        or tocca_annunciato(r["percorso"])
+        or tocca_intrusione(r["percorso"])
     )
 
 
@@ -322,7 +342,9 @@ def etichetta_attore(ev: dict) -> str:
     if tipo == "credenziale":
         return "CREDENZIALE PRESENTATA SULL'ESCA (intento dimostrato)"
     if tipo == "intrusione":
-        return "ESCA SEGUITA FINO AL COLLECTOR (ricognizione automatica)"
+        return "PERCORSO MAI ANNUNCIATO (indovinato, non letto)"
+    if tipo == "seguito":
+        return "COLLECTOR ANNUNCIATO SEGUITO (ha letto la risposta)"
     if tipo == "segnale":
         return "ha toccato un percorso riservato (ricognizione mirata)"
     inn = ev.get("inneschi", [])
@@ -353,7 +375,7 @@ def scrivi_log_operativo(ev: dict, origine_64: str, ip: str, marca: str):
         f"    impronta: {ev['impronta']} (epoca {ev.get('epoca_sale')})",
         f"    agente: {ev.get('agente','')[:90]}",
     ]
-    if ev.get("tipo") in ("segnale", "intrusione", "credenziale"):
+    if ev.get("tipo") in TIPI_A_PERCORSO:
         righe.append(f"    percorso: {ev.get('percorso_toccato', '?')}")
     if m:
         righe.append(f"    {m['richieste']} richieste, {m['pc404']}% non trovate, "
@@ -532,9 +554,9 @@ def avvisa(eventi):
     destinatario = os.getenv("NEURODESK_REPORT_EMAIL", "hello@neurodesk.it")
     creds = [e for e in eventi if e.get("tipo") == "credenziale"]
     intrus = [e for e in eventi if e.get("tipo") == "intrusione"]
+    seguiti = [e for e in eventi if e.get("tipo") == "seguito"]
     segnali = [e for e in eventi if e.get("tipo") == "segnale"]
-    sessioni_ev = [e for e in eventi
-                   if e.get("tipo") not in ("segnale", "intrusione", "credenziale")]
+    sessioni_ev = [e for e in eventi if e.get("tipo") not in TIPI_A_PERCORSO]
 
     righe = []
     if creds:
@@ -546,10 +568,16 @@ def avvisa(eventi):
             righe.append(f"    quando: {e['quando']}   agente: {e['agente'][:80]}")
         righe.append("")
     if intrus:
-        righe.append("  ⚠ ESCA SEGUITA FINO IN FONDO — ha letto la risposta e seguito il collector.")
-        righe.append("    Attenzione: l'esca stessa indica /ingest nel campo \"collector\",")
-        righe.append("    quindi arrivarci NON dimostra che il percorso fosse noto.")
+        righe.append("  ⛔ PERCORSO MAI ANNUNCIATO — questo non gliel'abbiamo detto noi.")
+        righe.append("    L'esca dichiara un altro collector: qui ci si arriva indovinando.")
         for e in intrus:
+            righe.append(f"    origine [{e['impronta']}]  ha toccato  {e['percorso_toccato']}")
+            righe.append(f"    quando: {e['quando']}   agente: {e['agente'][:80]}")
+        righe.append("")
+    if seguiti:
+        righe.append("  · collector annunciato seguito — ha letto la risposta dell'esca.")
+        righe.append("    Rumore atteso: il percorso gliel'ha dato l'esca stessa.")
+        for e in seguiti:
             righe.append(f"    origine [{e['impronta']}]  ha toccato  {e['percorso_toccato']}")
             righe.append(f"    quando: {e['quando']}   agente: {e['agente'][:80]}")
         righe.append("")
@@ -577,7 +605,7 @@ def avvisa(eventi):
 
     corpo = (
         f"To: {destinatario}\nFrom: {destinatario}\n"
-        f"Subject: {'NeuroDesk — CREDENZIALE usata sull-esca' if creds else 'NeuroDesk — esca seguita fino al collector' if intrus else 'NeuroDesk — percorso riservato toccato' if segnali else 'NeuroDesk — attivita anomala sul sito'}\n"
+        f"Subject: {'NeuroDesk — CREDENZIALE usata sull-esca' if creds else 'NeuroDesk — percorso mai annunciato' if intrus else 'NeuroDesk — percorso riservato toccato' if (segnali or seguiti) else 'NeuroDesk — attivita anomala sul sito'}\n"
         f"Content-Type: text/plain; charset=UTF-8\n\n"
         "Il rilevamento ha visto qualcosa che non e' il normale rumore di internet.\n\n"
         + "\n".join(righe)
@@ -624,6 +652,27 @@ def main() -> int:
         print("HONEYPOT_HASH_SALT non impostato: senza sale le impronte sono riconducibili.",
               file=sys.stderr)
         return 1
+
+    # Se il percorso annunciato dall'esca coincide con quello che vogliamo
+    # restare segreto, il gradino "intrusione" non scatta MAI: ogni arrivo viene
+    # declassato a "seguito", perche' il codice crede che l'avessimo annunciato.
+    # E' un guasto silenzioso — tutto continua a funzionare, ma l'allarme piu'
+    # importante e' spento. Meglio rifiutarsi di partire.
+    sovrapposti = [c for c in PERCORSI_ANNUNCIATI
+                   if any(c == i or c.startswith(i + "/") or i.startswith(c + "/")
+                          for i in PERCORSI_INTRUSIONE)]
+    if sovrapposti:
+        print("HONEYPOT_PERCORSI_ANNUNCIATI e HONEYPOT_PERCORSI_INTRUSIONE si sovrappongono: "
+              f"{', '.join(sovrapposti)}.\n"
+              "Il percorso che l'esca dichiara nella risposta DEVE essere diverso da quello\n"
+              "che deve restare segreto, altrimenti il gradino 'intrusione' non scatta mai.",
+              file=sys.stderr)
+        return 1
+
+    if PERCORSI_INTRUSIONE and not PERCORSI_ANNUNCIATI:
+        print("avviso: HONEYPOT_PERCORSI_ANNUNCIATI non impostato. Se l'esca dichiara un "
+              "collector nella propria risposta, quel percorso va elencato li' — "
+              "altrimenti seguirlo viene contato come intrusione.", file=sys.stderr)
     STATO.mkdir(parents=True, exist_ok=True)
     ARCHIVIO.parent.mkdir(parents=True, exist_ok=True)
 
@@ -638,15 +687,21 @@ def main() -> int:
     # sessione. PERCORSI_INTRUSIONE e' il gradino sopra PERCORSI_SEGNALE.
     for r in richieste:
         segnale = tocca_segnale(r["percorso"])
+        annunciato = tocca_annunciato(r["percorso"])
         intrusione = tocca_intrusione(r["percorso"])
-        if not (segnale or intrusione):
+        if not (segnale or annunciato or intrusione):
             continue
         org = r["origine"]
         imp = impronta(org)
+        # L'ordine conta, dal piu' probante al meno: presentare una credenziale
+        # e' intento; arrivare su un percorso MAI annunciato e' averlo
+        # indovinato; seguire il collector annunciato e' solo aver letto.
         if credenziale_su_esca(r):
             tipo = "credenziale"
-        elif intrusione:
+        elif intrusione and not annunciato:
             tipo = "intrusione"
+        elif annunciato:
+            tipo = "seguito"
         else:
             tipo = "segnale"
         chiave = f"{tipo}:{EPOCA}:{imp}:{int(r['ts'])}"
@@ -722,7 +777,7 @@ def main() -> int:
     for e in nuovi:
         marca = ("[PENTEST] " if e["origine_pentest"]
                  else "[nota] " if e["origine_nota"] else "")
-        if e.get("tipo") in ("segnale", "intrusione"):
+        if e.get("tipo") in TIPI_A_PERCORSO:
             print(f"  {marca}[{e['impronta']}] {e['tipo'].upper()}: {e['percorso_toccato']}")
         else:
             m = e["metriche"]
