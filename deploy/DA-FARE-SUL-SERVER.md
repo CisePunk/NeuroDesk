@@ -1,8 +1,17 @@
 # Da fare sul server — esca e rilevatore
 
-**Aperto dal 8 agosto 2026.** Il codice è pronto e pubblicato; sul VPS gira
-ancora la versione precedente. Finché non si fa questo passaggio, il
-rilevamento funziona come prima dell'episodio dell'8 agosto.
+**Chiuso l'8 agosto 2026.** Fatto sul VPS e verificato dall'esterno: l'esca
+risponde 200, il collector annunciato 200, il percorso segreto 401 e ogni altro
+sotto-percorso 404.
+
+**Una trappola trovata durante il passaggio.** Lo script scriveva le variabili
+`HONEYPOT_PERCORSI_*` in `neurodesk-controllo.service`, ma il rilevatore gira da
+`neurodesk-honeypot.service` — un'unità diversa, ogni quindici minuti invece che
+ogni tre giorni. Le variabili erano nel posto sbagliato e il nuovo gradino non
+sarebbe mai scattato, senza che niente lo segnalasse. Corretto a mano; lo script
+va sistemato prima del prossimo uso.
+
+Quello che segue resta per memoria.
 
 ## I due comandi
 
