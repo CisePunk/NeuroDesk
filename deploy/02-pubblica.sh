@@ -10,6 +10,13 @@
 #
 # Cosa NON carica mai: i file .env locali, i segreti, node_modules, il database.
 #
+# SE HAI CAMBIATO SOLO IL LANDING (le pagine di marketing in landing/), questo
+# script e' troppo: ricompila anche backend e frontend e riavvia i servizi.
+# Basta l'rsync del solo landing, che non tocca nient'altro:
+#
+#   rsync -az --delete --exclude='.DS_Store' landing/ root@IP:/var/www/neurodesk-landing/
+#
+# Vedi deploy/PUBBLICARE.md.
 set -euo pipefail
 
 SERVER="${1:-}"
