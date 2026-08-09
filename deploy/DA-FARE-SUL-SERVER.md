@@ -79,3 +79,57 @@ Lo script la fa da solo, ma vale la pena rileggere l'esito:
 - `deploy/04-aggiorna-esca.sh` — lo script
 - `deploy/honeypot.py` — i quattro gradini e la guardia sulla sovrapposizione
 - Commit: `b39d9af`, `9472ead`, `8b6cd53`, `f0ecd97`
+
+---
+
+# Aperto: escludere l'amministratrice
+
+**9 agosto 2026.** Provando i percorsi di un exploit segnalato dal rilevatore
+— sei richieste con `..%252f` in pochi secondi, per accertare che il dev server
+di Vite non fosse esposto — l'indirizzo di casa è stato bandito. Non solo dal
+web: **anche da SSH**.
+
+```
+443   Connection refused
+22    Connection refused
+DNS   risolve, la rete funziona
+```
+
+Un host spento darebbe timeout. Un rifiuto attivo significa che qualcosa c'è e
+sta dicendo di no.
+
+La difesa ha funzionato, e ha funzionato contro chi stava provando esattamente
+il pattern dell'attacco. Il problema è che chi amministra un server lo prova
+anche dall'esterno, ed è l'unico modo per sapere se una difesa regge.
+
+## Quando l'accesso torna
+
+```bash
+scp deploy/05-escludi-amministratore.sh root@IP:/root/
+ssh root@IP 'bash /root/05-escludi-amministratore.sh 93.38.26.63'
+```
+
+Lo script dichiara l'origine nota nel rilevatore — cercando **tutte** le unità
+che usano l'honeypot, non elencandone una — e poi va a vedere se c'è un
+`fail2ban` che l'ha bandita, la sbanda e la mette in `ignoreip`.
+
+Le mosse dell'amministratrice restano nell'archivio, marcate `[nota]`. Cambia
+solo che non generano una mail e non contano come attacco: **non è una difesa
+in meno, è smettere di suonare l'allarme a chi ha le chiavi.**
+
+## Da ricordare
+
+Un indirizzo di casa cambia. Se un giorno gli allarmi tornano a parlare di te,
+rilancia lo script con quello nuovo — e il vecchio va tolto, perché un
+indirizzo dichiarato affidabile che nel frattempo è passato a qualcun altro è
+peggio di nessuna esclusione.
+
+## Resta da guardare
+
+L'allarme del 9 agosto su `app.neurodesk.it` (quindici richieste in 0,18s,
+file di un pannello bot per WhatsApp) dice **73,3% non trovate**: quattro
+richieste su quindici hanno ottenuto altro. Quali, l'estratto non lo dice.
+
+```bash
+grep 6787d6f4ad51ae51 /var/log/neurodesk/honeypot-eventi.jsonl
+```
