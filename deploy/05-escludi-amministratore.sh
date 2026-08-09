@@ -86,13 +86,25 @@ if command -v fail2ban-client >/dev/null 2>&1; then
             fail2ban-client set "$jail" unbanip "$ORIGINE" >/dev/null 2>&1 || true
         fi
     done
-    # E lo si dichiara ignorato, così non ricapita.
-    if [ -d /etc/fail2ban ]; then
+    # L'esclusione PERMANENTE si fa solo se richiesta, e non è il caso normale.
+    #
+    # Un indirizzo domestico non è tuo per sempre: è quello del posto in cui
+    # ti trovi. Il 9 agosto 2026 stavo per scriverne uno in ignoreip, ed era
+    # casa di un parente — una rete su cui lei non ha alcun controllo,
+    # dichiarata affidabile a tempo indeterminato.
+    #
+    # Sbandare adesso è un'operazione reversibile. Un permesso in un file di
+    # sicurezza resta finché qualcuno non se lo ricorda.
+    if [ "${PERMANENTE:-no}" = "si" ] && [ -d /etc/fail2ban ]; then
         mkdir -p /etc/fail2ban/jail.d
         printf '[DEFAULT]\nignoreip = 127.0.0.1/8 ::1 %s\n' "$ORIGINE" \
             > /etc/fail2ban/jail.d/amministratore.conf
         systemctl reload fail2ban 2>/dev/null || systemctl restart fail2ban
-        echo "  dichiarato in ignoreip"
+        echo "  dichiarato in ignoreip (PERMANENTE=si)"
+    else
+        echo "  sbandato adesso, senza esclusione permanente."
+        echo "  Per renderla permanente — solo per una rete che controlli davvero:"
+        echo "    PERMANENTE=si bash $0 $ORIGINE"
     fi
 else
     echo "  fail2ban non è installato: il bando non viene da qui."

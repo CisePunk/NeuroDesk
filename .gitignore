@@ -23,3 +23,6 @@ frontend/.env*.local
 # OS
 .DS_Store
 tests/.venv/
+
+# Esportazione delle difese: contiene indirizzi e decisioni operative.
+deploy/difese-sul-server.txt
