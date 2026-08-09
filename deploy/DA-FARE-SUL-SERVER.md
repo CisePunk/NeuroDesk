@@ -106,7 +106,7 @@ anche dall'esterno, ed è l'unico modo per sapere se una difesa regge.
 
 ```bash
 scp deploy/05-escludi-amministratore.sh root@IP:/root/
-ssh root@IP 'bash /root/05-escludi-amministratore.sh 93.38.26.63'
+ssh root@IP 'bash /root/05-escludi-amministratore.sh 203.0.113.42'
 ```
 
 Lo script dichiara l'origine nota nel rilevatore — cercando **tutte** le unità

@@ -3,7 +3,7 @@
 # NeuroDesk — dichiara nota l'origine dell'amministratrice. SUL VPS, come root.
 #
 #   scp deploy/05-escludi-amministratore.sh root@IP:/root/
-#   ssh root@IP 'bash /root/05-escludi-amministratore.sh 93.38.26.63'
+#   ssh root@IP 'bash /root/05-escludi-amministratore.sh 203.0.113.42'
 #
 # Perché serve
 # ------------
@@ -33,7 +33,7 @@ err() { printf '\n\033[1;31m!!\033[0m %s\n' "$1" >&2; exit 1; }
 [ "$(id -u)" -eq 0 ] || err "Esegui come root."
 
 ORIGINE="${1:-}"
-[ -n "$ORIGINE" ] || read -rp "Indirizzo o rete da dichiarare nota (es. 93.38.26.63 o 2a01:…::/64): " ORIGINE
+[ -n "$ORIGINE" ] || read -rp "Indirizzo o rete da dichiarare nota (es. 203.0.113.42 o 2a01:…::/64): " ORIGINE
 [ -n "$ORIGINE" ] || err "Serve un indirizzo."
 
 # --- 1. Il rilevatore: smette di suonare, non smette di guardare -------------

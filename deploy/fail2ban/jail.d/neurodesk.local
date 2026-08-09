@@ -1,0 +1,32 @@
+[DEFAULT]
+# ignoreip: reti fidate, MAI bandite. I valori reali (casa + server)
+# vivono solo sul server: un elenco di indirizzi fidati in un repo
+# pubblico dice a un attaccante cosa e' escluso dai controlli.
+ignoreip = 127.0.0.1/8 ::1 <RETE_CASA_/64> <RETE_SERVER_/64>
+
+[caddy-neurodesk-scanner]
+enabled  = true
+filter   = caddy-neurodesk-scanner
+logpath  = /var/log/caddy/access.log
+backend  = polling
+maxretry = 2
+findtime = 600
+bantime  = 86400
+banaction = ufw
+
+[caddy-404-flood]
+enabled   = true
+filter    = caddy-404
+logpath   = /var/log/caddy/access.log
+backend   = polling
+maxretry  = 50
+findtime  = 60
+bantime   = 3600
+banaction = ufw
+
+[recidive]
+enabled   = true
+bantime   = 1w
+findtime  = 1d
+maxretry  = 5
+banaction = ufw

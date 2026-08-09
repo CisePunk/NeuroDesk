@@ -147,7 +147,7 @@ INIEZIONE = (
 # Sta nella configurazione del SERVER, non in questo file: un elenco di origini
 # fidate in un repository pubblico direbbe a chiunque quali indirizzi non fanno
 # scattare niente. Formato: indirizzi o reti separati da virgola, es.
-#   HONEYPOT_ORIGINI_NOTE=2a01:e11:800f:ad00::/64,203.0.113.7
+#   HONEYPOT_ORIGINI_NOTE=2001:db8:abcd::/64,203.0.113.7
 ORIGINI_NOTE = [
     x.strip() for x in os.getenv("HONEYPOT_ORIGINI_NOTE", "").split(",") if x.strip()
 ]

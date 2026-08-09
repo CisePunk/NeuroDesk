@@ -4,11 +4,10 @@ Quattro strati, e nessuno di loro fa il lavoro di un altro. Questo documento
 dice **cosa c'è, cosa fa, e cosa non è ancora nel repository** — perché la
 scoperta che l'ha fatto nascere è proprio che una parte non c'era.
 
-> **Stato al 9 agosto 2026.** Le configurazioni di `fail2ban` e CrowdSec vivono
-> solo sulla macchina. Quello che segue è ricostruito dal report giornaliero e
-> dal comportamento osservato, **non letto dai file**: dove non ho potuto
-> verificare, è scritto. Lo script [`06-esporta-difese.sh`](06-esporta-difese.sh)
-> porta la configurazione vera nel repository al primo accesso utile.
+> **Stato al 9 agosto 2026, sera.** I numeri di `fail2ban` qui sotto sono
+> **letti dai file** con [`06-esporta-difese.sh`](06-esporta-difese.sh), non più
+> ricostruiti dal report. Restano da leggere versione e scenari di CrowdSec —
+> segnalati dove mancano.
 
 ---
 
@@ -84,20 +83,25 @@ macchina. Da recuperare con `06-esporta-difese.sh`.
 
 ## 3. `fail2ban` — chi si comporta male qui
 
-Legge i log e bandisce all'ingresso, **su tutte le porte**. Dal report del 9
-agosto risultano **quattro jail**:
+Legge i log e bandisce all'ingresso. Quattro jail, letti da
+`/etc/fail2ban/jail.d/neurodesk.local` (copiato in
+[`fail2ban/`](fail2ban/) qui accanto):
 
-| Jail | Cosa intercetta | Verificato |
-|---|---|---|
-| `sshd` | forza bruta su SSH | standard di fail2ban |
-| `caddy-404-flood` | molti 404 in poco tempo | dal nome e dal report |
-| `caddy-neurodesk-scanner` | scansione mirata sui log di Caddy | **su me stessa**, vedi sotto |
-| `recidive` | chi è già stato bandito e torna | standard di fail2ban |
+| Jail | Scatta a | Finestra | Durata bando | Blocca |
+|---|---|---|---|---|
+| `sshd` | forza bruta su SSH | — | default | SSH |
+| `caddy-neurodesk-scanner` | 2 richieste ostili | 10 min | **24 ore** | **ufw: tutte le porte** |
+| `caddy-404-flood` | 50 richieste 404 | 60 sec | 1 ora | **ufw: tutte le porte** |
+| `recidive` | 5 bandi | 1 giorno | 1 settimana | ufw: tutte le porte |
 
-I due `caddy-*` sono **scritti su misura per questo server**: non esistono nella
-distribuzione di fail2ban, e non esistono in questo repository. Il filtro (quali
-righe di log contano come attacco), la soglia e la durata del bando si leggono
-solo in `/etc/fail2ban/jail.d/` e `/etc/fail2ban/filter.d/` sulla macchina.
+I due `caddy-*` sono **scritti su misura per questo server**. Il filtro di
+`caddy-neurodesk-scanner` conta come attacco `..%2f`, `/etc/passwd`, `${…}`,
+`<script`, i marcatori OGNL e simili — la firma delle scansioni, non il traffico
+normale.
+
+`ignoreip` contiene già `127.0.0.1/8`, `::1` e due reti `/64` IPv6 (la casa
+dell'amministratrice e il server stesso). **Nessun indirizzo IPv4 domestico**,
+ed è giusto così: cambiano.
 
 ### La prova che funziona, e il difetto che ha rivelato
 
@@ -118,31 +122,40 @@ caddy-neurodesk-scanner: 2 bannati ora
 nuovi ban nelle 24 ore: 3
   34.178.47.95    (path-traversal-probing — uno scanner vero)
   47.107.112.39   (forza bruta SSH — uno scanner vero)
-  93.38.26.63     (io)
+  203.0.113.42     (io — indirizzo reale sostituito con uno di documentazione)
 ```
 
 Il sistema **non ha sbagliato**: ha visto il pattern di un attacco e l'ha
 trattato come tale, accanto a due scanner reali presi per la stessa cosa. Non
 poteva sapere che dietro c'era chi ha le chiavi.
 
-**Il difetto che ha rivelato è un altro, e resta aperto.** Un jail che nasce
-dallo *scanning web* bandisce all'ingresso su **tutte le porte, SSH compreso**.
-Una richiesta HTTP sospetta costa l'accesso amministrativo: chi stava
-verificando le proprie difese si ritrova fuori dal proprio server, senza il modo
-di rientrare per sbandarsi — perché SSH è chiuso dalla stessa regola.
+**Il difetto che ha rivelato è un altro, e ora è confermato dai file.** Il jail
+usa `banaction = ufw`: `ufw` chiude l'indirizzo su **tutte le porte, SSH
+compreso**, per **86.400 secondi — un giorno intero**. Bastano **due** richieste
+ostili in dieci minuti (`maxretry = 2`).
+
+Una scansione web, quindi, costa l'accesso amministrativo per ventiquattro ore.
+Chi stava verificando le proprie difese si ritrova fuori dal proprio server,
+senza il modo di rientrare per sbandarsi — perché SSH è chiuso dalla stessa
+regola. È successo esattamente così il 9 agosto.
+
+*(Correzione a una mia stima precedente: avevo detto «di solito un'ora o poche
+ore». La durata vera è un giorno. Il bando si è poi risolto prima — un riavvio
+di fail2ban azzera i bandi non persistenti — ma la regola come scritta dura 24h.)*
 
 Peggiora se l'indirizzo è condiviso. Il 9 agosto ero sulla rete di un parente:
-mettere `93.38.26.63` in `ignoreip` avrebbe dichiarato affidabile a tempo
+mettere `203.0.113.42` in `ignoreip` avrebbe dichiarato affidabile a tempo
 indeterminato una rete non mia, su cui non ho controllo. La risposta giusta non
 è escludere l'indirizzo, è **non far bandire SSH da un jail che guarda il web**.
 
 ### Cosa andrebbe cambiato
 
-- `caddy-neurodesk-scanner` e `caddy-404-flood` dovrebbero agire **solo su 80 e
-  443** (`action` con `port="http,https"`), non sull'intera macchina. Un
-  attacco al web si respinge dal web; l'accesso amministrativo è un'altra porta.
-- `ignoreip` deve contenere solo reti **davvero controllate** — non l'indirizzo
-  del posto in cui ci si trova oggi.
+- I due `caddy-*` devono bandire **solo su 80 e 443**, non con `ufw` che chiude
+  tutto. In pratica: `banaction = nftables-multiport[port="http,https"]` al
+  posto di `banaction = ufw`. Un attacco al web si respinge dal web; SSH è
+  un'altra porta e non c'entra.
+- `sshd` continua a bandire SSH, che è corretto: lì l'attacco *è* su SSH.
+- `ignoreip` è già a posto: solo reti controllate, nessun IPv4 domestico.
 
 Sbandarsi resta comunque un'operazione reversibile: lo fa
 [`05-escludi-amministratore.sh`](05-escludi-amministratore.sh), che sbanda
@@ -173,7 +186,7 @@ Questa è la lista che rende onesto il documento.
 
 | | Dove vive | Perché non è versionato |
 |---|---|---|
-| Jail `caddy-*` (filtro, soglia, durata) | `/etc/fail2ban/*.d/` | scritti a mano sul server |
+| ~~Jail `caddy-*` (filtro, soglia, durata)~~ | ora in [`fail2ban/`](fail2ban/) | **portati nel repository il 9 agosto** |
 | `ignoreip` di fail2ban | `/etc/fail2ban/jail.d/` | dipende da reti che cambiano |
 | CrowdSec: versione, bouncer, scenari | configurazione di CrowdSec | installato a mano |
 | Durata dei bandi | dentro i jail | non deducibile da fuori |
