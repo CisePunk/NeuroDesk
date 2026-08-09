@@ -90,8 +90,8 @@ Legge i log e bandisce all'ingresso. Quattro jail, letti da
 | Jail | Scatta a | Finestra | Durata bando | Blocca |
 |---|---|---|---|---|
 | `sshd` | forza bruta su SSH | — | default | SSH |
-| `caddy-neurodesk-scanner` | 2 richieste ostili | 10 min | **24 ore** | **ufw: tutte le porte** |
-| `caddy-404-flood` | 50 richieste 404 | 60 sec | 1 ora | **ufw: tutte le porte** |
+| `caddy-neurodesk-scanner` | 2 richieste ostili | 10 min | 24 ore | **web + telnet, mai SSH** |
+| `caddy-404-flood` | 50 richieste 404 | 60 sec | 1 ora | **web + telnet, mai SSH** |
 | `recidive` | 5 bandi | 1 giorno | 1 settimana | ufw: tutte le porte |
 
 I due `caddy-*` sono **scritti su misura per questo server**. Il filtro di
@@ -129,33 +129,47 @@ Il sistema **non ha sbagliato**: ha visto il pattern di un attacco e l'ha
 trattato come tale, accanto a due scanner reali presi per la stessa cosa. Non
 poteva sapere che dietro c'era chi ha le chiavi.
 
-**Il difetto che ha rivelato è un altro, e ora è confermato dai file.** Il jail
-usa `banaction = ufw`: `ufw` chiude l'indirizzo su **tutte le porte, SSH
-compreso**, per **86.400 secondi — un giorno intero**. Bastano **due** richieste
-ostili in dieci minuti (`maxretry = 2`).
+**Il difetto che aveva rivelato — corretto il 9 agosto, sera.** I jail usavano
+`banaction = ufw`, che chiudeva l'indirizzo su **tutte le porte, SSH compreso**,
+per un giorno intero. Bastavano **due** richieste ostili in dieci minuti.
+
+Ora usano `nftables[type=multiport]` con `port = http,https,telnet`: bandiscono
+su 80, 443 e 23 (telnet), **mai sulla 22**. Una scansione web costa l'accesso al
+web e a telnet, non l'accesso amministrativo. La 22 resta difesa dal jail `sshd`,
+che è dove un attacco a SSH *deve* essere fermato.
+
+Verificato dopo la modifica: la regola nftables è `tcp dport { 23, 80, 443 }`, la
+22 non compare, un ban di prova non tocca SSH, e una connessione SSH nuova
+funziona. La scelta senza IP statico: non si può escludere un indirizzo che
+cambia, quindi si tiene aperta *la porta*, non *l'indirizzo*.
+
+*(Come è stato trovato che serviva un secondo tentativo: la prima stesura usava
+`nftables-multiport[port="…"]`, che è obsoleto e ignora il parametro. La regola
+risultava `tcp dport 0-65535` — tutte le porte, SSH compresa: l'opposto
+dell'intento. Preso guardando la regola vera con `nft list`, non fidandosi del
+fatto che la configurazione «sembrava giusta» e fail2ban dicesse «bandito».)*
 
 Una scansione web, quindi, costa l'accesso amministrativo per ventiquattro ore.
 Chi stava verificando le proprie difese si ritrova fuori dal proprio server,
 senza il modo di rientrare per sbandarsi — perché SSH è chiuso dalla stessa
 regola. È successo esattamente così il 9 agosto.
 
-*(Correzione a una mia stima precedente: avevo detto «di solito un'ora o poche
-ore». La durata vera è un giorno. Il bando si è poi risolto prima — un riavvio
-di fail2ban azzera i bandi non persistenti — ma la regola come scritta dura 24h.)*
-
 Peggiora se l'indirizzo è condiviso. Il 9 agosto ero sulla rete di un parente:
 mettere `203.0.113.42` in `ignoreip` avrebbe dichiarato affidabile a tempo
 indeterminato una rete non mia, su cui non ho controllo. La risposta giusta non
 è escludere l'indirizzo, è **non far bandire SSH da un jail che guarda il web**.
 
-### Cosa andrebbe cambiato
+### Cosa è stato cambiato, e cosa resta
 
-- I due `caddy-*` devono bandire **solo su 80 e 443**, non con `ufw` che chiude
-  tutto. In pratica: `banaction = nftables-multiport[port="http,https"]` al
-  posto di `banaction = ufw`. Un attacco al web si respinge dal web; SSH è
-  un'altra porta e non c'entra.
-- `sshd` continua a bandire SSH, che è corretto: lì l'attacco *è* su SSH.
-- `ignoreip` è già a posto: solo reti controllate, nessun IPv4 domestico.
+Fatto il 9 agosto: i due `caddy-*` bandiscono su web + telnet, mai su SSH
+(`nftables[type=multiport]`, `port = http,https,telnet`). Verificato sulla
+regola vera.
+
+Resta un margine, dichiarato: `recidive` — chi accumula cinque bandi — usa
+ancora `ufw`, tutte le porte. È per i recidivi confermati, e SSH è comunque
+coperto dal jail `sshd`; ma in teoria cinque scansioni web ripetute potrebbero
+ancora chiudere SSH. Con un IP che cambia è un rischio remoto. Da valutare se
+dare anche a `recidive` la stessa esclusione della 22.
 
 Sbandarsi resta comunque un'operazione reversibile: lo fa
 [`05-escludi-amministratore.sh`](05-escludi-amministratore.sh), che sbanda
