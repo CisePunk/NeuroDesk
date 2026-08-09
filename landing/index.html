@@ -81,35 +81,22 @@
     --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 14px 34px -18px rgba(0,0,0,0.6);
   }
   .lang-switch { display: flex; align-items: center; gap: 0.15rem; font-family: var(--sans); }
-  /* min-height 40px: il bersaglio da toccare era alto 31px, sotto la soglia
-     raccomandata. Su un selettore di lingua conta il doppio — chi non legge
-     l'italiano non puo' capire cosa ha sbagliato se prende il link accanto. */
+
   .lang-switch a { font-size: 0.82rem; font-weight: 600; color: var(--text-3); text-decoration: none; padding: 0.3rem 0.5rem; border-radius: 999px; white-space: nowrap; display: inline-flex; align-items: center; min-height: 40px; }
   .lang-switch a:hover { color: var(--accent-deep); background: var(--accent-soft); }
   .lang-switch a[aria-current] { color: var(--accent-deep); background: var(--accent-soft); }
   .lang-abbr { display: none; }
-  /* Sotto i 560px i tre nomi per esteso, il logo e il bottone del tema non ci
-     stanno: la pagina sbordava di 43px e si trascinava di lato. Le sigle
-     risolvono senza rimpicciolire il bersaglio. Il nome completo resta
-     nell'aria-label, quindi chi usa uno screen reader continua a sentire
-     "Italiano" e non "I-T". */
+
   @media (max-width: 560px) {
     .lang-switch a { padding: 0.3rem 0.5rem; font-size: 0.8rem; min-height: 40px; }
     .lang-full { display: none; }
     .lang-abbr { display: inline; }
-    /* Il gruppo di destra deve stare nello schermo qualunque cosa ci sia a
-       sinistra: sulle pagine interne il titolo e' piu' lungo e la barra sbordava
-       di pochi pixel, facendo trascinare tutta la pagina di lato. Stringendo qui
-       il margine invece che i bersagli, il bottone resta grande da toccare. */
+
     .top-right { gap: 0.35rem; }
     .lang-switch { gap: 0; }
     .brand { min-width: 0; font-size: 1.1rem; }
   }
 
-  /* Schermi molto stretti (iPhone SE e simili, 320px). Qui l'intestazione intera
-     non ci stava e trascinava la pagina di lato: la freccia "indietro" sparisce
-     perche' e' gia' ridondante — il logo accanto e' anche lui un link alla home —
-     e i margini si stringono. I bersagli da toccare restano alti 40px. */
   @media (max-width: 380px) {
     .wrap { padding: 0 0.9rem; }
     .brand { font-size: 0.98rem; }
@@ -117,11 +104,7 @@
     .back-btn { display: none; }
     .top-right { gap: 0.25rem; }
     .lang-switch a { padding: 0.3rem 0.38rem; }
-    /* Solo nelle pagine di aiuto: l'etichetta del pulsante citato nel testo era
-       "nowrap" e, non potendo andare a capo, allargava tutto il riquadro del
-       passo oltre lo schermo. Qui puo' spezzarsi. */
-    /* .passi .btn-label e non .btn-label: la regola originale con "nowrap" sta
-       piu' avanti nel foglio e, a parita' di specificita', vincerebbe lei. */
+
     .passi .btn-label { white-space: normal; }
     .passi > li { padding-left: 3.2rem; }
   }
@@ -150,7 +133,6 @@
   section { padding: clamp(3rem, 7vw, 5rem) 0; }
   .band { background: var(--bg-2); }
 
-  /* hero */
   .hero { padding: clamp(3rem, 8vw, 5.5rem) 0 clamp(1.5rem, 4vw, 2.5rem); text-align: center; }
   .hero .eyebrow { display: inline-block; margin-bottom: 1rem; }
   .hero h1 { font-size: clamp(2.4rem, 5.4vw, 4rem); line-height: 1.05; letter-spacing: -0.022em; max-width: 16ch; margin: 0 auto; }
@@ -158,7 +140,6 @@
   .hero-art { margin: 2rem auto 0; max-width: 30rem; color: var(--accent); }
   .hero-art svg { width: 100%; height: auto; display: block; }
 
-  /* scelte (CTA) */
   .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem; }
   .choice { display: flex; flex-direction: column; gap: 0.8rem; text-decoration: none; color: inherit; background: var(--surface); border: 1px solid var(--border); border-radius: 1.25rem; padding: 1.9rem; box-shadow: var(--shadow); transition: transform 0.15s ease, border-color 0.2s ease; }
   .choice:hover { transform: translateY(-3px); border-color: var(--accent); }
@@ -169,7 +150,6 @@
   .choice .go { margin-top: 0.4rem; font-family: var(--sans); font-weight: 700; color: #fbfdfb; background: var(--accent); align-self: flex-start; padding: 0.65rem 1.3rem; border-radius: 999px; display: inline-flex; align-items: center; gap: 0.45rem; transition: background 0.2s ease; }
   .choice:hover .go { background: var(--accent-deep); }
 
-  /* blocchi valore */
   .blocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.1rem; }
   .blocks .block { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 1rem; padding: 1.4rem 1.4rem 1.5rem; box-shadow: var(--shadow); }
   .block-ico { width: 2.4rem; height: 2.4rem; border-radius: 0.7rem; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-deep); margin-bottom: 0.9rem; }
@@ -178,7 +158,6 @@
   .blocks p { color: var(--text-2); font-size: 0.97rem; }
   .step-badge { width: 2.2rem; height: 2.2rem; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-deep); font-family: var(--serif); font-weight: 600; font-size: 1.05rem; margin-bottom: 0.9rem; }
 
-  /* mock conversazione */
   .chat-mock { background: var(--surface); border: 1px solid var(--border); border-radius: 1.25rem; box-shadow: var(--shadow); overflow: hidden; }
   .chat-head { display: flex; align-items: center; gap: 0.55rem; padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--border-soft); font-size: 0.9rem; font-weight: 600; color: var(--text-2); }
   .chat-head .bdot { width: 0.7rem; height: 0.7rem; border-radius: 50%; background: var(--accent); box-shadow: none; }
@@ -193,7 +172,6 @@
   .section-head .eyebrow { display: block; margin-bottom: 0.8rem; }
   .section-head p { margin-top: 1rem; color: var(--text-2); }
 
-  /* vetrina screenshot */
   .shots { display: flex; flex-direction: column; gap: 2.5rem; }
   .shot-row { display: grid; grid-template-columns: 1.25fr 1fr; gap: 2.2rem; align-items: center; }
   .shot-row.rev .shot-media { order: 2; }

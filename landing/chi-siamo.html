@@ -91,35 +91,22 @@
   .mail-btn:hover { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: var(--accent); }
   :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
   .lang-switch { display: flex; align-items: center; gap: 0.15rem; font-family: var(--sans); }
-  /* min-height 40px: il bersaglio da toccare era alto 31px, sotto la soglia
-     raccomandata. Su un selettore di lingua conta il doppio — chi non legge
-     l'italiano non puo' capire cosa ha sbagliato se prende il link accanto. */
+
   .lang-switch a { font-size: 0.82rem; font-weight: 600; color: var(--text-3); text-decoration: none; padding: 0.3rem 0.5rem; border-radius: 999px; white-space: nowrap; display: inline-flex; align-items: center; min-height: 40px; }
   .lang-switch a:hover { color: var(--accent-deep); background: var(--accent-soft); }
   .lang-switch a[aria-current] { color: var(--accent-deep); background: var(--accent-soft); }
   .lang-abbr { display: none; }
-  /* Sotto i 560px i tre nomi per esteso, il logo e il bottone del tema non ci
-     stanno: la pagina sbordava di 43px e si trascinava di lato. Le sigle
-     risolvono senza rimpicciolire il bersaglio. Il nome completo resta
-     nell'aria-label, quindi chi usa uno screen reader continua a sentire
-     "Italiano" e non "I-T". */
+
   @media (max-width: 560px) {
     .lang-switch a { padding: 0.3rem 0.5rem; font-size: 0.8rem; min-height: 40px; }
     .lang-full { display: none; }
     .lang-abbr { display: inline; }
-    /* Il gruppo di destra deve stare nello schermo qualunque cosa ci sia a
-       sinistra: sulle pagine interne il titolo e' piu' lungo e la barra sbordava
-       di pochi pixel, facendo trascinare tutta la pagina di lato. Stringendo qui
-       il margine invece che i bersagli, il bottone resta grande da toccare. */
+
     .top-right { gap: 0.35rem; }
     .lang-switch { gap: 0; }
     .brand { min-width: 0; font-size: 1.1rem; }
   }
 
-  /* Schermi molto stretti (iPhone SE e simili, 320px). Qui l'intestazione intera
-     non ci stava e trascinava la pagina di lato: la freccia "indietro" sparisce
-     perche' e' gia' ridondante — il logo accanto e' anche lui un link alla home —
-     e i margini si stringono. I bersagli da toccare restano alti 40px. */
   @media (max-width: 380px) {
     .wrap { padding: 0 0.9rem; }
     .brand { font-size: 0.98rem; }
@@ -127,11 +114,7 @@
     .back-btn { display: none; }
     .top-right { gap: 0.25rem; }
     .lang-switch a { padding: 0.3rem 0.38rem; }
-    /* Solo nelle pagine di aiuto: l'etichetta del pulsante citato nel testo era
-       "nowrap" e, non potendo andare a capo, allargava tutto il riquadro del
-       passo oltre lo schermo. Qui puo' spezzarsi. */
-    /* .passi .btn-label e non .btn-label: la regola originale con "nowrap" sta
-       piu' avanti nel foglio e, a parita' di specificita', vincerebbe lei. */
+
     .passi .btn-label { white-space: normal; }
     .passi > li { padding-left: 3.2rem; }
   }
