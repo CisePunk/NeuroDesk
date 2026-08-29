@@ -37,6 +37,15 @@ public class CompanionMessage {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String contenutoCifrato;
 
+    /**
+     * Etichetta CIFRATA, facoltativa (AES-GCM come il contenuto). NULL finché
+     * nessuno la imposta. È testo libero scritto dalla persona — non va
+     * trattata come {@code titolo} della sessione, che resta in chiaro solo
+     * perché arriva da un vocabolario chiuso, mai da quello che scrive l'utente.
+     */
+    @Column(columnDefinition = "TEXT")
+    private String etichettaCifrata;
+
     @Column(updatable = false)
     private LocalDateTime creatoIl;
 

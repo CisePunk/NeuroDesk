@@ -5,6 +5,7 @@ import {
     getSessioni,
     getSessione,
     cancellaCronologia,
+    impostaEtichettaMessaggio,
 } from '../api/companionSessionApi';
 import { revocaConsenso } from '../api/authApi';
 import { useAuth } from '../auth/AuthContext';
@@ -74,8 +75,17 @@ function CompanionPage() {
     const [includeProfile, setIncludeProfile] = useState(false);
     const [showAdvanced, setShowAdvanced] = useState(false);
 
-    const [conversation, setConversation] = useState(() => leggiCache()?.conversation ?? []); // [{ role, content }]
+    // { role, content, id?, etichetta? }. id ed etichetta arrivano solo per i
+    // messaggi già salvati sul server: una bolla appena scritta non li ha finché
+    // salvaScambio() non risponde (vedi handleSubmit).
+    const [conversation, setConversation] = useState(() => leggiCache()?.conversation ?? []);
     const [sessioneId, setSessioneId] = useState(() => leggiCache()?.sessioneId ?? null);
+    // Id del messaggio da cui mandare la cronologia al modello, invece che da
+    // tutto l'inizio. null = cronologia intera (comportamento di sempre).
+    const [daTagId, setDaTagId] = useState(null);
+    // Editor dell'etichetta aperto su un messaggio: { id, testo }. Uno solo alla
+    // volta, come "cosa vuol dire?" nel resto dell'app.
+    const [etichettaInModifica, setEtichettaInModifica] = useState(null);
     const [lastMeta, setLastMeta] = useState(null); // { provider, usage }
     const [providerConfigurato, setProviderConfigurato] = useState(null); // stato reale da /health
     const [errore, setErrore] = useState('');
@@ -157,7 +167,9 @@ function CompanionPage() {
                 return getSessione(list[0].id).then(det => {
                     if (!attivo) return;
                     setSessioneId(det.id);
-                    setConversation(det.messaggi.map(m => ({ role: m.ruolo, content: m.contenuto })));
+                    setConversation(det.messaggi.map(m => ({
+                        role: m.ruolo, content: m.contenuto, id: m.id, etichetta: m.etichetta,
+                    })));
                 });
             })
             .catch(() => { /* nessuna memoria da riprendere: si parte puliti */ });
@@ -202,7 +214,13 @@ function CompanionPage() {
         }
 
         const base = conversation;
-        const history = base.map(m => ({ role: m.role, content: m.content }));
+        // Se e' stato scelto un punto di partenza (un messaggio etichettato), la
+        // cronologia mandata al modello riparte da li' invece che dall'inizio:
+        // meno token, e la persona sa con certezza cosa il modello sta ricevendo
+        // di lei in questo scambio.
+        const daIndice = daTagId ? base.findIndex(m => m.id === daTagId) : -1;
+        const baseStorico = daIndice >= 0 ? base.slice(daIndice) : base;
+        const history = baseStorico.map(m => ({ role: m.role, content: m.content }));
         setConversation([...base, { role: 'user', content: cleanMessage }]);
         setMessage('');
         setCaricamento(true);
@@ -230,7 +248,24 @@ function CompanionPage() {
                     rispostaCompanion: data.reply,
                 });
                 if (saved?.sessioneId) setSessioneId(saved.sessioneId);
-            } catch { /* memoria server non disponibile: resta la copia locale */ }
+                // Solo ora i due messaggi hanno un id: e' quello che serve per
+                // poterli etichettare. Li aggiorno per indice (gli ultimi due),
+                // non per contenuto: due bolle uguali per errore andrebbero
+                // altrimenti a confondersi.
+                if (saved?.messaggioUtenteId && saved?.messaggioCompanionId) {
+                    setConversation(prev => {
+                        if (prev.length < 2) return prev;
+                        const aggiornata = [...prev];
+                        aggiornata[aggiornata.length - 2] = {
+                            ...aggiornata[aggiornata.length - 2], id: saved.messaggioUtenteId,
+                        };
+                        aggiornata[aggiornata.length - 1] = {
+                            ...aggiornata[aggiornata.length - 1], id: saved.messaggioCompanionId,
+                        };
+                        return aggiornata;
+                    });
+                }
+            } catch { /* memoria server non disponibile: resta la copia locale, non etichettabile */ }
         } catch (err) {
             // Rollback del messaggio ottimista, così può riprovare senza doppioni.
             setConversation(base);
@@ -262,6 +297,8 @@ function CompanionPage() {
         setParlando(false);
         setConversation([]);
         setSessioneId(null);
+        setDaTagId(null);
+        setEtichettaInModifica(null);
         setMessage('');
         setLastMeta(null);
         setErrore('');
@@ -290,6 +327,39 @@ function CompanionPage() {
         u.onerror = () => setParlando(false);
         setParlando(true);
         synth.speak(u);
+    }
+
+    // Copia UN messaggio, non l'intera conversazione: e' il bisogno diverso da
+    // "scarica la conversazione", che esporta tutto in un file. L'API
+    // Clipboard puo' rifiutare (permesso negato, contesto non sicuro): in
+    // quel caso lo si dice invece di far sparire il clic nel nulla.
+    async function copiaMessaggio(testo) {
+        try {
+            await navigator.clipboard.writeText(testo);
+            toast.successo(t.compCopiato);
+        } catch {
+            toast.errore(t.compCopiaFallita);
+        }
+    }
+
+    // Salva (o toglie, se il testo e' vuoto) l'etichetta di un messaggio GIA'
+    // salvato sul server. Aggiorna lo stato locale solo dopo la conferma del
+    // server: cosi' un'etichetta che sembra salvata lo e' davvero.
+    async function salvaEtichetta(messaggioId, testoGrezzo) {
+        const testo = testoGrezzo.trim();
+        try {
+            await impostaEtichettaMessaggio(sessioneId, messaggioId, testo || null);
+            setConversation(prev => prev.map(m =>
+                m.id === messaggioId ? { ...m, etichetta: testo || null } : m));
+            // Se si e' tolta l'etichetta usata come punto di partenza, si torna
+            // alla cronologia intera: un riferimento a un'etichetta sparita
+            // sarebbe silenziosamente sbagliato.
+            if (!testo && daTagId === messaggioId) setDaTagId(null);
+            setEtichettaInModifica(null);
+            toast.successo(testo ? t.compEtichettaSalvata : t.compEtichettaTolta);
+        } catch (err) {
+            toast.errore(err.message || t.compEtichettaFallita);
+        }
     }
 
     function scaricaIstruzioni() {
@@ -337,6 +407,13 @@ function CompanionPage() {
     }
 
     const vuota = conversation.length === 0;
+    // Messaggi etichettati e già salvati: sono le sole voci selezionabili come
+    // punto di partenza. Un'etichetta su un messaggio non ancora salvato non
+    // può comparire qui (non ha id), e infatti il pulsante per crearla è
+    // disabilitato finché quell'id non arriva.
+    const messaggiEtichettati = conversation.filter(m => m.id && m.etichetta);
+    const indiceDaTag = daTagId ? conversation.findIndex(m => m.id === daTagId) : -1;
+    const conteggioDaTag = indiceDaTag >= 0 ? conversation.length - indiceDaTag : 0;
 
     return (
         <div className="page companion-page">
@@ -517,6 +594,29 @@ function CompanionPage() {
                         )}
                     </div>
 
+                    {/* Compare solo se c'e' almeno un'etichetta da poter scegliere: senza,
+                        sarebbe un controllo vuoto che non serve a niente. */}
+                    {messaggiEtichettati.length > 0 && (
+                        <div className="companion-da-qui">
+                            <label htmlFor="da-qui">{t.compDaQuiTitolo}</label>
+                            <select
+                                id="da-qui"
+                                value={daTagId ?? ''}
+                                onChange={(e) => setDaTagId(e.target.value ? Number(e.target.value) : null)}
+                            >
+                                <option value="">{t.compDaQuiIntera}</option>
+                                {messaggiEtichettati.map(m => (
+                                    <option key={m.id} value={m.id}>{m.etichetta}</option>
+                                ))}
+                            </select>
+                            {daTagId && conteggioDaTag > 0 && (
+                                <span className="companion-da-qui-conta">
+                                    {conteggioDaTag} {t.compDaQuiMessaggiEtichetta}
+                                </span>
+                            )}
+                        </div>
+                    )}
+
                     <p className="companion-notice">
                         {t.compAvviso}
                     </p>
@@ -540,9 +640,80 @@ function CompanionPage() {
                                     key={i}
                                     className={`companion-msg companion-msg--${m.role === 'user' ? 'user' : 'assistant'}`}
                                 >
-                                    <span className="companion-msg-label">
-                                        {m.role === 'user' ? t.compTu : 'Companion'}
-                                    </span>
+                                    <div className="companion-msg-head">
+                                        <span className="companion-msg-label">
+                                            {m.role === 'user' ? t.compTu : 'Companion'}
+                                        </span>
+                                        <div className="companion-msg-azioni">
+                                            <button
+                                                type="button"
+                                                className="companion-msg-azione"
+                                                onClick={() => copiaMessaggio(m.content)}
+                                                aria-label={t.compCopia}
+                                                title={t.compCopia}
+                                            >
+                                                <span aria-hidden="true">⧉</span>
+                                            </button>
+                                            {/* Etichettare ha senso solo su un messaggio già salvato: senza
+                                                id non c'è dove persistere l'etichetta. Il pulsante resta
+                                                visibile ma disabilitato, con il motivo nel title, invece di
+                                                sparire — sparire farebbe sembrare la funzione assente. */}
+                                            <button
+                                                type="button"
+                                                className="companion-msg-azione"
+                                                onClick={() => setEtichettaInModifica({ id: m.id, testo: m.etichetta || '' })}
+                                                aria-label={m.etichetta ? t.compEtichettaModifica : t.compEtichettaAggiungi}
+                                                title={m.id ? (m.etichetta ? t.compEtichettaModifica : t.compEtichettaAggiungi) : t.compEtichettaNonSalvato}
+                                                disabled={!m.id}
+                                            >
+                                                <span aria-hidden="true">🏷</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {m.etichetta && etichettaInModifica?.id !== m.id && (
+                                        <p className="companion-msg-etichetta">
+                                            <span aria-hidden="true">🏷</span> {m.etichetta}
+                                        </p>
+                                    )}
+
+                                    {/* Guardia esplicita su etichettaInModifica, non solo sull'id:
+                                        "undefined === undefined" è vero, e una bolla appena scritta
+                                        (senza id, come l'editor chiuso) ci sarebbe caduta dentro,
+                                        provando a leggere .testo da un editor che non esiste. */}
+                                    {etichettaInModifica && etichettaInModifica.id === m.id && (
+                                        <form
+                                            className="companion-msg-etichetta-editor"
+                                            onSubmit={(e) => { e.preventDefault(); salvaEtichetta(m.id, etichettaInModifica.testo); }}
+                                        >
+                                            <input
+                                                type="text"
+                                                value={etichettaInModifica.testo}
+                                                onChange={(e) => setEtichettaInModifica(v => ({ ...v, testo: e.target.value }))}
+                                                placeholder={t.compEtichettaSegnaposto}
+                                                maxLength={60}
+                                                autoFocus
+                                            />
+                                            <button type="submit" className="btn-secondary">{t.compEtichettaSalva}</button>
+                                            {m.etichetta && (
+                                                <button
+                                                    type="button"
+                                                    className="btn-secondary"
+                                                    onClick={() => salvaEtichetta(m.id, '')}
+                                                >
+                                                    {t.compEtichettaTogli}
+                                                </button>
+                                            )}
+                                            <button
+                                                type="button"
+                                                className="btn-secondary"
+                                                onClick={() => setEtichettaInModifica(null)}
+                                            >
+                                                {t.compEtichettaAnnulla}
+                                            </button>
+                                        </form>
+                                    )}
+
                                     <div className="companion-msg-body">{m.content}</div>
                                 </div>
                             ))}

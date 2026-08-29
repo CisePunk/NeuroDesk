@@ -10,8 +10,11 @@ public record SessioneDettaglioResponse(
         List<MessaggioResponse> messaggi) {
 
     public record MessaggioResponse(
+            Long id,
             String ruolo,
             String contenuto,
+            /** Decifrata; null se il messaggio non ha un'etichetta. */
+            String etichetta,
             LocalDateTime creatoIl) {
     }
 }

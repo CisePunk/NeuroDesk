@@ -1,5 +1,6 @@
 package com.neurodesk.app.neurodesk.controller;
 
+import com.neurodesk.app.neurodesk.dto.ImpostaEtichettaRequest;
 import com.neurodesk.app.neurodesk.dto.SalvaScambioRequest;
 import com.neurodesk.app.neurodesk.dto.ScambioSalvatoResponse;
 import com.neurodesk.app.neurodesk.dto.SessioneDettaglioResponse;
@@ -56,5 +57,18 @@ public class CompanionSessionController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void cancellaUna(@AuthenticationPrincipal Utente utente, @PathVariable Long id) {
         memory.cancellaUna(utente.getId(), id);
+    }
+
+    /**
+     * Imposta o toglie l'etichetta di un messaggio. Corpo vuoto/assente la toglie:
+     * non è un caso d'errore, è il modo per tornare indietro.
+     */
+    @PutMapping("/{sessioneId}/messaggi/{messaggioId}/etichetta")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void impostaEtichetta(@AuthenticationPrincipal Utente utente,
+                                 @PathVariable Long sessioneId,
+                                 @PathVariable Long messaggioId,
+                                 @Valid @RequestBody ImpostaEtichettaRequest req) {
+        memory.impostaEtichetta(utente.getId(), sessioneId, messaggioId, req.etichetta());
     }
 }

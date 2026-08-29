@@ -28,3 +28,13 @@ export function cancellaCronologia() {
 export function cancellaSessione(id) {
     return apiFetch(`/api/companion-sessions/${id}`, { method: 'DELETE' });
 }
+
+// Imposta l'etichetta di un messaggio. etichetta vuota/null la toglie: non è un
+// errore, è il modo per tornare indietro. Serve un messaggio già SALVATO
+// (con un id del server): non ha senso su una bolla ancora solo locale.
+export function impostaEtichettaMessaggio(sessioneId, messaggioId, etichetta) {
+    return apiFetch(`/api/companion-sessions/${sessioneId}/messaggi/${messaggioId}/etichetta`, {
+        method: 'PUT',
+        body: { etichetta },
+    });
+}
