@@ -50,6 +50,7 @@ export function clearToken() {
 // l'app: "backend", "server", "elemento", "sessione" non vogliono dire niente a
 // chi sta solo cercando di fare un passo.
 export function messaggioAmichevole(status, serverMessage) {
+  const t = testi();
   switch (status) {
     case 0:
       return t.errRete;
