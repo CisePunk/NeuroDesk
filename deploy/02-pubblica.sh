@@ -40,8 +40,16 @@ JAR=$(ls -1 backend/target/*.jar | head -1)
 [ -f "$JAR" ] || err "Jar non trovato: la build del backend è fallita."
 
 msg "Compilo il frontend"
+# .env.production e' gitignored (vive solo qui, non nel repo). Senza, Vite usa
+# il fallback http://localhost:8080 come URL del backend e l'app deployata non
+# raggiunge le API da nessun browser: ogni login fallisce con "Non riesco a
+# collegarmi". Gia' successo compilando da un worktree pulito. Meglio fermarsi.
+[ -f frontend/.env.production ] || err "Manca frontend/.env.production. Copialo da frontend/.env.production.example (per il proxy same-origin: VITE_API_BASE_URL vuoto)."
 (cd frontend && npm ci --silent && npm run build --silent)
 [ -f frontend/dist/index.html ] || err "Build del frontend non trovata."
+if grep -rq "localhost:8080" frontend/dist/assets/*.js; then
+    err "Il bundle contiene ancora localhost:8080: .env.production non e' stato applicato. Deploy interrotto."
+fi
 
 # --- 2. Carico ---------------------------------------------------------------
 msg "Carico il backend"
