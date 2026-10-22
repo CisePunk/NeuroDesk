@@ -130,7 +130,12 @@ app.${DOMINIO} {
     import trappole
 
     handle /api/companion/* {
-        reverse_proxy 127.0.0.1:8090
+        reverse_proxy 127.0.0.1:8090 {
+            # Sovrascrive X-Forwarded-For con l'IP vero del client (non quello che
+            # il client potrebbe essersi scritto da solo): il rate limiter del
+            # Companion legge il primo valore, e cosi' quel valore e' sempre fidato.
+            header_up X-Forwarded-For {remote_host}
+        }
     }
     handle /api/internal/* {
         respond 404
