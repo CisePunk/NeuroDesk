@@ -1,32 +1,41 @@
 #!/usr/bin/env bash
 #
 # NeuroDesk — runner di manutenzione notturna. NON eseguirlo a mano:
-# aggiorna i pacchetti di sistema e RIAVVIA il server. Lo pianifica
-# deploy/07-aggiorna-e-riavvia.sh, che lo copia in /opt/neurodesk/deploy/.
+# aggiorna i pacchetti di sistema e, se serve, RIAVVIA il server. Lo lancia
+# ogni notte neurodesk-manutenzione.timer, installato da
+# deploy/07-aggiorna-e-riavvia.sh, che copia questo file in /opt/neurodesk/deploy/.
 #
-# Logica, in ordine:
-#   1. Controlla che il server sia scarico:
+# Il timer scatta ogni 20 minuti fra le 01:30 e le 04:50 UTC. A ogni scatto:
+#   1. Se stanotte la manutenzione e' gia' stata fatta: esce senza scrivere niente.
+#   2. Controlla che il server sia scarico:
 #        - nessuna sessione SSH umana (who),
 #        - nessuna richiesta all'app negli ultimi 15 minuti
 #          (log di Caddy, host app.neurodesk.it, /api/*, esito 2xx/3xx).
-#   2. Se qualcuno c'e': si ripianifica da solo fra 20 minuti, fino alle
-#      05:00 UTC. Dopo, rinuncia per stanotte senza toccare niente.
+#      Se qualcuno c'e', esce: ci riprova lo scatto successivo. Dopo l'ultimo
+#      (04:50) rinuncia per stanotte senza toccare niente.
 #   3. Se e' scarico: apt-get update && upgrade (solo upgrade, mai
-#      dist-upgrade), autoremove, poi verifica che i servizi siano
-#      abilitati all'avvio e RIAVVIA.
+#      dist-upgrade), autoremove, riavvio dei servizi rimasti con librerie
+#      vecchie (needrestart), verifica che i servizi siano abilitati all'avvio.
+#      RIAVVIA il server solo se Ubuntu lo chiede (/var/run/reboot-required:
+#      kernel, libc, ...). Altrimenti resta acceso.
 #
 # Tutto finisce in /var/log/neurodesk/manutenzione.log.
 
 set -uo pipefail
 
 LOG=/var/log/neurodesk/manutenzione.log
-mkdir -p /var/log/neurodesk
+FATTA=/var/lib/neurodesk/manutenzione-ultima   # data UTC dell'ultima manutenzione riuscita
+mkdir -p /var/log/neurodesk /var/lib/neurodesk
+
+oggi=$(date -u +%F)
+[ "$(cat "$FATTA" 2>/dev/null)" = "$oggi" ] && exit 0
+
 exec >>"$LOG" 2>&1
 
 echo
 echo "=== $(date -u +%FT%TZ) — controllo manutenzione ==="
 
-LIMITE_UTC="05:00"          # oltre quest'ora, si rinuncia per stanotte
+ULTIMO_UTC="04:45"          # dopo quest'ora e' l'ultimo scatto della notte
 FINESTRA_MIN=15             # "attivo" = richieste all'app negli ultimi N minuti
 SERVIZI=(neurodesk-backend neurodesk-companion caddy)
 
@@ -76,20 +85,12 @@ server_scarico() {
     return 0
 }
 
-ripianifica() {
-    # Riarma la stessa unita' transitoria: nessuna dipendenza da 'at'.
-    systemctl reset-failed neurodesk-manutenzione.service 2>/dev/null || true
-    systemd-run --unit=neurodesk-manutenzione --on-active=20min \
-        /opt/neurodesk/deploy/manutenzione-notturna.sh >/dev/null 2>&1
-}
-
 if ! server_scarico; then
-    if [[ "$(date -u +%H:%M)" > "$LIMITE_UTC" ]]; then
-        echo "  oltre le ${LIMITE_UTC} UTC: rinuncio per stanotte. Niente aggiornamenti, niente reboot."
-        exit 0
+    if [[ "$(date -u +%H:%M)" > "$ULTIMO_UTC" ]]; then
+        echo "  ultimo tentativo della notte: rinuncio. Niente aggiornamenti, niente reboot."
+    else
+        echo "  riprovo al prossimo scatto del timer (20 minuti)"
     fi
-    echo "  riprovo fra 20 minuti"
-    ripianifica
     exit 0
 fi
 
@@ -97,19 +98,23 @@ echo "  procedo con gli aggiornamenti"
 export DEBIAN_FRONTEND=noninteractive
 
 echo "--- apt-get update ---"
-apt-get -qq update || { echo "  apt-get update FALLITO: mi fermo, niente reboot."; exit 1; }
+APT_LOCK=(-o DPkg::Lock::Timeout=600)   # unattended-upgrades potrebbe avere il lock
+apt-get -qq "${APT_LOCK[@]}" update || { echo "  apt-get update FALLITO: mi fermo, niente reboot."; exit 1; }
 
 echo "--- pacchetti che verranno aggiornati ---"
 apt-get -s -o Dpkg::Options::="--force-confold" upgrade 2>/dev/null | grep '^Inst' || echo "  (nessuno)"
 
 echo "--- apt-get upgrade ---"
-if ! apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade; then
+if ! apt-get -y "${APT_LOCK[@]}" -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade; then
     echo "  apt-get upgrade FALLITO: mi fermo, niente reboot. Da controllare a mano."
     exit 1
 fi
 
 echo "--- autoremove ---"
-apt-get -y autoremove --purge || true
+apt-get -y "${APT_LOCK[@]}" autoremove --purge || true
+
+echo "--- servizi con librerie vecchie ---"
+needrestart -r a -q 2>/dev/null || true
 
 echo "--- servizi abilitati all'avvio? ---"
 for s in "${SERVIZI[@]}"; do
@@ -121,6 +126,16 @@ for s in "${SERVIZI[@]}"; do
     fi
 done
 
+echo "$oggi" > "$FATTA"
+
+if [ ! -f /var/run/reboot-required ]; then
+    echo "=== $(date -u +%FT%TZ) — aggiornamenti completati, nessun riavvio richiesto ==="
+    for s in "${SERVIZI[@]}"; do echo "  $s: $(systemctl is-active "$s")"; done
+    exit 0
+fi
+
+echo "--- riavvio richiesto da ---"
+sed 's/^/  /' /var/run/reboot-required.pkgs 2>/dev/null | sort -u
 echo "=== $(date -u +%FT%TZ) — aggiornamenti completati, riavvio adesso ==="
 echo "    dopo il boot, verifica con:"
 echo "      systemctl is-active ${SERVIZI[*]}"

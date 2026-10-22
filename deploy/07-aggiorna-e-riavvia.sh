@@ -1,29 +1,27 @@
 #!/usr/bin/env bash
 #
-# NeuroDesk — aggiornamenti di sistema + reboot, di notte, solo a server scarico.
-# SI ESEGUE DAL MAC:
+# NeuroDesk — aggiornamenti di sistema ogni notte, solo a server scarico.
+# SI ESEGUE DAL MAC, una volta (o dopo aver cambiato il runner):
 #
-#   bash deploy/07-aggiorna-e-riavvia.sh root@IP_DEL_VPS [HH:MM]
-#
-# HH:MM e' l'ora UTC del reboot. Default 01:30 UTC = ~03:30 in Italia (CEST).
-# Se quell'ora e' gia' passata oggi, parte la notte che viene.
+#   bash deploy/07-aggiorna-e-riavvia.sh root@IP_DEL_VPS
 #
 # Cosa fa:
 #   1. Si collega adesso e mostra chi e' connesso (SSH + attivita' app).
 #   2. Copia sul server il runner deploy/manutenzione-notturna.sh.
-#   3. Lo pianifica per stanotte con una unita' systemd transitoria
-#      (niente 'at', niente cron: nome fisso, ri-lanciabile).
-#   4. All'ora X il runner RICONTROLLA che nessuno sia connesso: se scarico
-#      aggiorna e riavvia, se occupato rimanda di 20' fino alle 05:00 UTC.
+#   3. Installa e attiva neurodesk-manutenzione.timer (unita' permanente,
+#      sopravvive ai reboot): scatta ogni 20 minuti fra le 01:30 e le 04:50
+#      UTC (~03:30-06:50 in Italia d'estate, un'ora prima d'inverno).
+#   4. A ogni scatto il runner controlla che nessuno sia connesso: se scarico
+#      aggiorna, e riavvia solo se Ubuntu lo chiede; se occupato ci riprova
+#      lo scatto dopo. Una manutenzione riuscita per notte, non di piu'.
 #   Log sul server: /var/log/neurodesk/manutenzione.log
 #
-# Annulla la pianificazione:
-#   ssh root@IP 'systemctl stop neurodesk-manutenzione.timer; systemctl reset-failed neurodesk-manutenzione.*'
+# Sospendi la manutenzione:
+#   ssh root@IP 'systemctl disable --now neurodesk-manutenzione.timer'
 set -euo pipefail
 
 SERVER="${1:-}"
-ORA_UTC="${2:-01:30}"
-[ -n "$SERVER" ] || { echo "Uso: bash deploy/07-aggiorna-e-riavvia.sh root@IP_DEL_VPS [HH:MM_UTC]"; exit 1; }
+[ -n "$SERVER" ] || { echo "Uso: bash deploy/07-aggiorna-e-riavvia.sh root@IP_DEL_VPS"; exit 1; }
 
 RADICE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$RADICE"
@@ -72,38 +70,57 @@ ssh "$SERVER" 'mkdir -p /opt/neurodesk/deploy /var/log/neurodesk'
 scp -q deploy/manutenzione-notturna.sh "$SERVER:/opt/neurodesk/deploy/manutenzione-notturna.sh"
 ssh "$SERVER" 'chmod +x /opt/neurodesk/deploy/manutenzione-notturna.sh'
 
-# --- 3. Pianifico per stanotte ------------------------------------------
-msg "Pianifico il reboot per le $ORA_UTC UTC"
-ssh "$SERVER" ORA="$ORA_UTC" bash -s <<'REMOTO'
+# --- 3. Timer permanente ------------------------------------------------
+msg "Installo neurodesk-manutenzione.timer (ogni notte, 01:30-04:50 UTC)"
+ssh "$SERVER" bash -s <<'REMOTO'
 set -euo pipefail
-now=$(date -u +%s)
-tgt=$(date -u -d "today $ORA" +%s)
-[ "$tgt" -le "$now" ] && tgt=$(date -u -d "tomorrow $ORA" +%s)
-delay=$((tgt - now))
-
-# Ripulisco una pianificazione precedente, poi (ri)creo l'unita'.
-systemctl stop neurodesk-manutenzione.timer 2>/dev/null || true
+# Tolgo l'eventuale unita' transitoria delle versioni precedenti di questo
+# script: ha lo stesso nome e impedirebbe di caricare quella permanente.
+if [ -f /run/systemd/transient/neurodesk-manutenzione.timer ]; then
+    systemctl stop neurodesk-manutenzione.timer 2>/dev/null || true
+fi
 systemctl reset-failed 'neurodesk-manutenzione.*' 2>/dev/null || true
 
-systemd-run --unit=neurodesk-manutenzione \
-    --on-active="${delay}s" \
-    --timer-property=AccuracySec=1min \
-    /opt/neurodesk/deploy/manutenzione-notturna.sh
+cat > /etc/systemd/system/neurodesk-manutenzione.service <<'UNIT'
+[Unit]
+Description=NeuroDesk - manutenzione notturna (aggiornamenti, reboot se richiesto)
+After=network-online.target
+Wants=network-online.target
 
-echo "  parte fra $((delay / 3600))h $(((delay % 3600) / 60))m — $(date -u -d "@$tgt" +%FT%TZ)"
+[Service]
+Type=oneshot
+ExecStart=/opt/neurodesk/deploy/manutenzione-notturna.sh
+UNIT
+
+cat > /etc/systemd/system/neurodesk-manutenzione.timer <<'UNIT'
+[Unit]
+Description=NeuroDesk - manutenzione notturna, un tentativo ogni 20 minuti
+
+[Timer]
+OnCalendar=*-*-* 01:30,50:00 UTC
+OnCalendar=*-*-* 02..04:10,30,50:00 UTC
+AccuracySec=1min
+Persistent=false
+
+[Install]
+WantedBy=timers.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now neurodesk-manutenzione.timer
 systemctl list-timers 'neurodesk-manutenzione*' --all --no-pager || true
 REMOTO
 
 msg "Fatto"
 cat <<FINE
 
-  Domattina, il resoconto:
+  Il resoconto delle notti:
     ssh $SERVER 'cat /var/log/neurodesk/manutenzione.log'
 
-  Stato dei servizi dopo il reboot:
+  Stato dei servizi:
     ssh $SERVER 'systemctl is-active neurodesk-backend neurodesk-companion caddy'
 
-  Per annullare adesso:
-    ssh $SERVER 'systemctl stop neurodesk-manutenzione.timer; systemctl reset-failed neurodesk-manutenzione.*'
+  Per sospendere la manutenzione:
+    ssh $SERVER 'systemctl disable --now neurodesk-manutenzione.timer'
 
 FINE
