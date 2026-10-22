@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.7</version>
+		<version>4.0.8</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.neurodesk.app</groupId>
@@ -32,6 +32,12 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<!-- Patch di sicurezza oltre quelle di Spring Boot 4.0.8 (ottobre 2026):
+		     Tomcat >= 11.0.25 e Jackson >= 2.21.7 / 3.1.7. Togliere quando il
+		     parent le include gia'. -->
+		<tomcat.version>11.0.27</tomcat.version>
+		<jackson-2-bom.version>2.21.8</jackson-2-bom.version>
+		<jackson-bom.version>3.1.8</jackson-bom.version>
 	</properties>
 	<dependencies>
 		<dependency>
