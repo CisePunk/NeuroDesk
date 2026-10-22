@@ -185,6 +185,8 @@ Requires=mysql.service
 User=neurodesk
 EnvironmentFile=/etc/neurodesk/backend.env
 ExecStart=/usr/bin/java -Xmx768m -jar /opt/neurodesk/backend.jar
+# La JVM fermata da systemd (SIGTERM) esce con 143: e' uno stop pulito, non un errore.
+SuccessExitStatus=143
 Restart=on-failure
 RestartSec=5
 # Irrigidimento: il servizio non deve poter scrivere fuori da casa sua.
