@@ -1,9 +1,4 @@
-/* NeuroDesk landing — stili condivisi: menu di navigazione, banner cookie, form contatti.
-   Usa le stesse variabili CSS (:root) definite inline in ogni pagina. */
 
-/* ---- Cursore "a mirino" (cerchio + pallino) disegnato da site.js, come
-   sull'app e ispirato a centrireset.it. Elementi nel DOM, quindi grandi quanto
-   serve (un cursore CSS è tappato a 32px). Solo su mouse. ---- */
 .cursore-anello,
 .cursore-pallino {
   position: fixed; left: 0; top: 0;
@@ -25,8 +20,6 @@
 .cursore-attivo, .cursore-attivo * { cursor: none !important; }
 @media (prefers-reduced-motion: reduce) { .cursore-anello { transition: none; } }
 
-/* ---- Tasto "torna su": tondo, nel colore del sito, in basso a destra;
-   compare dopo un po' di scroll. La freccia in su è l'affordance standard. ---- */
 .torna-su {
   position: fixed; right: 22px; bottom: 22px; z-index: 300;
   width: 48px; height: 48px; border-radius: 50%;
@@ -40,13 +33,11 @@
 .torna-su:hover { background: var(--accent-deep, #4a6b62); }
 @media (prefers-reduced-motion: reduce) { .torna-su { transition: opacity 0.2s ease; transform: none; } }
 
-/* ---- Menu di navigazione ---- */
 .top-right { display: flex; align-items: center; gap: 0.6rem; }
 .site-nav { display: flex; align-items: center; gap: 0.15rem; }
 .site-nav a { font-family: var(--sans); font-size: 0.92rem; font-weight: 600; color: var(--text-2); text-decoration: none; padding: 0.4rem 0.7rem; border-radius: 999px; line-height: 1; white-space: nowrap; transition: background 0.15s ease, color 0.15s ease; }
 .site-nav a:hover { color: var(--accent-deep); background: var(--accent-soft); }
 .site-nav a.is-current { color: var(--accent-deep); background: var(--accent-soft); }
-/* Pulsante "Accedi" all'app: distinto, come una CTA. */
 .site-nav a.nav-accedi { color: #fbfdfb; background: var(--accent); font-weight: 700; }
 .site-nav a.nav-accedi:hover { color: #fbfdfb; background: var(--accent-deep); }
 
@@ -61,9 +52,7 @@
   .site-nav a { padding: 0.75rem 0.9rem; font-size: 1rem; }
 }
 
-/* Header su telefoni stretti: evita che logo e menu (☰) si tocchino. */
 @media (max-width: 560px) {
-  /* La CTA in alto è ridondante col menu ☰ e con la CTA nella pagina: la nascondo. */
   .top-right .cta-link { display: none; }
 }
 @media (max-width: 380px) {
@@ -71,8 +60,6 @@
   header.top .brand { font-size: 1.12rem; }
 }
 
-/* CTA "Scrivici" a tutta larghezza: appare solo su telefono, su una riga sua
-   (quando la CTA in alto viene nascosta), così non affolla il logo. */
 .mobile-cta { display: none; }
 @media (max-width: 560px) {
   .mobile-cta { display: block; padding: 0.7rem 1.1rem; background: var(--accent-soft); border-bottom: 1px solid var(--border-soft); }
@@ -80,7 +67,6 @@
   .mobile-cta a:active { background: var(--accent-deep); }
 }
 
-/* ---- Banner cookie (solo tecnici) ---- */
 .cookie-banner { position: fixed; left: 1rem; right: 1rem; bottom: 1rem; z-index: 50; max-width: 46rem; margin: 0 auto; background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; box-shadow: var(--shadow); padding: 1rem 1.2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.8rem 1.2rem; }
 .cookie-banner p { margin: 0; font-size: 0.9rem; color: var(--text-2); flex: 1 1 18rem; }
 .cookie-banner a { color: var(--accent-deep); font-weight: 600; }
@@ -89,7 +75,6 @@
 .cookie-banner button:hover { background: var(--accent-deep); }
 .cookie-banner[hidden] { display: none; }
 
-/* ---- Form contatti ---- */
 .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 1.25rem; box-shadow: var(--shadow); padding: clamp(1.5rem, 4vw, 2.4rem); max-width: 38rem; }
 .contact-form { display: grid; gap: 1.1rem; }
 .field { display: grid; gap: 0.4rem; }
@@ -107,7 +92,6 @@
 .form-note { font-size: 0.82rem; color: var(--text-3); margin: 0; }
 .form-note a { color: var(--accent-deep); font-weight: 600; }
 
-/* ---- Contenuto testuale lungo (privacy, chi siamo) ---- */
 .prose { max-width: 46rem; }
 .prose h2 { font-size: clamp(1.4rem, 3vw, 1.9rem); margin-top: 2.2rem; }
 .prose h3 { font-family: var(--sans); font-size: 1.05rem; font-weight: 700; margin-top: 1.6rem; }

@@ -1,8 +1,6 @@
-/* NeuroDesk landing — comportamenti condivisi: menu mobile, pagina corrente, banner cookie. */
 (function () {
   'use strict';
 
-  // --- Menu mobile: apri/chiudi ---
   var toggle = document.getElementById('navToggle');
   var nav = document.getElementById('siteNav');
   if (toggle && nav) {
@@ -18,7 +16,6 @@
     });
   }
 
-  // --- Evidenzia la pagina corrente nel menu ---
   if (nav) {
     var path = location.pathname.split('/').pop() || 'index.html';
     var links = nav.querySelectorAll('a[data-nav]');
@@ -30,9 +27,6 @@
     }
   }
 
-  // --- Pulsante "Accedi" all'applicazione, su tutte le pagine ---
-  // L'etichetta segue la lingua della pagina (<html lang>): sulle versioni EN/FR
-  // comparirebbe altrimenti una parola italiana in mezzo a un menu tradotto.
   var ETICHETTA_ACCEDI = { it: 'Accedi', en: 'Sign in', fr: 'Se connecter' };
   if (nav && !nav.querySelector('.nav-accedi')) {
     var lingua = (document.documentElement.getAttribute('lang') || 'it').slice(0, 2).toLowerCase();
@@ -43,7 +37,6 @@
     nav.appendChild(accedi);
   }
 
-  // --- Banner cookie (solo cookie tecnici, nessun tracciamento) ---
   var banner = document.getElementById('cookieBanner');
   if (banner) {
     var ok = false;
@@ -58,10 +51,6 @@
     }
   }
 
-  // --- Cursore "a mirino" (cerchio + pallino) che segue il mouse, come sull'app
-  //     e ispirato a centrireset.it. Elementi nel DOM: grandi quanto serve (un
-  //     cursore CSS è tappato a 32px). Solo su mouse; l'anello insegue con easing,
-  //     il pallino è preciso. ---
   (function cursore() {
     if (!window.matchMedia || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
     var ridotto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -102,7 +91,6 @@
     }
   })();
 
-  // --- Tasto "torna su": compare dopo un po' di scroll, riporta in cima ---
   (function tornaSu() {
     var btn = document.createElement('button');
     btn.type = 'button';
