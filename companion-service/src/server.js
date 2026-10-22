@@ -166,9 +166,9 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 204, {});
   }
 
-  // /health interno; /api/companion/health raggiungibile dal frontend via Caddy,
-  // cosi' la UI puo' dire la verita' sul provider reale (mock vs anthropic/openai).
-  if (req.method === 'GET' && (req.url === '/health' || req.url === '/api/companion/health')) {
+  // /health INTERNO (solo 127.0.0.1, non esposto da Caddy): dettaglio completo
+  // per il debug e il monitoraggio operativo.
+  if (req.method === 'GET' && req.url === '/health') {
     return sendJson(res, 200, {
       status: 'ok',
       service: 'neurodesk-companion-service',
@@ -179,6 +179,16 @@ const server = http.createServer(async (req, res) => {
         anthropic: Boolean(process.env.ANTHROPIC_API_KEY),
       },
     });
+  }
+
+  // /api/companion/health PUBBLICO (via Caddy): solo l'essenziale. Alla UI serve
+  // sapere se l'AI e' reale o mock (per non mentire nel badge); non serve il nome
+  // interno del servizio ne' quali chiavi sono configurate, e da fuori non devono
+  // trapelare. Il provider reale si legge solo dopo l'accesso, dalla risposta a
+  // /respond, non da qui.
+  if (req.method === 'GET' && req.url === '/api/companion/health') {
+    const reale = (process.env.AI_PROVIDER || 'mock') !== 'mock';
+    return sendJson(res, 200, { status: 'ok', provider: reale ? 'attivo' : 'mock' });
   }
 
   if (req.method === 'POST' && req.url === '/api/companion/respond') {

@@ -63,6 +63,9 @@ ${DOMINIO} {
         X-Content-Type-Options "nosniff"
         Referrer-Policy "no-referrer"
         Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=(), usb=()"
+        # Discrezione: non dichiarare il reverse proxy nelle risposte.
+        -Server
+        -Via
         Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
     }
     header /assets/* Cache-Control "no-cache"
@@ -116,6 +119,9 @@ app.${DOMINIO} {
         X-Content-Type-Options "nosniff"
         Referrer-Policy "no-referrer"
         Permissions-Policy "geolocation=(), camera=(), microphone=(), payment=(), usb=()"
+        # Discrezione: non dichiarare il reverse proxy nelle risposte.
+        -Server
+        -Via
         # script-src 'self' senza hash: nessuno script inline nell'app (tema e SW
         # sono file esterni/nel bundle), così un XSS iniettato non gira e non ruba
         # il token. 'unsafe-inline' resta solo sugli stili (React), rischio basso.
